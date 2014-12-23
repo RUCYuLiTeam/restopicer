@@ -1,13 +1,3 @@
-memoryWhiteList <- c("memoryWhiteList","convertDimensionToAttribute","convertAttributeToDimension","rmTempObject","addPersistentObjects")
-addPersistentObjects <- function(names){
-  memoryWhiteList <<- unique(c(memoryWhiteList,names))
-}
-rmTempObject <- function(){
-  rm(list = setdiff(ls(envir = globalenv()), memoryWhiteList),envir = globalenv())
-  gc()
-  ls(envir = globalenv())
-}
-
 library(plyr)
 convertDimensionToAttribute<-function(data,dimensions,attributevalues,DIMENSION_NAME="ATTRIBUTE",VALUE_NAME="VALUE"){
   data$UNIQUEALL<-c(1:nrow(data))
@@ -24,7 +14,6 @@ convertDimensionToAttribute<-function(data,dimensions,attributevalues,DIMENSION_
   head(result)
   return(result)
 }
-library(plyr)
 #value must be integer
 convertAttributeToDimensionForIntegerValue <- function(data,dimensions,attribute,value){
   dimensionsdata <- unique(data[,dimensions])
@@ -44,8 +33,6 @@ convertAttributeToDimensionForIntegerValue <- function(data,dimensions,attribute
   head(result,1)
   return(result)
 }
-
-library(plyr)
 #any value - character / numeric / other
 convertAttributeToDimension <- function(data,dimensions,attribute,value){
   dimensionsdata <- unique(data[,dimensions])
@@ -56,8 +43,8 @@ convertAttributeToDimension <- function(data,dimensions,attribute,value){
   FROM_TO_VALUE_DF <- datawithUNIQUEFROM[,c(ncol(datawithUNIQUEFROM),attribute,value)]
   colnames(FROM_TO_VALUE_DF)<-c("UNIQUEFROM","TO","VALUE")
   #apply for each 
-  FROM_TO_VALUEMATRIX<-as.matrix(table(FROM_TO_DF$UNIQUEFROM,FROM_TO_DF$TO))
-  m_ply(FROM_TO_VALUE_DF[1:100,],function(UNIQUEFROM,TO,VALUE,FROM_TO_VALUEMATRIX){FROM_TO_VALUEMATRIX[which(rownames(FROM_TO_VALUEMATRIX)==UNIQUEFROM),which(colnames(FROM_TO_VALUEMATRIX)==TO)] <<- VALUE},FROM_TO_VALUEMATRIX,.expand = F)
+  FROM_TO_VALUEMATRIX<-as.matrix(table(FROM_TO_VALUE_DF$UNIQUEFROM,FROM_TO_VALUE_DF$TO))
+  m_ply(FROM_TO_VALUE_DF,function(UNIQUEFROM,TO,VALUE,FROM_TO_VALUEMATRIX){FROM_TO_VALUEMATRIX[which(rownames(FROM_TO_VALUEMATRIX)==UNIQUEFROM),which(colnames(FROM_TO_VALUEMATRIX)==TO)] <<- VALUE},FROM_TO_VALUEMATRIX,.expand = F)
   #join
   MatrixWithValue <- cbind(as.data.frame.matrix(FROM_TO_VALUEMATRIX),UNIQUEFROM=rownames(FROM_TO_VALUEMATRIX))
   system.time(result <- join(datawithUNIQUEFROM[,append(dimensions,ncol(datawithUNIQUEFROM))], MatrixWithValue, by = c("UNIQUEFROM")))
@@ -65,3 +52,30 @@ convertAttributeToDimension <- function(data,dimensions,attribute,value){
   head(result)
   return(result)
 }
+convertFROMTOVALUEToVALUEMATRIX <- function(FROM_TO_VALUE,FROM,TO,VALUE){
+  if(VALUE!=0){
+    FROM_TO_VALUE_DF <- data.frame(FROM=FROM_TO_VALUE[,FROM],TO=FROM_TO_VALUE[,TO],VALUE=FROM_TO_VALUE[,VALUE])
+  }else{
+    FROM_TO_VALUE_DF <- data.frame(FROM=FROM_TO_VALUE[,FROM],TO=FROM_TO_VALUE[,TO])
+  }
+  FROM_TO_VALUEMATRIX<-as.matrix(table(FROM_TO_VALUE_DF$FROM,FROM_TO_VALUE_DF$TO))
+  if(VALUE!=0){
+    m_ply(FROM_TO_VALUE_DF,function(FROM,TO,VALUE,FROM_TO_VALUEMATRIX){FROM_TO_VALUEMATRIX[which(rownames(FROM_TO_VALUEMATRIX)==FROM),which(colnames(FROM_TO_VALUEMATRIX)==TO)] <<- VALUE},FROM_TO_VALUEMATRIX)
+  }
+  return(FROM_TO_VALUEMATRIX)
+}
+memoryWhiteList <- c("memoryWhiteList","convertDimensionToAttribute","convertAttributeToDimension","convertFROMTOVALUEToVALUEMATRIX","rmTempObject","addPersistentObjects")
+addPersistentObjects <- function(names){
+  memoryWhiteList <<- unique(c(memoryWhiteList,names))
+}
+rmTempObject <- function(){
+  rm(list = setdiff(ls(envir = globalenv()), memoryWhiteList),envir = globalenv())
+  gc()
+  ls(envir = globalenv())
+}
+library(compiler)
+convertDimensionToAttribute <- cmpfun(convertDimensionToAttribute)
+convertAttributeToDimension <- cmpfun(convertAttributeToDimension)
+convertFROMTOVALUEToVALUEMATRIX <- cmpfun(convertFROMTOVALUEToVALUEMATRIX)
+#clear
+rmTempObject()
