@@ -15,3 +15,5 @@ project/plugins/project/
 # Scala-IDE specific
 .scala_dependencies
 .worksheet
+restopicer-data/sample_data/restopicer_origin.sql
+restopicer-data/sample_data/restopicer_resource_info.sql
