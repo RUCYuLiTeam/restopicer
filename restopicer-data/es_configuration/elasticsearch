@@ -1,0 +1,60 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          elasticsearch
+# Required-Start:    $all
+# Required-Stop:    $all
+# Default-Start:    2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Starts elasticsearch
+# Description:      Starts elasticsearch using start-stop-daemon
+### END INIT INFO
+
+ES_HOME=/opt/elasticsearch
+# ES_MIN_MEM should equal ES_MAX_MEM
+# ES_MAX_MEM/ES_MIN_MEM should be at least half of the physical Memory
+ES_MIN_MEM=12g
+ES_MAX_MEM=12g
+DAEMON=$ES_HOME/bin/elasticsearch
+NAME=elasticsearch
+PID_FILE=/var/run/$NAME.pid
+LOG_DIR=/var/log/$NAME
+WORK_DIR=/tmp/$NAME
+CONFIG_FILE=/etc/$NAME/elasticsearch.yml
+DAEMON_OPTS="-Xmx$ES_MAX_MEM -Xms$ES_MIN_MEM -p $PID_FILE -Des.config=$CONFIG_FILE -Des.path.home=$ES_HOME -Des.path.logs=$LOG_DIR -Des.path.work=$WORK_DIR"
+test -x $DAEMON || exit 0
+
+set -e
+
+case "$1" in
+  start)
+    echo -n "Starting $NAME: "
+    mkdir -p $LOG_DIR $WORK_DIR
+    if start-stop-daemon --start --pidfile $PID_FILE --background --startas $DAEMON -- $DAEMON_OPTS
+    then
+        echo "started."
+    else
+        echo "failed."
+    fi
+    ;;
+  stop)
+    echo -n "Stopping $NAME: "
+    if start-stop-daemon --stop --pidfile $PID_FILE
+    then
+        echo "stopped."
+    else
+        echo "failed."
+    fi
+    ;;
+  restart|force-reload)
+    ${0} stop
+    sleep 0.5
+    ${0} start
+    ;;
+  *)
+    N=/etc/init.d/$NAME
+    echo "Usage: $N {start|stop|restart|force-reload}" >&2
+    exit 1
+    ;;
+esac
+ 
+exit 0
