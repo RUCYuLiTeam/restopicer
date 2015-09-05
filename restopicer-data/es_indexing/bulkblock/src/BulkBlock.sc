@@ -5,9 +5,9 @@ def stripQuotes(s: String): String = {
   else s
 }
 val out = new PrintWriter("F:\\Desktop\\restopicer\\restopicer-data\\es_indexing\\output\\es_paper_with_issue_requests")
-val dataHeader = dataFile.apply(0).split(",")
+val dataHeader = dataFile.apply(0).split("\t")
 for(i <- 1 to (dataFile.length-1)){
-  var dataLine = dataFile.apply(i).split(",").zip(dataHeader)
+  var dataLine = dataFile.apply(i).split("\t").map(x => "\""+stripQuotes(x).replaceAll("\"","")+"\"").zip(dataHeader)
   //action_and_meta_data
   out.print("{ \"index\" : { \"_index\" : \"restopicer\", \"_type\" : \"paper\", \"_id\" : "+ dataLine.apply(0)._1 +" } }\n")
   //optional_source
