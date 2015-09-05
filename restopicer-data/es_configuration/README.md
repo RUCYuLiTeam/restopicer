@@ -37,7 +37,7 @@ ElasticSearch Configuration
 - kibana
 
 ### run elasticsearch
-- under the folder run : elasticsearch -Xmx15g -Xms15g
+- under the folder run : elasticsearch -Xmx16g -Xms16g
 - run: sudo elasticsearch start
 
 ### using plugin and restful service
