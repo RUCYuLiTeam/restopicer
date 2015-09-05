@@ -18,3 +18,4 @@ project/plugins/project/
 restopicer-data/sample_data/restopicer_origin.sql
 restopicer-data/sample_data/restopicer_resource_info.sql
 restopicer-data/es_indexing/bulkblock/.idea/
+*.iml
