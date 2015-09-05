@@ -1,80 +1,78 @@
-"settings" : {
-    "number_of_shards" : 10
-},
-"mappings" : {
-    "paper" : {
-        dynamic: false,
-		date_detection: false,
-		numeric_detection: false,
-        "_source" : { "enabled" : false },
-        "properties" : {
-            "item_ut": {
-               "type": "string",
-			   "index":"not_analyzed"
-            },
-            "article_title": {
-                "type": "string"
-            },
-            "document_type": {
-                "type": "string"
-            },
-            "meeting_abstract_number": {
-                "type": "string",
-               	"index":"not_analyzed"
-            },
-			"abstract": {
-                "type": "string"
-            },
-			"beginning_page": {
-                "type": "int",
-               	"index":"not_analyzed"
-            },
-			"ending_page": {
-                "type": "int",
-               	"index":"not_analyzed"
-            },
-			"page_count": {
-                "type": "int",
-               	"index":"not_analyzed"
-            },
-			"item_t9": {
-                "type": "int",
-               	"index":"not_analyzed"
-            },
-			"cited_count": {
-                "type": "int",
-               	"index":"not_analyzed"
-            },
-			"paper_id": {
-                "type": "int",
-               	"index":"not_analyzed"
-            },
-			"item_ui": {
-                "type": "string",
-               	"index":"not_analyzed"
-            },
-			"full_source_title": {
-                "type": "string",
-               	"index":"not_analyzed"
-            },
-			"volume": {
-                "type": "string",
-               	"index":"not_analyzed"
-            },
-			"issue": {
-                "type": "string",
-               	"index":"not_analyzed"
-            },
-			"publication_type": {
-                "type": "string"
-            },
-			"publication_year": {
-                "type": "year"
-            },
-			"publication_date": {
-                "type": "string"
-				"index":"not_analyzed"
-            }
-        }
-    }
+{
+  "settings" : {
+      "number_of_shards" : 10
+  },
+  "mappings" : {
+      "paper" : {
+          dynamic: false,
+          date_detection: false,
+          numeric_detection: false,
+          "properties" : {
+              "item_ut": {
+                 "type": "string"
+              },
+              "article_title": {
+                  "type": "string"
+              },
+              "document_type": {
+                  "type": "string"
+              },
+              "meeting_abstract_number": {
+                  "type": "string",
+                  "index":"not_analyzed"
+              },
+              "abstract": {
+                  "type": "string"
+              },
+              "beginning_page": {
+                  "type": "string",
+                  "index":"not_analyzed"
+              },
+              "ending_page": {
+                  "type": "string",
+                  "index":"not_analyzed"
+              },
+              "page_count": {
+                  "type": "integer",
+                  "index":"not_analyzed"
+              },
+              "item_t9": {
+                  "type": "string",
+                  "index":"not_analyzed"
+              },
+              "cited_count": {
+                  "type": "integer",
+                  "index":"not_analyzed"
+              },
+              "paper_id": {
+                  "type": "string",
+                  "index":"not_analyzed"
+              },
+              "item_ui": {
+                  "type": "string"
+              },
+              "full_source_title": {
+                  "type": "string"
+              },
+              "volume": {
+                  "type": "string",
+                  "index":"not_analyzed"
+              },
+              "issue": {
+                  "type": "string",
+                  "index":"not_analyzed"
+              },
+              "publication_type": {
+                  "type": "string"
+              },
+              "publication_year": {
+                  "type": "date",
+                  "format" : "YYYY"
+              },
+              "publication_date": {
+                  "type": "string"
+              }
+          }
+      }
+  }
 }
