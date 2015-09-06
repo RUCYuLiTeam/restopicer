@@ -1,4 +1,25 @@
-.RData
-.Rhistory
-RCitationEvolution.Rproj
-.Rproj.user
+*.class
+*.log
+
+# sbt specific
+.cache
+.history
+.lib/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
+restopicer-data/sample_data/restopicer_origin.sql
+restopicer-data/sample_data/restopicer_resource_info.sql
+restopicer-data/es_indexing/bulkblock/.idea/
+*.iml
+restopicer-research/LinkTopicModel/document/
+*.RData
+*.Rhistory
+*.Rproj
