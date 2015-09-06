@@ -23,3 +23,5 @@ restopicer-research/LinkTopicModel/document/
 *.RData
 *.Rhistory
 *.Rproj
+restopicer-research/LinkTopicModel/LTM_doc/
+restopicer-research/probabilisticLinkTopicModel/pLTM_doc/
