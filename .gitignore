@@ -25,3 +25,4 @@ restopicer-research/LinkTopicModel/document/
 *.Rproj
 restopicer-research/LinkTopicModel/LTM_doc/
 restopicer-research/probabilisticLinkTopicModel/pLTM_doc/
+.Rproj.user
