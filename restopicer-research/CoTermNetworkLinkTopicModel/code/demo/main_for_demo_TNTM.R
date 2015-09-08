@@ -18,6 +18,7 @@ projecting_tm(t(bi_MaxCompart),method = "sum")
 projectingKeywordNetwork <- list(keyword=colnames(bi_MaxCompart),coterm=projecting_tm(t(bi_MaxCompart),method = "sum"))
 
 
+
 # plot report
 plotDocumentTermReport(filename = "demo_LDA_keyword",TF_data = corpus_dtm,plotDocComparison = TRUE,plotTermDist = TRUE, path = "output/demo_LDA_keyword")
 plotTopicTermReport(filename = "demo_LDA_keyword",data = topic_posterior$terms,plotTopicComparison = TRUE, plotTopicDist = TRUE, path = "output/demo_LDA_keyword")

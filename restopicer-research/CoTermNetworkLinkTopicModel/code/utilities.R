@@ -1,6 +1,16 @@
 # required library
 library(plyr)
 ###########
+# convert DataFrame to SQL data file
+###########
+convertDataFrametoInsertSQLFile <- function(table_name,data){
+  unlist(
+    alply(data,.margins = 1,function(r){
+      paste("INSERT INTO",table_name,"(",paste(colnames(r),collapse = ","),")","VALUES","(",paste("\"",r,"\"",sep = "",collapse = ","),")",sep = " ")
+    })
+  )
+}
+###########
 # convert Dimension To Attribute, just like reshape (but reshape has limitations)
 ###########
 convertDimensionToAttribute<-function(data,dimensions,values,DIMENSION_NAME="ATTRIBUTE",VALUE_NAME="VALUE"){
@@ -17,6 +27,18 @@ convertDimensionToAttribute<-function(data,dimensions,values,DIMENSION_NAME="ATT
   result$UNIQUE<-NULL
   head(result)
   return(result)
+}
+###########
+# utilities for data
+###########
+constantWeightImpact <- function(x){
+  ifelse(x>0,1,0)
+}
+linearWeightImpact <- function(x){
+  x
+}
+quadWeightImpact <- function(x){
+  x^2
 }
 ###########
 # memory control (exec last)
