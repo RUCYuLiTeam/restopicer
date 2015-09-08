@@ -1,5 +1,6 @@
 library(tm)
 library(bipartite)
+library(dplyr)
 library(slam)
 library(wordcloud)
 ######
@@ -62,11 +63,11 @@ plotDocumentTermReport <- function(filename, TF_data, type = "matrix", sumTF_Top
   }
   write.table(df_for_plot,file = file.path(path,paste(filename,"-plot.txt",sep="")),quote = F,sep = "\t",row.names = F,col.names = T)
 }
-runMaxCompartOfBipartite <- function(bi_data, type = "matrix", ){
+runMaxCompartOfBipartite <- function(bi_data, type = "matrix", plotCompartAnalysis = FALSE){
   if(type=="matrix"){
     bi_matrix <- bi_data
     bi_compart <- compart(bi_matrix)
-    bi_compart$n.compart
+    #bi_compart$n.compart
     size.compart <- data.frame(doc=row.names(bi_compart$cweb),compart=-apply(bi_compart$cweb,1,FUN = min)) %>% group_by(compart) %>% summarise(cnt = n())
     max.size.compart <- size.compart[which.max(size.compart$cnt),]$compart
     doc.compart <- data.frame(doc=row.names(bi_compart$cweb),compart=-apply(bi_compart$cweb,1,FUN = min)) %>% filter(compart == max.size.compart)
@@ -173,3 +174,7 @@ plotDocTopicReport <- function(filename, data, path = "output/"){
   dev.off()
   write.table(cbind(doc=rownames(data),as.data.frame(data)),file = file.path(path,paste(filename,"-doctopicmatrix.txt",sep="")),quote = F,sep = "\t",row.names = F,col.names = T)
 }
+#####
+# the last part
+#####
+source("code/utilities.R")

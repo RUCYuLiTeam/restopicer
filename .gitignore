@@ -20,7 +20,6 @@ restopicer-data/sample_data/restopicer_resource_info.sql
 restopicer-data/es_indexing/bulkblock/.idea/
 *.iml
 restopicer-research/LinkTopicModel/document/
-*.RData
 *.Rhistory
 *.Rproj
 restopicer-research/LinkTopicModel/LTM_doc/
@@ -30,3 +29,5 @@ restopicer-research/LinkTopicModel/output/
 restopicer-research/CoTermNetworkLinkTopicModel/document/
 restopicer-research/CoTermNetworkLinkTopicModel/output/
 restopicer-research/CoTermNetworkLinkTopicModel/LTM_doc/
+restopicer-research/CoTermNetworkLinkTopicModel/.RData
+restopicer-research/RCitationEvolution/.RData
