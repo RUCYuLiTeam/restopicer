@@ -4,10 +4,8 @@ setwd("F:/Desktop/restopicer/restopicer-research/CoTermNetworkLinkTopicModel")
 # required library
 #####
 library(topicmodels)
-library(bipartite)
-library(dplyr)
-source(file = "code/functions.R")
 load(file = "rdata/demo.RData")
+source(file = "code/functions.R")
 ##############
 # LDA on abstract demo
 ##############

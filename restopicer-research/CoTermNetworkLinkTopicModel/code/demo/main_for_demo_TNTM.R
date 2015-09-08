@@ -3,8 +3,8 @@ setwd("F:/Desktop/restopicer/restopicer-research/CoTermNetworkLinkTopicModel")
 #####
 # required library
 #####
-source(file = "code/functions.R")
 load(file = "rdata/demo.RData")
+source(file = "code/functions.R")
 ##############
 # Traditional Network Topic Model demo
 ##############
@@ -12,8 +12,9 @@ load(file = "rdata/demo.RData")
 data <- unique(demoPapersKeywords)
 bi_matrix <- table(data$item_ut,tolower(data$author_keyword))
 # bipartite network max compart
-
+bi_MaxCompart <- runMaxCompartOfBipartite(bi_matrix)
 # new corpus_dtm is the bi_MaxCompart
+runBipartiteProjecting(t(bi_MaxCompart))
 projecting_tm(t(bi_MaxCompart),method = "sum")
 projectingKeywordNetwork <- list(keyword=colnames(bi_MaxCompart),coterm=projecting_tm(t(bi_MaxCompart),method = "sum"))
 

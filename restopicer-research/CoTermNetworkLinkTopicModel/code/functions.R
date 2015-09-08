@@ -73,7 +73,7 @@ runMaxCompartOfBipartite <- function(bi_data, type = "matrix", plotCompartAnalys
     doc.compart <- data.frame(doc=row.names(bi_compart$cweb),compart=-apply(bi_compart$cweb,1,FUN = min)) %>% filter(compart == max.size.compart)
     bi_MaxCompart <- bi_matrix[row.names(bi_matrix) %in% doc.compart$doc,]
     #bi_MaxCompart[which(bi_MaxCompart!=0)] <- 1 # transform to binary
-    bi_MaxCompart <- empty(bi_MaxCompart)
+    bi_MaxCompart <- bipartite::empty(bi_MaxCompart)
   }
   bi_MaxCompart
 }
