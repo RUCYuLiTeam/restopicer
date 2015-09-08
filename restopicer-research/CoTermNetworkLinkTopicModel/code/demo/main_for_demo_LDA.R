@@ -1,5 +1,5 @@
 rm(list = ls(envir = globalenv()))
-setwd("F:/Desktop/restopicer/restopicer-research/LinkTopicModel")
+setwd("F:/Desktop/restopicer/restopicer-research/CoTermNetworkLinkTopicModel")
 #####
 # required library
 #####
@@ -50,9 +50,9 @@ corpus_topic <- list(VEM = LDA(corpus_dtm, k = k, control = list(seed = SEED)),
 sapply(corpus_topic,  function(x)  mean(apply(posterior(x)$topics,1,  function(z) -sum(z*log(z)))))
 topic_posterior <- posterior(corpus_topic[["Gibbs"]])
 # plot report
-plotDocumentTermMatrixReport(filename = "demo_LDA_abstract",TF_data = corpus_dtm,plotDocComparison = TRUE,plotTermDist = TRUE, path = "output/demo_LDA_abstract")
-plotTopicTermMatrixReport(filename = "demo_LDA_abstract",data = topic_posterior$terms,plotTopicComparison = TRUE, plotTopicDist = TRUE, path = "output/demo_LDA_abstract")
-plotDocTopicMatrixReport(filename = "demo_LDA_abstract",data = topic_posterior$topics,path = "output/demo_LDA_abstract")
+plotDocumentTermReport(filename = "demo_LDA_abstract",TF_data = corpus_dtm,plotDocComparison = TRUE,plotTermDist = TRUE, path = "output/demo_LDA_abstract")
+plotTopicTermReport(filename = "demo_LDA_abstract",data = topic_posterior$terms,plotTopicComparison = TRUE, plotTopicDist = TRUE, path = "output/demo_LDA_abstract")
+plotDocTopicReport(filename = "demo_LDA_abstract",data = topic_posterior$topics,path = "output/demo_LDA_abstract")
 ##############
 # LDA on keywords demo
 ##############
@@ -69,9 +69,9 @@ corpus_topic <- list(VEM = LDA(corpus_dtm, k = k, control = list(seed = SEED)),
 sapply(corpus_topic,  function(x)  mean(apply(posterior(x)$topics,1,  function(z) -sum(z*log(z)))))
 topic_posterior <- posterior(corpus_topic[["Gibbs"]])
 # plot report
-plotDocumentTermMatrixReport(filename = "demo_LDA_keyword",TF_data = corpus_dtm,plotDocComparison = TRUE,plotTermDist = TRUE, path = "output/demo_LDA_keyword")
-plotTopicTermMatrixReport(filename = "demo_LDA_keyword",data = topic_posterior$terms,plotTopicComparison = TRUE, plotTopicDist = TRUE, path = "output/demo_LDA_keyword")
-plotDocTopicMatrixReport(filename = "demo_LDA_keyword",data = topic_posterior$topics,path = "output/demo_LDA_keyword")
+plotDocumentTermReport(filename = "demo_LDA_keyword",TF_data = corpus_dtm,plotDocComparison = TRUE,plotTermDist = TRUE, path = "output/demo_LDA_keyword")
+plotTopicTermReport(filename = "demo_LDA_keyword",data = topic_posterior$terms,plotTopicComparison = TRUE, plotTopicDist = TRUE, path = "output/demo_LDA_keyword")
+plotDocTopicReport(filename = "demo_LDA_keyword",data = topic_posterior$topics,path = "output/demo_LDA_keyword")
 ##############
 # END LDA on demo
 ##############

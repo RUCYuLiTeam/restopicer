@@ -1,26 +1,22 @@
 library(tm)
+library(bipartite)
 library(slam)
 library(wordcloud)
 ######
-# type is matrix or data.frame
-# the matrix Docs-Terms weightTf matrix (weightTfIdf is calculated)
-# the data.frame is Docs-Terms-weightTf (weightTfIdf is calculated)
-###
-## simple wordcloud and simple TermDist
-###
+# for Document-Term Matrix
+# bipartite
 ######
-plotDocumentTermMatrixReport <- function(filename, TF_data, type = class(TF_data), sumTF_TopN = Inf, sumTFIDF_TopN = Inf, plotWordCloud = TRUE, plotDocComparison = FALSE, plotTermDist = FALSE, path = "output/"){
+plotDocumentTermReport <- function(filename, TF_data, type = "matrix", sumTF_TopN = Inf, sumTFIDF_TopN = Inf, plotWordCloud = TRUE, plotDocComparison = FALSE, plotTermDist = FALSE, path = "output/"){
   # folder
   if(!file.exists(path)) dir.create(path,recursive = TRUE)
   # preprocessing
-  if(any(type %in% c("DocumentTermMatrix","matrix"))){
+  if(type=="matrix"){
     TF_data <- as.DocumentTermMatrix(TF_data,weighting = weightTf)
     TFIDF_data <- weightTfIdf(TF_data)
     df_for_plot <- data.frame(Terms = Terms(TF_data), sumTF = col_sums(TF_data),sumTFIDF = col_sums(TFIDF_data), stringsAsFactors = F)
-  }else if(any(type %in% c("data.frame"))){
+  }
+  if(type=="edgelist"){
     
-  }else{
-    return(NULL)
   }
   # get Top N
   sumTF_TopN <- ifelse(sumTF_TopN == Inf, length(df_for_plot$Terms), sumTF_TopN)
@@ -65,15 +61,26 @@ plotDocumentTermMatrixReport <- function(filename, TF_data, type = class(TF_data
     dev.off()
   }
   write.table(df_for_plot,file = file.path(path,paste(filename,"-plot.txt",sep="")),quote = F,sep = "\t",row.names = F,col.names = T)
-  #return(df_for_plot)
+}
+runMaxCompartOfBipartite <- function(bi_data, type = "matrix", ){
+  if(type=="matrix"){
+    bi_matrix <- bi_data
+    bi_compart <- compart(bi_matrix)
+    bi_compart$n.compart
+    size.compart <- data.frame(doc=row.names(bi_compart$cweb),compart=-apply(bi_compart$cweb,1,FUN = min)) %>% group_by(compart) %>% summarise(cnt = n())
+    max.size.compart <- size.compart[which.max(size.compart$cnt),]$compart
+    doc.compart <- data.frame(doc=row.names(bi_compart$cweb),compart=-apply(bi_compart$cweb,1,FUN = min)) %>% filter(compart == max.size.compart)
+    bi_MaxCompart <- bi_matrix[row.names(bi_matrix) %in% doc.compart$doc,]
+    #bi_MaxCompart[which(bi_MaxCompart!=0)] <- 1 # transform to binary
+    bi_MaxCompart <- empty(bi_MaxCompart)
+  }
+  bi_MaxCompart
 }
 ######
+# topics
 # for topic-term matrix
-###
-## topic wordcloud and topic comparison wordcloud and topicdist
-###
 ######
-plotTopicTermMatrixReport <- function(filename, data, plotWordCloud = TRUE, plotTopicComparison = FALSE, plotTopicDist = FALSE, path = "output/"){
+plotTopicTermReport <- function(filename, data, plotWordCloud = TRUE, plotTopicComparison = FALSE, plotTopicDist = FALSE, path = "output/"){
   # folder
   if(!file.exists(path)) dir.create(path,recursive = TRUE)
   if(plotWordCloud){
@@ -113,11 +120,8 @@ plotTopicTermMatrixReport <- function(filename, data, plotWordCloud = TRUE, plot
 }
 ######
 # for doc-topic matrix
-###
-## docdist
-###
 ######
-plotDocTopicMatrixReport <- function(filename, data, path = "output/"){
+plotDocTopicReport <- function(filename, data, path = "output/"){
   # folder
   if(!file.exists(path)) dir.create(path,recursive = TRUE)
   loc <- cmdscale(dist(data,method = "minkowski", p = 2))
