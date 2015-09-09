@@ -1,84 +1,111 @@
 library(tm)
 library(bipartite)
-library(dplyr)
 library(slam)
 library(wordcloud)
 ######
-# for Document-Term Matrix
-# bipartite
+# plot for Matrix of bipartite
+# weightType for plotRowWordCloud, plotWordCloud, plotRowDist
+# for col, please use transpose = TRUE
 ######
-plotDocumentTermReport <- function(filename, TF_data, type = "matrix", sumTF_TopN = Inf, sumTFIDF_TopN = Inf, plotWordCloud = TRUE, plotDocComparison = FALSE, plotTermDist = FALSE, path = "output/"){
+plotBipartiteMatrixReport <- function(filename, bi_matrix, transpose = FALSE, showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = FALSE, path = "output/"){
   # folder
   if(!file.exists(path)) dir.create(path,recursive = TRUE)
-  # preprocessing
-  if(type=="matrix"){
-    TF_data <- as.DocumentTermMatrix(TF_data,weighting = weightTf)
-    TFIDF_data <- weightTfIdf(TF_data)
-    df_for_plot <- data.frame(Terms = Terms(TF_data), sumTF = col_sums(TF_data),sumTFIDF = col_sums(TFIDF_data), stringsAsFactors = F)
+  type="o"
+  if(transpose){
+    bi_matrix <- as.matrix(t(bi_matrix))
+    type="t"
   }
-  if(type=="edgelist"){
-    
+  # preprocessing for matrix
+  bi_matrix_tf <- as.DocumentTermMatrix(bi_matrix,weighting = weightTf)
+  bi_matrix_tfidf <- weightTfIdf(bi_matrix_tf)
+  df_for_plot <- data.frame(columns = Terms(bi_matrix_tf), sumTF = col_sums(bi_matrix_tf),sumTFIDF = col_sums(bi_matrix_tfidf), stringsAsFactors = F)
+  df_column <- data.frame(column_id = 1:nTerms(bi_matrix_tf), column_name = Terms(bi_matrix_tf), stringsAsFactors = F)
+  df_row <- data.frame(row_id = 1:nDocs(bi_matrix_tf), column_name = Docs(bi_matrix_tf), stringsAsFactors = F)
+  if(weightType=="tfidf"){
+    # using when exploring importance of columns, especially for original data
+    bi_data <- bi_matrix_tfidf
+  }else{
+    # using when exploring result of model
+    bi_data <- bi_matrix_tf
+    df_for_plot$sumTFIDF <- df_for_plot$sumTF
   }
-  # get Top N
-  sumTF_TopN <- ifelse(sumTF_TopN == Inf, length(df_for_plot$Terms), sumTF_TopN)
-  sumTFIDF_TopN <- ifelse(sumTFIDF_TopN == Inf, length(df_for_plot$Terms), sumTFIDF_TopN)
-  df_for_plot[df_for_plot$sumTF >= sort(df_for_plot$sumTF,decreasing = T)[sumTF_TopN],]
-  df_for_plot[df_for_plot$sumTFIDF >= sort(df_for_plot$sumTFIDF,decreasing = T)[sumTFIDF_TopN],]
-  # do scale
-  df_for_plot$sumTF <- scale(df_for_plot$sumTF, center = F, scale = T)
-  df_for_plot$sumTFIDF <- scale(df_for_plot$sumTFIDF, center = F, scale = T)
-  loc <- cmdscale(dist(df_for_plot[,c("sumTF","sumTFIDF")],method = "canberra", p = 2))
-  df_for_plot$loc_scaleSumTF <- loc[,1]
-  df_for_plot$loc_scaleSumTFIDF <- loc[,2]
+  # plotRowWordCloud
+  if(plotRowWordCloud){
+    # different weightType of bi_data
+    for(i in 1:nrow(bi_data)){
+      line <- as.matrix(bi_data[i,])
+      line <- line[,which(line!=0)]
+      #plot wordcloud for each line
+      png(file.path(path,paste(filename,i,weightType,type,"rowwordcloud.png",sep="-")),width=600,height=600)
+      par(fig = c(0,1,0.1,1),mar = c(0,0,0,0))
+      pal <- brewer.pal(9,"Blues")[4:9]
+      color_cluster <- pal[ceiling(6*(line/max(line)))]
+      wordcloud(words=names(line),freq=line,scale = c(4, 0.5),min.freq=1,max.words = Inf,
+                random.order=F,random.color=F,rot.per=0,colors=color_cluster,ordered.colors=T,
+                use.r.layout=F,fixed.asp=F)
+      par(fig = c(0,1,0,0.1), mar = c(3, 2, 0, 2), new=TRUE)
+      display.brewer.pal(9, "Blues")
+      dev.off()
+    }
+  }
   if(plotWordCloud){
+    # different weightType of bi_data
     #plot wordcloud
-    png(file.path(path,paste(filename,"-wordcloud.png",sep="")),width=600,height=600)
+    png(file.path(path,paste(filename,type,"wordcloud.png",sep="-")),width=600,height=600)
     par(fig = c(0,1,0.1,1),mar = c(0,0,0,0))
     pal <- brewer.pal(9,"Blues")[4:9]
     color_cluster <- pal[ceiling(6*df_for_plot$sumTFIDF/max(df_for_plot$sumTFIDF))]
-    wordcloud(words=df_for_plot$Terms,freq=df_for_plot$sumTF,scale = c(4, 0.5),min.freq=1,max.words = Inf,
+    wordcloud(words=df_for_plot$columns,freq=df_for_plot$sumTF,scale = c(4, 0.5),min.freq=1,max.words = Inf,
               random.order=F,random.color=F,rot.per=0,colors=color_cluster,ordered.colors=T,
               use.r.layout=F,fixed.asp=F)
     par(fig = c(0,1,0,0.1), mar = c(3, 2, 0, 2), new=TRUE)
     display.brewer.pal(9, "Blues")
     dev.off()
   }
-  if(plotDocComparison){
-    data <- as.matrix(TFIDF_data)
-    rownames(data) <- 1:nrow(data)
+  if(plotRowComparison){
+    #no influence for different weightType of bi_data, only use tf
+    data <- as.matrix(bi_matrix_tf)
+    if(!showNamesInPlot) rownames(data) <- 1:nrow(data)
     #plot textplot
-    png(file.path(path,paste(filename,"-doccomparison.png",sep="")),width=600,height=600)
+    png(file.path(path,paste(filename,type,"rowcomparison.png",sep="-")),width=600,height=600)
     par(fig = c(0,1,0.1,1),mar = c(0,0,0,0))
     comparison.cloud(term.matrix = t(data),title.size = 2,scale = c(4,0.5),rot.per = 0,max.words = Inf,colors = rep(brewer.pal(n = 12,name = "Paired"),ceiling(nrow(data)/12)))
     par(fig = c(0,1,0,0.1), mar = c(3, 2, 0, 2), new=TRUE)
     display.brewer.pal(12, "Paired")
     dev.off()
   }
-  if(plotTermDist){
+  if(plotRowDist){
+    # different weightType of bi_data
+    loc <- cmdscale(dist(bi_data,method = "minkowski", p = 2))
+    if(!showNamesInPlot) rownames(loc) <- 1:nrow(loc)
     #plot textplot
-    png(file.path(path,paste(filename,"-termdist.png",sep="")),width=600,height=600)
+    png(file.path(path,paste(filename,weightType,type,"rowdist.png",sep="-")),width=600,height=600)
     par(mar=c(5,4,4,2))
-    textplot(loc[,1],loc[,2],rownames(loc),cex = 1)
+    textplot(loc[,1],loc[,2],rownames(loc),cex = 2)
     dev.off()
   }
-  write.table(df_for_plot,file = file.path(path,paste(filename,"-plot.txt",sep="")),quote = F,sep = "\t",row.names = F,col.names = T)
+  write.table(df_column,file = file.path(path,paste(filename,"column.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+  write.table(df_row,file = file.path(path,paste(filename,"row.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
 }
-runMaxCompartOfBipartite <- function(bi_data, type = "matrix", plotCompartAnalysis = FALSE){
-  if(type=="matrix"){
+######
+# run data processing for bipartite
+# type : matrix and edgelist
+######
+runMaxCompartOfBipartite <- function(bi_data, plotCompartAnalysis = FALSE){
+  if(class(bi_data)=="matrix"){
     bi_matrix <- bi_data
     bi_compart <- compart(bi_matrix)
-    #bi_compart$n.compart
-    size.compart <- data.frame(doc=row.names(bi_compart$cweb),compart=-apply(bi_compart$cweb,1,FUN = min)) %>% group_by(compart) %>% summarise(cnt = n())
+    compart.belong <- data.frame(row=row.names(bi_compart$cweb),compart=-apply(bi_compart$cweb,1,FUN = min))
+    size.compart <-  ddply(compart.belong,.(compart),.fun = nrow)
+    colnames(size.compart) <- c("compart","cnt")
     max.size.compart <- size.compart[which.max(size.compart$cnt),]$compart
-    doc.compart <- data.frame(doc=row.names(bi_compart$cweb),compart=-apply(bi_compart$cweb,1,FUN = min)) %>% filter(compart == max.size.compart)
-    bi_MaxCompart <- bi_matrix[row.names(bi_matrix) %in% doc.compart$doc,]
+    row.compart <- compart.belong[compart.belong$compart == max.size.compart,]
+    bi_MaxCompart <- bi_matrix[row.names(bi_matrix) %in% row.compart$row,]
     #bi_MaxCompart[which(bi_MaxCompart!=0)] <- 1 # transform to binary
-    bi_MaxCompart <- bipartite::empty(bi_MaxCompart)
   }
   bi_MaxCompart
 }
-# bug fix for projecting_tm
-runBipartiteProjecting <- function (net, method = "Newman", directed = F){
+runBipartiteProjecting <- function (net, method = "length", directed = F){
   if (is.null(attributes(net)$tnet)) {
     if (ncol(net) == 3) {
       net <- as.tnet(net, type = "weighted two-mode tnet")
@@ -92,17 +119,21 @@ runBipartiteProjecting <- function (net, method = "Newman", directed = F){
   net2 <- net
   if (attributes(net)$tnet == "binary two-mode tnet") 
     net2 <- cbind(net2, w = 1)
+  # i is the projected part
+  # w is the weight of i-p
   net2 <- net2[order(net2[, "i"], net2[, "p"]), ]
   np <- table(net2[, "p"])
+  # np is the degree of p
   net2 <- merge(net2, cbind(p = as.numeric(row.names(np)),np = np))
-  net1 <- merge(net2, cbind(j = net2[, "i"], p = net2[, "p"]))
-  net1 <- net1[net1[, "i"] != net1[, "j"], c("i", "j", "w", "np")]
+  net1 <- merge(net2, cbind(j = net2[, "i"], p = net2[, "p"], w_j = net2[, "w"]))
+  colnames(net1) <- c("p","i","w_i","np","j","w_j")
+  net1 <- net1[net1[, "i"] != net1[, "j"], c("i", "w_i", "j", "w_j", "np")]
   net1 <- net1[order(net1[, "i"], net1[, "j"]), ]
   index <- !duplicated(net1[, c("i", "j")])
   w <- switch(method, binary = rep(1, sum(index)), 
-              sum = tapply(net1[,"w"], cumsum(index), sum), 
-              Newman = tapply(1:nrow(net1), cumsum(index), function(a) sum(net1[a, "w"]/(net1[a,"np"] - 1))))
-  net1 <- cbind(net1[index, c("i", "j")], w = as.numeric(w))
+              length = tapply(net1[,"np"], cumsum(index), length), 
+              sumchoose = tapply(net1[,"np"], cumsum(index), function(a) sum(1/choose(a,2))))
+  net1 <- cbind(net1[index, c("i", "w_i", "j", "w_j")], w = as.numeric(w))
   if(!directed){
     dup_Bool <- net1$i>net1$j
     tmp <- net1[dup_Bool,]$i
@@ -110,70 +141,18 @@ runBipartiteProjecting <- function (net, method = "Newman", directed = F){
     net1[dup_Bool,]$j <- tmp
     net1 <- net1[order(net1[, "i"], net1[, "j"]), ]
     index <- !duplicated(net1[, c("i", "j")])
-    w <- switch(method, binary = tapply(net1[,"w"], cumsum(index), sum),
-                sum = tapply(net1[,"w"], cumsum(index), mean),
-                Newman = tapply(net1[,"w"], cumsum(index), mean))
-    net1 <- cbind(net1[index, c("i", "j")], w = as.numeric(w))
+    w <- switch(method, binary = rep(1, sum(index)),
+                length = tapply(net1[,"w"], cumsum(index), unique),
+                sumchoose = tapply(net1[,"w"], cumsum(index), unique))
+    net1 <- cbind(net1[index, c("i", "w_i", "j", "w_j")], w = as.numeric(w))
   }
-  return(as.tnet(net1, type = "weighted one-mode tnet"))
+  return(net1)
 }
 ######
-# topics
-# for topic-term matrix
+# plot network for bipartite
+# type : matrix and edgelist
 ######
-plotTopicTermReport <- function(filename, data, plotWordCloud = TRUE, plotTopicComparison = FALSE, plotTopicDist = FALSE, path = "output/"){
-  # folder
-  if(!file.exists(path)) dir.create(path,recursive = TRUE)
-  if(plotWordCloud){
-    for(i in 1:nrow(data)){
-      topic <- data[i,]
-      #plot wordcloud
-      png(file.path(path,paste(filename,"-topic",i,"-wordcloud.png",sep="")),width=600,height=600)
-      par(fig = c(0,1,0.1,1),mar = c(0,0,0,0))
-      pal <- brewer.pal(9,"Blues")[4:9]
-      color_cluster <- pal[ceiling(6*(topic/max(topic)))]
-      wordcloud(words=names(topic),freq=topic,scale = c(4, 0.5),min.freq=1,max.words = Inf,
-                random.order=F,random.color=F,rot.per=0,colors=color_cluster,ordered.colors=T,
-                use.r.layout=F,fixed.asp=F)
-      par(fig = c(0,1,0,0.1), mar = c(3, 2, 0, 2), new=TRUE)
-      display.brewer.pal(9, "Blues")
-      dev.off()
-    }
-  }
-  if(plotTopicComparison){
-    #plot textplot
-    png(file.path(path,paste(filename,"-topiccomparison.png",sep="")),width=600,height=600)
-    par(fig = c(0,1,0.1,1),mar = c(0,0,0,0))
-    comparison.cloud(term.matrix = t(data),title.size = 5,scale = c(4,0.5),rot.per = 0,max.words = Inf,colors = rep(brewer.pal(n = 12,name = "Paired"),ceiling(nrow(data)/12)))
-    par(fig = c(0,1,0,0.1), mar = c(3, 2, 0, 2), new=TRUE)
-    display.brewer.pal(12, "Paired")
-    dev.off()
-  }
-  if(plotTopicDist){
-    loc <- cmdscale(dist(data,method = "minkowski", p = 1))
-    #plot textplot
-    png(file.path(path,paste(filename,"-topicdist.png",sep="")),width=600,height=600)
-    par(mar=c(5,4,4,2))
-    textplot(loc[,1],loc[,2],rownames(loc),cex = 2)
-    dev.off()
-  }
-  write.table(cbind(topic=rownames(data),as.data.frame(data)),file = file.path(path,paste(filename,"-topictermmatrix.txt",sep="")),quote = F,sep = "\t",row.names = F,col.names = T)
-}
-######
-# for doc-topic matrix
-######
-plotDocTopicReport <- function(filename, data, path = "output/"){
-  # folder
-  if(!file.exists(path)) dir.create(path,recursive = TRUE)
-  loc <- cmdscale(dist(data,method = "minkowski", p = 2))
-  #plot textplot
-  png(file.path(path,paste(filename,"-docdist.png",sep="")),width=600,height=600)
-  par(mar=c(5,4,4,2))
-  #textplot(loc[,1],loc[,2],rownames(loc),cex = 2)
-  textplot(loc[,1],loc[,2],1:nrow(loc),cex = 2)
-  dev.off()
-  write.table(cbind(doc=rownames(data),as.data.frame(data)),file = file.path(path,paste(filename,"-doctopicmatrix.txt",sep="")),quote = F,sep = "\t",row.names = F,col.names = T)
-}
+
 #####
 # the last part
 #####

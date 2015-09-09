@@ -49,9 +49,9 @@ corpus_topic <- list(VEM = LDA(corpus_dtm, k = k, control = list(seed = SEED)),
 sapply(corpus_topic,  function(x)  mean(apply(posterior(x)$topics,1,  function(z) -sum(z*log(z)))))
 topic_posterior <- posterior(corpus_topic[["Gibbs"]])
 # plot report
-plotDocumentTermReport(filename = "demo_LDA_abstract",TF_data = corpus_dtm,plotDocComparison = TRUE,plotTermDist = TRUE, path = "output/demo_LDA_abstract")
-plotTopicTermReport(filename = "demo_LDA_abstract",data = topic_posterior$terms,plotTopicComparison = TRUE, plotTopicDist = TRUE, path = "output/demo_LDA_abstract")
-plotDocTopicReport(filename = "demo_LDA_abstract",data = topic_posterior$topics,path = "output/demo_LDA_abstract")
+plotBipartiteMatrixReport(filename = "demo_LDA_abstract",bi_matrix = corpus_dtm,path = "output/demo_LDA_abstract/document_term",showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotColDist = TRUE)
+plotBipartiteMatrixReport(filename = "demo_LDA_abstract",bi_matrix = topic_posterior$terms,path = "output/demo_LDA_abstract/topic_term",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotColDist = TRUE)
+plotBipartiteMatrixReport(filename = "demo_LDA_abstract",bi_matrix = topic_posterior$topics,path = "output/demo_LDA_abstract/document_topic",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotColDist = TRUE)
 ##############
 # LDA on keywords demo
 ##############
@@ -68,9 +68,9 @@ corpus_topic <- list(VEM = LDA(corpus_dtm, k = k, control = list(seed = SEED)),
 sapply(corpus_topic,  function(x)  mean(apply(posterior(x)$topics,1,  function(z) -sum(z*log(z)))))
 topic_posterior <- posterior(corpus_topic[["Gibbs"]])
 # plot report
-plotDocumentTermReport(filename = "demo_LDA_keyword",TF_data = corpus_dtm,plotDocComparison = TRUE,plotTermDist = TRUE, path = "output/demo_LDA_keyword")
-plotTopicTermReport(filename = "demo_LDA_keyword",data = topic_posterior$terms,plotTopicComparison = TRUE, plotTopicDist = TRUE, path = "output/demo_LDA_keyword")
-plotDocTopicReport(filename = "demo_LDA_keyword",data = topic_posterior$topics,path = "output/demo_LDA_keyword")
+plotBipartiteMatrixReport(filename = "demo_LDA_keyword",bi_matrix = corpus_dtm,path = "output/demo_LDA_keyword/document_term",showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotColDist = TRUE)
+plotBipartiteMatrixReport(filename = "demo_LDA_keyword",bi_matrix = topic_posterior$terms,path = "output/demo_LDA_keyword/topic_term",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotColDist = TRUE)
+plotBipartiteMatrixReport(filename = "demo_LDA_keyword",bi_matrix = topic_posterior$topics,path = "output/demo_LDA_keyword/document_topic",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotColDist = TRUE)
 ##############
 # END LDA on demo
 ##############
