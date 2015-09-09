@@ -8,6 +8,7 @@ load(file = "rdata/demo.RData")
 source(file = "code/functions.R")
 ##############
 # LDA on abstract demo
+# http://yuedu.baidu.com/ebook/d0b441a8ccbff121dd36839a
 ##############
 # preprocessing
 data <- unique(demoPapers)
