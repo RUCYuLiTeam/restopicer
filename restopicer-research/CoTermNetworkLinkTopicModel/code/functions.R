@@ -7,7 +7,7 @@ library(wordcloud)
 # weightType for plotRowWordCloud, plotWordCloud, plotRowDist
 # for col, please use transpose = TRUE
 ######
-plotBipartiteMatrixReport <- function(filename, bi_matrix, transpose = FALSE, showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = FALSE, path = "output/"){
+plotBipartiteMatrixReport <- function(filename, bi_matrix, transpose = FALSE, showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = FALSE, plotModules = FALSE, path = "output/"){
   # folder
   if(!file.exists(path)) dir.create(path,recursive = TRUE)
   type="o"
@@ -36,7 +36,7 @@ plotBipartiteMatrixReport <- function(filename, bi_matrix, transpose = FALSE, sh
       line <- as.matrix(bi_data[i,])
       line <- line[,which(line!=0)]
       #plot wordcloud for each line
-      png(file.path(path,paste(filename,i,weightType,type,"rowwordcloud.png",sep="-")),width=600,height=600)
+      png(file.path(path,paste(type,filename,i,weightType,"rowwordcloud.png",sep="-")),width=600,height=600)
       par(fig = c(0,1,0.1,1),mar = c(0,0,0,0))
       pal <- brewer.pal(9,"Blues")[4:9]
       color_cluster <- pal[ceiling(6*(line/max(line)))]
@@ -51,7 +51,7 @@ plotBipartiteMatrixReport <- function(filename, bi_matrix, transpose = FALSE, sh
   if(plotWordCloud){
     # different weightType of bi_data
     #plot wordcloud
-    png(file.path(path,paste(filename,type,"wordcloud.png",sep="-")),width=600,height=600)
+    png(file.path(path,paste(type,filename,weightType,"wordcloud.png",sep="-")),width=600,height=600)
     par(fig = c(0,1,0.1,1),mar = c(0,0,0,0))
     pal <- brewer.pal(9,"Blues")[4:9]
     color_cluster <- pal[ceiling(6*df_for_plot$sumTFIDF/max(df_for_plot$sumTFIDF))]
@@ -67,7 +67,7 @@ plotBipartiteMatrixReport <- function(filename, bi_matrix, transpose = FALSE, sh
     data <- as.matrix(bi_matrix_tf)
     if(!showNamesInPlot) rownames(data) <- 1:nrow(data)
     #plot textplot
-    png(file.path(path,paste(filename,type,"rowcomparison.png",sep="-")),width=600,height=600)
+    png(file.path(path,paste(type,filename,"rowcomparison.png",sep="-")),width=600,height=600)
     par(fig = c(0,1,0.1,1),mar = c(0,0,0,0))
     comparison.cloud(term.matrix = t(data),title.size = 2,scale = c(4,0.5),rot.per = 0,max.words = Inf,colors = rep(brewer.pal(n = 12,name = "Paired"),ceiling(nrow(data)/12)))
     par(fig = c(0,1,0,0.1), mar = c(3, 2, 0, 2), new=TRUE)
@@ -79,21 +79,36 @@ plotBipartiteMatrixReport <- function(filename, bi_matrix, transpose = FALSE, sh
     loc <- cmdscale(dist(bi_data,method = "minkowski", p = 2))
     if(!showNamesInPlot) rownames(loc) <- 1:nrow(loc)
     #plot textplot
-    png(file.path(path,paste(filename,weightType,type,"rowdist.png",sep="-")),width=600,height=600)
+    png(file.path(path,paste(type,filename,weightType,"rowdist.png",sep="-")),width=600,height=600)
     par(mar=c(5,4,4,2))
     textplot(loc[,1],loc[,2],rownames(loc),cex = 2)
     dev.off()
   }
-  write.table(df_column,file = file.path(path,paste(filename,"column.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
-  write.table(df_row,file = file.path(path,paste(filename,"row.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+  if(plotModules){
+    # different weightType of bi_data
+    data <- as.matrix(bi_data)
+    if(!showNamesInPlot) rownames(data) <- 1:nrow(data)
+    #plot moduleWebObject
+    moduleWebObject = computeModules(web = as.matrix(data),steps = 1,tolerance = 1)
+    png(file.path(path,paste(type,filename,weightType,"moduleweb.png",sep="-")),width=1000,height=1000)
+    par(fig = c(0,1,0,1),mar = c(0,0,0,0))
+    plotModuleWeb(moduleWebObject,plotModules = TRUE, rank = FALSE, weighted = TRUE, 
+                  displayAlabels = TRUE, displayBlabels = TRUE, 
+                  labsize = 1, xlabel = "", ylabel = "", square.border = "white", fromDepth = 0, upToDepth = -1)
+    dev.off()
+  }
+  if(!transpose){
+    write.table(df_column,file = file.path(path,paste(filename,"column.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+    write.table(df_row,file = file.path(path,paste(filename,"row.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+  }
 }
 ######
 # run data processing for bipartite
 # type : matrix and edgelist
 ######
 runMaxCompartOfBipartite <- function(bi_data, plotCompartAnalysis = FALSE){
-  if(class(bi_data)=="matrix"){
-    bi_matrix <- bi_data
+  if(class(bi_data) %in% c("matrix","table")){
+    bi_matrix <- as.matrix(bi_data)
     bi_compart <- compart(bi_matrix)
     compart.belong <- data.frame(row=row.names(bi_compart$cweb),compart=-apply(bi_compart$cweb,1,FUN = min))
     size.compart <-  ddply(compart.belong,.(compart),.fun = nrow)
@@ -152,7 +167,9 @@ runBipartiteProjecting <- function (net, method = "length", directed = F){
 # plot network for bipartite
 # type : matrix and edgelist
 ######
-
+plotBipartiteNetworkReport <- function(){
+  
+}
 #####
 # the last part
 #####

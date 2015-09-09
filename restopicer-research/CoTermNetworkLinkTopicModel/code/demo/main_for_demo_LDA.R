@@ -40,7 +40,7 @@ control <- list(weighting = weightTf, tokenize= words,
                 tolower = TRUE, removePunctuation = TRUE, removeNumbers = TRUE, stopwords = TRUE, stemming = FALSE,
                 dictionary = NULL, bounds = list(local = c(1, Inf)), wordLengths = c(3, Inf))
 corpus_dtm <- DocumentTermMatrix(corpus,control)
-# LDA run
+# run LDA
 k <- 10
 SEED <- 2015
 corpus_topic <- list(VEM = LDA(corpus_dtm, k = k, control = list(seed = SEED)),
@@ -49,9 +49,14 @@ corpus_topic <- list(VEM = LDA(corpus_dtm, k = k, control = list(seed = SEED)),
 sapply(corpus_topic,  function(x)  mean(apply(posterior(x)$topics,1,  function(z) -sum(z*log(z)))))
 topic_posterior <- posterior(corpus_topic[["Gibbs"]])
 # plot report
-plotBipartiteMatrixReport(filename = "demo_LDA_abstract",bi_matrix = corpus_dtm,path = "output/demo_LDA_abstract/document_term",showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotColDist = TRUE)
-plotBipartiteMatrixReport(filename = "demo_LDA_abstract",bi_matrix = topic_posterior$terms,path = "output/demo_LDA_abstract/topic_term",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotColDist = TRUE)
-plotBipartiteMatrixReport(filename = "demo_LDA_abstract",bi_matrix = topic_posterior$topics,path = "output/demo_LDA_abstract/document_topic",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotColDist = TRUE)
+# transpose = FALSE
+plotBipartiteMatrixReport(filename = "demo_LDA_abstract",bi_matrix = corpus_dtm,path = "output/demo_LDA_abstract/document_term",showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
+plotBipartiteMatrixReport(filename = "demo_LDA_abstract",bi_matrix = topic_posterior$terms,path = "output/demo_LDA_abstract/topic_term",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
+plotBipartiteMatrixReport(filename = "demo_LDA_abstract",bi_matrix = topic_posterior$topics,path = "output/demo_LDA_abstract/document_topic",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
+# transpose = TRUE
+plotBipartiteMatrixReport(filename = "demo_LDA_abstract",bi_matrix = corpus_dtm,transpose = TRUE,path = "output/demo_LDA_abstract/document_term",showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = TRUE, plotModules = FALSE)
+plotBipartiteMatrixReport(filename = "demo_LDA_abstract",bi_matrix = topic_posterior$terms,transpose = TRUE,path = "output/demo_LDA_abstract/topic_term",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = TRUE, plotModules = FALSE)
+plotBipartiteMatrixReport(filename = "demo_LDA_abstract",bi_matrix = topic_posterior$topics,transpose = TRUE,path = "output/demo_LDA_abstract/document_topic",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = TRUE, plotModules = FALSE)
 ##############
 # LDA on keywords demo
 ##############
@@ -59,7 +64,7 @@ plotBipartiteMatrixReport(filename = "demo_LDA_abstract",bi_matrix = topic_poste
 data <- unique(demoPapersKeywords)
 bi_matrix <- table(data$item_ut,tolower(data$author_keyword))
 corpus_dtm <- as.DocumentTermMatrix(bi_matrix,weighting = weightTf)
-# LDA run
+# run LDA
 k <- 10
 SEED <- 2015
 corpus_topic <- list(VEM = LDA(corpus_dtm, k = k, control = list(seed = SEED)),
@@ -68,9 +73,14 @@ corpus_topic <- list(VEM = LDA(corpus_dtm, k = k, control = list(seed = SEED)),
 sapply(corpus_topic,  function(x)  mean(apply(posterior(x)$topics,1,  function(z) -sum(z*log(z)))))
 topic_posterior <- posterior(corpus_topic[["Gibbs"]])
 # plot report
-plotBipartiteMatrixReport(filename = "demo_LDA_keyword",bi_matrix = corpus_dtm,path = "output/demo_LDA_keyword/document_term",showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotColDist = TRUE)
-plotBipartiteMatrixReport(filename = "demo_LDA_keyword",bi_matrix = topic_posterior$terms,path = "output/demo_LDA_keyword/topic_term",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotColDist = TRUE)
-plotBipartiteMatrixReport(filename = "demo_LDA_keyword",bi_matrix = topic_posterior$topics,path = "output/demo_LDA_keyword/document_topic",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotColDist = TRUE)
+# transpose = FALSE
+plotBipartiteMatrixReport(filename = "demo_LDA_keyword",bi_matrix = corpus_dtm,path = "output/demo_LDA_keyword/document_term",showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
+plotBipartiteMatrixReport(filename = "demo_LDA_keyword",bi_matrix = topic_posterior$terms,path = "output/demo_LDA_keyword/topic_term",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
+plotBipartiteMatrixReport(filename = "demo_LDA_keyword",bi_matrix = topic_posterior$topics,path = "output/demo_LDA_keyword/document_topic",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
+# transpose = TRUE
+plotBipartiteMatrixReport(filename = "demo_LDA_keyword",bi_matrix = corpus_dtm,transpose = TRUE,path = "output/demo_LDA_keyword/document_term",showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = TRUE, plotModules = FALSE)
+plotBipartiteMatrixReport(filename = "demo_LDA_keyword",bi_matrix = topic_posterior$terms,transpose = TRUE,path = "output/demo_LDA_keyword/topic_term",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = TRUE, plotModules = FALSE)
+plotBipartiteMatrixReport(filename = "demo_LDA_keyword",bi_matrix = topic_posterior$topics,transpose = TRUE,path = "output/demo_LDA_keyword/document_topic",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = TRUE, plotModules = FALSE)
 ##############
 # END LDA on demo
 ##############
