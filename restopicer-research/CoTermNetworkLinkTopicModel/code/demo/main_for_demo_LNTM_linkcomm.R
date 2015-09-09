@@ -3,11 +3,11 @@ setwd("F:/Desktop/restopicer/restopicer-research/CoTermNetworkLinkTopicModel")
 #####
 # required library
 #####
+library(igraph)
 load(file = "rdata/demo.RData")
 source(file = "code/functions.R")
 ##############
 # Traditional Network Topic Model demo
-# fastgreedy.community
 ##############
 # preprocessing
 data <- unique(demoPapersKeywords)
