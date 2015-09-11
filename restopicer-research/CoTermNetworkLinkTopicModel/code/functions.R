@@ -172,16 +172,24 @@ plotBipartiteNetworkReport <- function(){
   
 }
 ######
+# From Community to topic
+# return an topic-term matrix
+######
+
+######
 # Community Detection In R
 # igraph
 # http://igraph.wikidot.com/community-detection-in-r
 ######
-clique.community <- function(graph, k) {
+# g <- sample_gnp(100, 0.3)
+# k <- 6
+clique.community <- function(graph, k, threshold = 1) {
   clq <- cliques(graph, min=k, max=k)
   edges <- c()
   for (i in seq_along(clq)) {
-    for (j in seq_along(clq)) {
-      if ( length(unique(c(clq[[i]], clq[[j]]))) == k+1 ) {
+    for (j in (i+1):length(clq)) {
+      # (K-threshold)/(K+threshold)
+      if ( length(unique(c(clq[[i]], clq[[j]]))) <= k+threshold ) {
         edges <- c(edges, c(i,j)-1)
       }
     }
