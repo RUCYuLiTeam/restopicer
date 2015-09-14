@@ -48,7 +48,13 @@ corpus_topic <- list(VEM = LDA(corpus_dtm, k = k, control = list(seed = SEED)),
 #熵值越高说明主题分布更均匀
 sapply(corpus_topic,  function(x)  mean(apply(posterior(x)$topics,1,  function(z) -sum(z*log(z)))))
 topic_posterior <- posterior(corpus_topic[["Gibbs"]])
+# document tagging test
+doc_topic <- topic_posterior$topics
+taggingtest_doc_topic <- cbind(item_ut=rownames(doc_topic),as.data.frame(doc_topic))
+taggingtest_doc_sc <- unique(demoPapersSubjectCategory[,c("item_ut","subject_category")])
+taggingtest_data <- merge(taggingtest_doc_topic, taggingtest_doc_sc)
 # plot report
+doc.tagging.test(taggingtest_data = taggingtest_data,filename = "demo_LDA_abstract",path = "output/demo_LDA_abstract/document_topic",LeaveOneOut = FALSE)
 # transpose = FALSE
 plotBipartiteMatrixReport(filename = "demo_LDA_abstract",bi_matrix = corpus_dtm,path = "output/demo_LDA_abstract/document_term",showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
 plotBipartiteMatrixReport(filename = "demo_LDA_abstract",bi_matrix = topic_posterior$terms,path = "output/demo_LDA_abstract/topic_term",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
@@ -72,7 +78,13 @@ corpus_topic <- list(VEM = LDA(corpus_dtm, k = k, control = list(seed = SEED)),
 #熵值越高说明主题分布更均匀
 sapply(corpus_topic,  function(x)  mean(apply(posterior(x)$topics,1,  function(z) -sum(z*log(z)))))
 topic_posterior <- posterior(corpus_topic[["Gibbs"]])
+# document tagging test
+doc_topic <- topic_posterior$topics
+taggingtest_doc_topic <- cbind(item_ut=rownames(doc_topic),as.data.frame(doc_topic))
+taggingtest_doc_sc <- unique(demoPapersSubjectCategory[,c("item_ut","subject_category")])
+taggingtest_data <- merge(taggingtest_doc_topic, taggingtest_doc_sc)
 # plot report
+doc.tagging.test(taggingtest_data = taggingtest_data,filename = "demo_LDA_keyword",path = "output/demo_LDA_keyword/document_topic",LeaveOneOut = FALSE)
 # transpose = FALSE
 plotBipartiteMatrixReport(filename = "demo_LDA_keyword",bi_matrix = corpus_dtm,path = "output/demo_LDA_keyword/document_term",showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
 plotBipartiteMatrixReport(filename = "demo_LDA_keyword",bi_matrix = topic_posterior$terms,path = "output/demo_LDA_keyword/topic_term",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
