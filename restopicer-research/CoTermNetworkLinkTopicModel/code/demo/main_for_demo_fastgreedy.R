@@ -13,7 +13,8 @@ source(file = "code/functions.R")
 data <- unique(demoPapersKeywords)
 bi_matrix <- table(data$item_ut,tolower(data$author_keyword))
 # bipartite network max compart
-bi_MaxCompart <- runMaxCompartOfMatrix(bi_matrix)
+#bi_MaxCompart <- runMaxCompartOfMatrix(bi_matrix)
+bi_MaxCompart <- bi_matrix
 # bipartite from incidence matrix
 bi_g <- graph_from_incidence_matrix(bi_MaxCompart)
 # projecting of two side
@@ -31,8 +32,8 @@ doc_topic <- getDocTopicBipartiteMatrix(doc_member = bi_MaxCompart,topic_member 
 taggingtest_doc_topic <- cbind(item_ut=rownames(doc_topic),as.data.frame(doc_topic))
 taggingtest_doc_sc <- unique(demoPapersSubjectCategory[,c("item_ut","subject_category")])
 taggingtest_data <- merge(taggingtest_doc_topic, taggingtest_doc_sc)
-
 # plot report
+doc.tagging.test(taggingtest_data = taggingtest_data,filename = "demo_FASTGREEDY_keyword",path = "output/demo_FASTGREEDY_keyword/document_topic",LeaveOneOut = FALSE)
 # transpose = FALSE
 plotBipartiteMatrixReport(filename = "demo_FASTGREEDY_keyword",bi_matrix = bi_MaxCompart,path = "output/demo_FASTGREEDY_keyword/document_term",showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
 plotBipartiteMatrixReport(filename = "demo_FASTGREEDY_keyword",bi_matrix = topic_term,path = "output/demo_FASTGREEDY_keyword/topic_term",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
