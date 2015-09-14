@@ -1,8 +1,11 @@
 library(tm)
 library(bipartite)
+library(tnet)
 library(igraph)
 library(slam)
 library(wordcloud)
+library(MASS)
+library(ggplot2)
 ######
 # plot for Matrix of bipartite
 # weightType for plotRowWordCloud, plotWordCloud, plotRowDist
@@ -35,13 +38,14 @@ plotBipartiteMatrixReport <- function(filename, bi_matrix, transpose = FALSE, sh
     # different weightType of bi_data
     for(i in 1:nrow(bi_data)){
       line <- as.matrix(bi_data[i,])
-      line <- line[,which(line!=0)]
+      line_names <- colnames(line)[which(line!=0)]
+      line_freq <- line[,which(line!=0)]
       #plot wordcloud for each line
       png(file.path(path,paste(type,filename,i,weightType,"rowwordcloud.png",sep="-")),width=600,height=600)
       par(fig = c(0,1,0.1,1),mar = c(0,0,0,0))
       pal <- brewer.pal(9,"Blues")[4:9]
       color_cluster <- pal[ceiling(6*(line/max(line)))]
-      wordcloud(words=names(line),freq=line,scale = c(4, 0.5),min.freq=1,max.words = Inf,
+      wordcloud(words=line_names,freq=line_freq,scale = c(4, 0),min.freq=1,max.words = Inf,
                 random.order=F,random.color=F,rot.per=0,colors=color_cluster,ordered.colors=T,
                 use.r.layout=F,fixed.asp=F)
       par(fig = c(0,1,0,0.1), mar = c(3, 2, 0, 2), new=TRUE)
@@ -107,18 +111,17 @@ plotBipartiteMatrixReport <- function(filename, bi_matrix, transpose = FALSE, sh
 # run data processing for bipartite
 # type : matrix and edgelist
 ######
-runMaxCompartOfBipartite <- function(bi_data, plotCompartAnalysis = FALSE){
-  if(class(bi_data) %in% c("matrix","table")){
-    bi_matrix <- as.matrix(bi_data)
-    bi_compart <- compart(bi_matrix)
-    compart.belong <- data.frame(row=row.names(bi_compart$cweb),compart=-apply(bi_compart$cweb,1,FUN = min))
-    size.compart <-  ddply(compart.belong,.(compart),.fun = nrow)
-    colnames(size.compart) <- c("compart","cnt")
-    max.size.compart <- size.compart[which.max(size.compart$cnt),]$compart
-    row.compart <- compart.belong[compart.belong$compart == max.size.compart,]
-    bi_MaxCompart <- bi_matrix[row.names(bi_matrix) %in% row.compart$row,]
-    #bi_MaxCompart[which(bi_MaxCompart!=0)] <- 1 # transform to binary
-  }
+runMaxCompartOfMatrix <- function(bi_data, plotCompartAnalysis = FALSE){
+  bi_matrix <- as.matrix(bi_data)
+  bi_compart <- compart(bi_matrix)
+  compart.belong <- data.frame(row=row.names(bi_compart$cweb),compart=-apply(bi_compart$cweb,1,FUN = min))
+  size.compart <-  ddply(compart.belong,.(compart),.fun = nrow)
+  colnames(size.compart) <- c("compart","cnt")
+  max.size.compart <- size.compart[which.max(size.compart$cnt),]$compart
+  row.compart <- compart.belong[compart.belong$compart == max.size.compart,]
+  bi_MaxCompart <- bi_matrix[row.names(bi_matrix) %in% row.compart$row,]
+  bi_MaxCompart <- bi_MaxCompart[,colSums(bi_MaxCompart)!=0]
+  #bi_MaxCompart[which(bi_MaxCompart!=0)] <- 1 # transform to binary
   bi_MaxCompart
 }
 runBipartiteProjecting <- function (net, method = "length", directed = F){
@@ -171,11 +174,40 @@ runBipartiteProjecting <- function (net, method = "length", directed = F){
 plotBipartiteNetworkReport <- function(){
   
 }
+plotNormalNetworkReport <- function(){
+  
+}
 ######
-# From Community to topic
-# return an topic-term matrix
+# Community is the topic
+# return an topic-term or topic-edge bipartite matrix
+# community-membership or called Topic-Member bipartite matrix
 ######
-
+getTopicMemberBipartiteMatrix <- function(member, community, weight = "binary"){
+  bi_matrix <- table(community,member)
+  if(weight != "binary"){
+    
+  }
+  as.matrix(bi_matrix)
+}
+getDocTopicBipartiteMatrix <- function(doc_member,topic_member,method = "Moore-Penrose", scaling = FALSE){
+  calGeneralizedInverseMatrix <- function(){
+    doc_member %*% ginv(topic_member)
+  }
+  calTransposMatrix <- function(){
+    doc_member %*% t(topic_member)
+  }
+  calSimilarity.cos <- function(){
+    t(apply(doc_member,1,FUN = function(doc){doc/sqrt(sum(doc^2))})) %*% t(apply(topic_member,2,FUN = function(topic){topic/sqrt(sum(topic^2))}))
+  }
+  M <- switch(method,
+         "Moore-Penrose" = calGeneralizedInverseMatrix(),
+         "Transpose" = calTransposMatrix(),
+         "similarity.cos" = calSimilarity.cos())
+  if(scaling){
+    M <- t(scale(t(M),center = F,scale = T)) 
+  }
+  M
+}
 ######
 # Community Detection In R
 # igraph
@@ -239,6 +271,12 @@ largeScaleCommunity <- function(g,mode="all"){
 # Testing the significance of a community
 # for different perspect
 ######
+doc.tagging.test <- function(taggingtest_data, LeaveOneOut = FALSE){
+  taggingtype <- unique(taggingtest_data[,dim(taggingtest_data)[2]])
+  for(type <- taggingtype){
+    data <- taggingtest_data[,]
+  }
+}
 community.significance.test <- function(graph, vs, ...) {
   if (is.directed(graph)) stop("This method requires an undirected graph")
   subgraph <- induced.subgraph(graph, vs)
