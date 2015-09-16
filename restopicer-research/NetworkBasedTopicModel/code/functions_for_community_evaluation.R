@@ -1,3 +1,4 @@
+library(entropy)
 # comunity.coverage<-calcommunity.coverage(topic_term)
 # [0,1], the larger the better
 calcommunity.coverage<- function(comm_member){
@@ -39,13 +40,18 @@ calcommunity.quality<-function(comm_member,coterm_g){
 }
 
 # df_bi_data <- data[,c("item_ut","author_keyword")]
+# df_bi_data$author_keyword <- tolower(df_bi_data$author_keyword)
+# df_bi_data <- unique(df_bi_data)
 # df_doc_tag <- unique(demoPapersSubjectCategory[,c("item_ut","subject_category")])
 caloverlap.quality<- function(comm_member,df_bi_data,df_doc_tag){
   member_comm_list <- apply(comm_member,MARGIN = 2,FUN = function(v){
     names(v[v!=0])
   })
-  v.model <- lapply(member_comm_list,FUN = length)
+  v.model <- unlist(lapply(member_comm_list,FUN = length))
+  v.model <- v.model[order(names(v.model),decreasing = F)]
   member_tag_df <- merge(df_bi_data,df_doc_tag)[,2:3]
-  v.real <- lapply(split(member_tag_df,member_tag_df[,1]),FUN = nrow)
-  
+  v.real <- unlist(lapply(split(member_tag_df,member_tag_df[,1]),FUN = nrow))
+  v.real <- v.real[order(names(v.real),decreasing = F)]
+  # cal the mutual information
+  entropy::mi.plugin(matrix(c(v.model,v.real),nrow = 2,ncol = length(v.real)),unit = "log2")
 }
