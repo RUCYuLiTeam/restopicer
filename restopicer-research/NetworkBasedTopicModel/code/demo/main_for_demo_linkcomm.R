@@ -40,7 +40,8 @@ taggingtest_data <- merge(taggingtest_doc_topic, taggingtest_doc_sc)
 # plot report
 doc.tagging.test(taggingtest_data = taggingtest_data,filename = "demo_linkcomm_keyword",path = "output/demo_linkcomm_keyword/document_topic",LeaveOneOut = FALSE)
 # network of topic
-plotTopicNetworkReport(filename = "demo_linkcomm_keyword",graph = coterm_g,community_member_list,showNamesInPlot = TRUE,plotCommunity = TRUE,plotOverallTopics = TRUE,path = "output/demo_linkcomm_keyword/topic_term")
+plotBipartiteNetworkReport(filename = "demo_linkcomm_keyword",bi_graph = bi_g,community_member_list,showNamesInPlot = F,path = "output/demo_linkcomm_keyword/document_term")
+plotTopicNetworkReport(filename = "demo_linkcomm_keyword",graph = coterm_g,community_member_list,showNamesInPlot = FALSE,plotCommunity = TRUE,plotOverallTopics = TRUE,path = "output/demo_linkcomm_keyword/topic_term")
 # transpose = FALSE
 plotBipartiteMatrixReport(filename = "demo_linkcomm_keyword",bi_matrix = bi_MaxCompart,path = "output/demo_linkcomm_keyword/document_term",showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
 plotBipartiteMatrixReport(filename = "demo_linkcomm_keyword",bi_matrix = topic_term,path = "output/demo_linkcomm_keyword/topic_term",showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
