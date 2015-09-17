@@ -69,7 +69,7 @@ caloverlap.number.quality<- function(community_member_list,member_tag_df){
   v.model <- v.model[order(names(v.model),decreasing = F)]
   v.real <- unlist(lapply(split(member_tag_df,member_tag_df$member),FUN = nrow))
   v.real <- v.real[order(names(v.real),decreasing = F)]
-  # cal the mutual information
+  # cal the cross entropy
   entropy::KL.plugin(v.model,v.real,unit = "log2")
 }
 # Testing the significance of a community
