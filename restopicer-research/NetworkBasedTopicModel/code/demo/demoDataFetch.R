@@ -1,12 +1,12 @@
 rm(list = ls(envir = globalenv()))
-setwd("F:/Desktop/restopicer/restopicer-research/NetworkBasedTopicModel")
+# setwd("F:/Desktop/restopicer/restopicer-research/NetworkBasedTopicModel")
 #####
 # required library
 #####
 source(file = "code/utilities.R")
 library(RMySQL)
 ##############
-# LTM demo data Fetching From MySQL DB
+# demo data Fetching From MySQL DB
 ##############
 conn <- dbConnect(MySQL(), dbname = "restopicer_resource_info")
 dbListTables(conn)
@@ -57,5 +57,5 @@ rmTempObject()
 # save .RData
 save(file = "rdata/demo.RData",list = memoryWhiteList)
 ##############
-# END FOR LTM demo data Fetching From MySQL DB
+# END FOR demo data Fetching From MySQL DB
 ##############

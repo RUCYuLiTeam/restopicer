@@ -1,9 +1,11 @@
 # required library
 library(plyr)
 library(tm)
+library(topicmodels)
 library(bipartite)
 library(tnet)
 library(igraph)
+library(linkcomm)
 library(slam)
 library(wordcloud)
 library(MASS)
@@ -14,6 +16,7 @@ library(entropy)
 #####
 # for matrix/edgelist form network processing
 # mostly not used
+# igraph can solve most demands
 #####
 source("code/functions_for_network_processing.R")
 #####
@@ -35,7 +38,7 @@ source("code/functions_for_community_to_topic.R")
 # community evaluation functions and plot report
 # on community_member test,topic_member test and doc_topic test
 ######
-source("code/functions_for_community_evaluation.R") # still bug
+source("code/functions_for_community_evaluation.R")
 #####
 # for general matrix plotreport or network drawing
 #####
