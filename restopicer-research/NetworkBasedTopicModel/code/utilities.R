@@ -1,5 +1,3 @@
-# required library
-library(plyr)
 ###########
 # convert DataFrame to SQL data file
 ###########

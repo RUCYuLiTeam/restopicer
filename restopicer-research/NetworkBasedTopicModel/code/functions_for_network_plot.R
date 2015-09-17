@@ -1,4 +1,5 @@
 ######
+# for general matrix plotreport or network drawing
 # plot network for bipartite and co-term
 # type : matrix and edgelist
 ######
