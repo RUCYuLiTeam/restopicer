@@ -1,8 +1,11 @@
 ######
+# self-defined community detection method or similarity calculations
+# 1.self-defined community detection method
+# 2.self-defined similarity method
+######
 # Community Detection In R
 # igraph
 # http://igraph.wikidot.com/community-detection-in-r
-######
 # g <- sample_gnp(100, 0.3)
 # k <- 6
 clique.community <- function(graph, k, threshold = 1) {
