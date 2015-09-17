@@ -39,21 +39,38 @@ calcommunity.quality<-function(comm_member,coterm_g){
   enrichment <- sum(apply(comm_member,1,calsum.similarityofmatrix))/sum(coterm_matrix)
   enrichment
 }
-# df_bi_data <- data[,c("item_ut","author_keyword")]
+# df_bi_data <- unique(demoPapersKeywords)[,c("item_ut","author_keyword")]
 # df_bi_data$author_keyword <- tolower(df_bi_data$author_keyword)
 # df_bi_data <- unique(df_bi_data)
 # df_doc_tag <- unique(demoPapersSubjectCategory[,c("item_ut","subject_category")])
 # member_tag_df <- merge(df_bi_data,df_doc_tag)[,2:3]
-caloverlap.quality<- function(comm_member,member_tag_df){
-  member_comm_list <- apply(comm_member,MARGIN = 2,FUN = function(v){
-    names(v[v!=0])
+caloverlap.quality<- function(community_member_list,member_tag_df){
+  colnames(member_tag_df) <- c("member","tag")
+  member_community_df <- ldply(community_member_list,.fun = function(member){
+    data.frame(member)
   })
-  v.model <- unlist(lapply(member_comm_list,FUN = length))
+  colnames(member_community_df) <- c("community","member")
+  member_community_tag_df <- merge(member_community_df,member_tag_df)
+  cross_matrix <- table(member_community_tag_df$community,member_community_tag_df$tag)
+  # cal information gain by weighted entropy
+  # H_tag <- entropy.plugin(colSums(cross_matrix),unit = "log2")
+  # H_tag_when_comm <- (rowSums(cross_matrix)/sum(rowSums(cross_matrix))) %*% apply(cross_matrix,1,entropy.plugin,unit = "log2")
+  # IG <- H_tag - H_tag_when_comm
+  # cal information gain by weighted mutual information
+  entropy::mi.plugin(cross_matrix,unit = "log2")
+}
+caloverlap.number.quality<- function(community_member_list,member_tag_df){
+  colnames(member_tag_df) <- c("member","tag")
+  member_community_df <- ldply(community_member_list,.fun = function(member){
+    data.frame(member)
+  })
+  colnames(member_community_df) <- c("community","member")
+  v.model <- unlist(lapply(split(member_community_df,member_community_df$member),FUN = nrow))
   v.model <- v.model[order(names(v.model),decreasing = F)]
-  v.real <- unlist(lapply(split(member_tag_df,member_tag_df[,1]),FUN = nrow))
+  v.real <- unlist(lapply(split(member_tag_df,member_tag_df$member),FUN = nrow))
   v.real <- v.real[order(names(v.real),decreasing = F)]
   # cal the mutual information
-  entropy::mi.plugin(matrix(c(v.model,v.real),nrow = 2,ncol = length(v.real),byrow = T),unit = "log2")
+  entropy::KL.plugin(v.model,v.real,unit = "log2")
 }
 # Testing the significance of a community
 community.significance.test <- function(graph, vs, ...) {
