@@ -1,8 +1,6 @@
 ######
 # community evaluation functions and plot report
-# Community Detection Result comparison
-# Testing the significance of a community
-# for different perspect
+# on community_member test,topic_member test and doc_topic test
 ######
 # comunity.coverage<-calcommunity.coverage(topic_term)
 # [0,1], the larger the better
@@ -45,18 +43,19 @@ calcommunity.quality<-function(comm_member,coterm_g){
 # df_bi_data$author_keyword <- tolower(df_bi_data$author_keyword)
 # df_bi_data <- unique(df_bi_data)
 # df_doc_tag <- unique(demoPapersSubjectCategory[,c("item_ut","subject_category")])
-caloverlap.quality<- function(comm_member,df_bi_data,df_doc_tag){
+# member_tag_df <- merge(df_bi_data,df_doc_tag)[,2:3]
+caloverlap.quality<- function(comm_member,member_tag_df){
   member_comm_list <- apply(comm_member,MARGIN = 2,FUN = function(v){
     names(v[v!=0])
   })
   v.model <- unlist(lapply(member_comm_list,FUN = length))
   v.model <- v.model[order(names(v.model),decreasing = F)]
-  member_tag_df <- merge(df_bi_data,df_doc_tag)[,2:3]
   v.real <- unlist(lapply(split(member_tag_df,member_tag_df[,1]),FUN = nrow))
   v.real <- v.real[order(names(v.real),decreasing = F)]
   # cal the mutual information
-  entropy::mi.plugin(matrix(c(v.model,v.real),nrow = 2,ncol = length(v.real)),unit = "log2")
+  entropy::mi.plugin(matrix(c(v.model,v.real),nrow = 2,ncol = length(v.real),byrow = T),unit = "log2")
 }
+# Testing the significance of a community
 community.significance.test <- function(graph, vs, ...) {
   if (is.directed(graph)) stop("This method requires an undirected graph")
   subgraph <- induced.subgraph(graph, vs)
@@ -64,7 +63,7 @@ community.significance.test <- function(graph, vs, ...) {
   out.degrees <- degree(graph, vs) - in.degrees
   wilcox.test(in.degrees, out.degrees, ...)
 }
-# doc-topics-sc
+# taggingtest_data is a df as doc-topics-tag
 doc.tagging.test <- function(taggingtest_data,filename,path = "output/", LeaveOneOut = FALSE){
   # folder
   if(!file.exists(path)) dir.create(path,recursive = TRUE)
@@ -72,8 +71,13 @@ doc.tagging.test <- function(taggingtest_data,filename,path = "output/", LeaveOn
   taggingtype <- unique(taggingtest_data[,dim(taggingtest_data)[2]])
   taggingtest_result <- data.frame()
   for(type in taggingtype){
-    data <- taggingtest_data[,2:dim(taggingtest_data)[2]]
+    data <- taggingtest_data
     data[,dim(data)[2]] <- (taggingtest_data[,dim(taggingtest_data)[2]]==type)
+    data <- ddply(data,1,.fun = function(doc){
+      doc[,dim(doc)[2]] <- any(doc[,dim(doc)[2]])
+      unique(doc)
+    })
+    data <- data[,-1]
     colnames(data)[dim(data)[2]] <- "binary_class"
     result <- data.frame()
     if(LeaveOneOut){

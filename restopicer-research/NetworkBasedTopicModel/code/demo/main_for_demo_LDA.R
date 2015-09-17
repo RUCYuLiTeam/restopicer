@@ -9,6 +9,7 @@ source(file = "code/functions.R")
 ##############
 # LDA on abstract demo
 # http://yuedu.baidu.com/ebook/d0b441a8ccbff121dd36839a
+# http://blog.csdn.net/pirage/article/details/9467547
 ##############
 # preprocessing
 data <- unique(demoPapers)
