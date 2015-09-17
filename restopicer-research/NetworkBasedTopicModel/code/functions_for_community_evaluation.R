@@ -1,4 +1,6 @@
-library(entropy)
+######
+# community evaluation functions and plot report
+######
 # comunity.coverage<-calcommunity.coverage(topic_term)
 # [0,1], the larger the better
 calcommunity.coverage<- function(comm_member){
@@ -9,7 +11,6 @@ calcommunity.coverage<- function(comm_member){
   community.coverage<-ncol(nontrival_comm_nodes)/ncol(comm_member)
   community.coverage
 }
-
 #[1,Inf)
 caloverlap.coverage<-function(comm_member){
   # cal non-trival comm_member matrix
@@ -17,7 +18,6 @@ caloverlap.coverage<-function(comm_member){
   nontrival_comm_nodes<-nontrival_comm[,colSums(nontrival_comm)>0]
   mean(colSums(nontrival_comm_nodes))  
 }
-
 #the larger the denser
 calcommunity.quality<-function(comm_member,coterm_g){
   coterm_matrix <- get.adjacency(coterm_g,attr = "weight",type = "upper")
@@ -38,7 +38,6 @@ calcommunity.quality<-function(comm_member,coterm_g){
   enrichment <- sum(apply(comm_member,1,calsum.similarityofmatrix))/sum(coterm_matrix)
   enrichment
 }
-
 # df_bi_data <- data[,c("item_ut","author_keyword")]
 # df_bi_data$author_keyword <- tolower(df_bi_data$author_keyword)
 # df_bi_data <- unique(df_bi_data)
