@@ -13,42 +13,36 @@ source("code/methods.R")
 #####
 # experiment BEGIN
 # experiment 1:
-# data:
 # method:
 # parameter:
 #####
 
 #####
 # experiment 2:
-# data:
 # method:
 # parameter:
 #####
 
 #####
 # experiment 3:
-# data:
 # method:
 # parameter:
 #####
 
 #####
 # experiment 4:
-# data:
 # method:
 # parameter:
 #####
 
 #####
 # experiment 5:
-# data:
 # method:
 # parameter:
 #####
 
 #####
 # experiment 6:
-# data:
 # method:
 # parameter:
 #####
