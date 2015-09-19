@@ -135,39 +135,38 @@ doc.tagging.test <- function(taggingtest_data,filename,path = "output/", LeaveOn
     Mcnemar_Test.PValue <- mcnemar.test(result.table)$p.value
     no_information_rate <- max(distribution,1-distribution)
     # roc and auc
-    if(length(unique(result$fitted.values))>5){
-      ROC_plot <- roc(result$real.y, result$fitted.values,smooth=T,percent=T)
-    }else{
+    AUC <- NA
+    if(length(unique(result$fitted.values))>=2){
       ROC_plot <- roc(result$real.y, result$fitted.values,percent=T)
+      # plot ROC
+      png(file.path(path,paste(filename,type,"ROC.png",sep="-")),width=500,height=500)
+      par(mar=c(5,4,4,2))
+      plot(ROC_plot,max.auc.polygon=T,auc.polygon=T,grid=T,show.thres=T,print.auc=T,main=type,cex.main=1)
+      dev.off()
+      #auc <- mean(sample(pos.decision,1000,replace=T) > sample(neg.decision,1000,replace=T))
+      AUC <- ROC_plot$auc
+      # prc : precision/recall curve
+      PRC_plot <- ROC_plot
+      PRC_precision <- performance(prediction(predictions = result$fitted.values,labels = result$real.y),"prec")
+      #specificities
+      PRC_plot$specificities <- PRC_plot$recall <- ROC_plot$sensitivities
+      #sensitivities
+      PRC_plot$sensitivities <- PRC_plot$precision <- na.fill(PRC_precision@y.values[[1]] * 100,fill = 1)
+      png(file.path(path,paste(filename,type,"PRC.png",sep="-")),width=500,height=500)
+      par(mar=c(5,4,4,2))
+      plot(PRC_plot,main=type,cex.main=1,max.auc.polygon=T,grid=T,
+           asp=1,mar=c(4, 4, 2, 2)+.1,mgp=c(2.5, 1, 0),
+           col=par("col"),lty=par("lty"),lwd=2,type="l",
+           xlab="Recall (%)",ylab="Precision (%)",xlim=c(0,100),ylim=c(0,100))
+      dev.off()
     }
-    # plot ROC
-    png(file.path(path,paste(filename,type,"ROC.png",sep="-")),width=500,height=500)
-    par(mar=c(5,4,4,2))
-    plot(ROC_plot,max.auc.polygon=T,auc.polygon=T,grid=T,show.thres=T,print.auc=T,main=type,cex.main=1)
-    dev.off()
-    #auc <- mean(sample(pos.decision,1000,replace=T) > sample(neg.decision,1000,replace=T))
-    AUC <- ROC_plot$auc
-    # prc : precision/recall curve
-    PRC_plot <- ROC_plot
-    PRC_precision <- performance(prediction(predictions = result$fitted.values,labels = result$real.y),"prec")
-    #specificities
-    PRC_plot$specificities <- PRC_plot$recall <- ROC_plot$sensitivities
-    #sensitivities
-    PRC_plot$sensitivities <- PRC_plot$precision <- na.fill(PRC_precision@y.values[[1]] * 100,fill = 1)
-    png(file.path(path,paste(filename,type,"PRC.png",sep="-")),width=500,height=500)
-    par(mar=c(5,4,4,2))
-    plot(PRC_plot,main=type,cex.main=1,max.auc.polygon=T,grid=T,
-         asp=1,mar=c(4, 4, 2, 2)+.1,mgp=c(2.5, 1, 0),
-         col=par("col"),lty=par("lty"),lwd=2,type="l",
-         xlab="Recall (%)",ylab="Precision (%)",xlim=c(0,100),ylim=c(0,100))
-    dev.off()
     result.measure <- data.frame(filename,tagging.type=type,
                                  accuracy,error_rate,balanced_accuracy,
                                  Mcnemar_Test.PValue,AUC,no_information_rate,
                                  sensitivity,recall,miss_rate,specificity,
                                  distribution,prevalence,detection_prevalence,PPV,NPV,
                                  precision,detection_rate,f_measure)
-    taggingtest_result <- rbind(taggingtest_result,result.measure)  
+    taggingtest_result <- rbind(taggingtest_result,result.measure)
   }
   write.table(taggingtest_result,file = file.path(path,paste(filename,"taggingtest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
 }
