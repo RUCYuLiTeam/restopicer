@@ -10,9 +10,10 @@ library(slam)
 library(wordcloud)
 library(MASS)
 library(pROC)
-#library(ROCR)
+library(ROCR)
 library(ggplot2)
 library(entropy)
+library(zoo)
 #####
 # for matrix/edgelist form network processing
 # mostly not used
