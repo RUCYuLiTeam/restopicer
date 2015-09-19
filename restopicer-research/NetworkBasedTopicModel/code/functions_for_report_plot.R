@@ -79,7 +79,7 @@ plotBipartiteMatrixReport <- function(filename, bi_matrix, transpose = FALSE, sh
     #plot textplot
     png(file.path(path,paste(type,filename,weightType,"rowdist.png",sep="-")),width=600,height=600)
     par(mar=c(5,4,4,2))
-    textplot(loc[,1],loc[,2],rownames(loc),cex = 2)
+    wordcloud::textplot(x = loc[,1],y = loc[,2],words = rownames(loc),cex = 2)
     dev.off()
   }
   if(plotModules){
