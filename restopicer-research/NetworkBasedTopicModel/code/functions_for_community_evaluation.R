@@ -147,6 +147,20 @@ doc.tagging.test <- function(taggingtest_data,filename,path = "output/", LeaveOn
     dev.off()
     #auc <- mean(sample(pos.decision,1000,replace=T) > sample(neg.decision,1000,replace=T))
     AUC <- ROC_plot$auc
+    # prc : precision/recall curve
+    PRC_plot <- ROC_plot
+    PRC_precision <- performance(prediction(predictions = result$fitted.values,labels = result$real.y),"prec")
+    #specificities
+    PRC_plot$specificities <- PRC_plot$recall <- ROC_plot$sensitivities
+    #sensitivities
+    PRC_plot$sensitivities <- PRC_plot$precision <- na.fill(PRC_precision@y.values[[1]] * 100,fill = 1)
+    png(file.path(path,paste(filename,type,"PRC.png",sep="-")),width=500,height=500)
+    par(mar=c(5,4,4,2))
+    plot(PRC_plot,main=type,cex.main=1,max.auc.polygon=T,grid=T,
+         asp=1,mar=c(4, 4, 2, 2)+.1,mgp=c(2.5, 1, 0),
+         col=par("col"),lty=par("lty"),lwd=2,type="l",
+         xlab="Recall (%)",ylab="Precision (%)",xlim=c(0,100),ylim=c(0,100))
+    dev.off()
     result.measure <- data.frame(filename,tagging.type=type,
                                  accuracy,error_rate,balanced_accuracy,
                                  Mcnemar_Test.PValue,AUC,no_information_rate,
