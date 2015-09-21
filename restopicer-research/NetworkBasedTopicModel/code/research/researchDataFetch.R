@@ -1,5 +1,5 @@
 rm(list = ls(envir = globalenv()))
-setwd("F:/Desktop/restopicer/restopicer-research/LinkTopicModel")
+# setwd("F:/Desktop/restopicer/restopicer-research/NetworkBasedTopicModel/")
 #####
 # required library
 #####
