@@ -18,7 +18,7 @@ plotPath="output/demo"
 # parameter:
 ## datatype: abstract
 ## K: 10
-## LDA_method: Gibbs
+## LDA_method: Gibbs/VEM
 #####
 topicDiscovery.LDA(data = demoPapers,datatype = "abstract",K = 10,LDA_method = "Gibbs",plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory)
 #####
@@ -27,7 +27,7 @@ topicDiscovery.LDA(data = demoPapers,datatype = "abstract",K = 10,LDA_method = "
 # parameter:
 ## datatype: keywords
 ## K: 10
-## LDA_method: Gibbs
+## LDA_method: Gibbs/VEM
 #####
 topicDiscovery.LDA(data = demoPapersKeywords,datatype = "keywords",K = 10,LDA_method = "Gibbs",plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory)
 #####
@@ -36,11 +36,11 @@ topicDiscovery.LDA(data = demoPapersKeywords,datatype = "keywords",K = 10,LDA_me
 # p.s. Maximum Spanning Tree
 # parameter:
 ## datatype: keywords
-## network_backbone_extract(MST_Threshold method): FULL
+## network_backbone_extract: FALSE -> MST_Threshold: 0
 ## topic_term_weight: binary/degree
 ## doc_topic_method: similarity.cos
 #####
-
+topicDiscovery.fastgreedy(data = demoPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory)
 #####
 # *
 # experiment 4:keywords_co_linkcomm
@@ -51,17 +51,16 @@ topicDiscovery.LDA(data = demoPapersKeywords,datatype = "keywords",K = 10,LDA_me
 ## topic_term_weight: binary/degree
 ## doc_topic_method: similarity.cos
 #####
-
+topicDiscovery.linkcomm(data = demoPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory,link_similarity_method="original")
 #####
 # *
 # experiment 5:keywords_bi_linkcomm
 # method:bi_linkcomm
 # parameter:
 ## datatype: keywords
-## topic_term_weight: binary/degree
-## doc_topic_weight: binary/degree
+## weight: degree
 #####
-
+topicDiscovery.linkcomm.bipartite(data = demoPapersKeywords,datatype = "keywords",weight = "degree",plotPath = plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory,link_similarity_method="original")
 #####
 # *
 # experiment 6:keywords_co_linkcomm_coneighbor/innerlink

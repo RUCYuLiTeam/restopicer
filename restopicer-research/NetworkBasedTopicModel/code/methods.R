@@ -1,8 +1,8 @@
 #####
-# abstract_bi_lda
+# topic discovery
+#####
 # http://yuedu.baidu.com/ebook/d0b441a8ccbff121dd36839a
 # http://blog.csdn.net/pirage/article/details/9467547
-#####
 topicDiscovery.LDA <- function(data,datatype="abstract",
                                K=10,LDA_method="Gibbs",
                                plotPath="output/demo",plotReport=TRUE,papers_tags_df=NULL){
@@ -35,6 +35,133 @@ topicDiscovery.LDA <- function(data,datatype="abstract",
     doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
     # matrix plot
     plotReport.bipartite.matrix(corpus_dtm,topic_term,doc_topic,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"))
+  }
+}
+topicDiscovery.fastgreedy <- function(data,datatype="keywords",MST_Threshold=0,
+                                      topic_term_weight="degree",doc_topic_method="similarity.cos",
+                                      plotPath="output/demo",plotReport=TRUE,papers_tags_df=NULL){
+  # step 1:preprocessing corpus and get bipartite from incidence matrix
+  corpus_dtm <- switch(datatype,
+                       "abstract" = preprocess.abstract.corpus(data),
+                       "keywords" = preprocess.keywords.corpus(data))
+  bi_graph <- graph_from_incidence_matrix(corpus_dtm)
+  # step 2:projecting and network_backbone_extract
+  if(MST_Threshold!=0){
+    MST_Threshold
+  }else{
+    proj_graph <- bipartite_projection(bi_graph, types = NULL, multiplicity = TRUE,probe1 = NULL, which = "true", remove.type = TRUE)
+  }
+  coterm_graph <- simplify(proj_graph)
+  # step 3:run fastgreedy community
+  fc <- fastgreedy.community(coterm_graph)
+  community_member_list <- communities(fc)
+  # step 4:doc_topic and topic_term matrix through community_member_list
+  # generate topic-term matrix through community
+  topic_term <- getTopicMemberBipartiteMatrix(community_member_list,weight = topic_term_weight,graph = coterm_graph)
+  # calculate similarity to get doc-topic matrix
+  doc_topic <- getDocTopicBipartiteMatrix(doc_member = corpus_dtm,topic_member = topic_term,method = doc_topic_method)
+  # step 5:plot Report
+  if(plotReport){
+    model <- NULL
+    # filenames and foldername
+    model$parameter <- paste(datatype,"fastgreedy",MST_Threshold,topic_term_weight,doc_topic_method,sep = "_")
+    #modularity
+    model$modularity <- modularity(fc)
+    #entropy
+    model$entropy <- mean(apply(doc_topic,1,function(z) -sum(z*log(z))))
+    # folder
+    if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
+    write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,paste(model$parameter,"modeltest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+    # doc_topic for taggingtest
+    doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
+    # matrix plot
+    plotReport.bipartite.matrix(corpus_dtm,topic_term,doc_topic,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),drawNetwork=T,coterm_graph=coterm_graph,community_member_list=community_member_list)
+  }
+}
+topicDiscovery.linkcomm <- function(data,datatype="keywords",MST_Threshold=0,
+                                    topic_term_weight="degree",doc_topic_method="similarity.cos",
+                                    plotPath="output/demo",plotReport=TRUE,papers_tags_df=NULL,link_similarity_method="original"){
+  # step 1:preprocessing corpus and get bipartite from incidence matrix
+  corpus_dtm <- switch(datatype,
+                       "abstract" = preprocess.abstract.corpus(data),
+                       "keywords" = preprocess.keywords.corpus(data))
+  bi_graph <- graph_from_incidence_matrix(corpus_dtm)
+  # step 2:projecting and network_backbone_extract
+  if(MST_Threshold!=0){
+    MST_Threshold
+  }else{
+    proj_graph <- bipartite_projection(bi_graph, types = NULL, multiplicity = TRUE,probe1 = NULL, which = "true", remove.type = TRUE)
+  }
+  coterm_graph <- simplify(proj_graph)
+  # step 3:run Link community
+  coterm_edgelist <- as.data.frame(cbind(get.edgelist(coterm_graph),get.edge.attribute(coterm_graph,name = "weight")),stringsAsFactors = F)
+  coterm_edgelist$V3 <- as.numeric(coterm_edgelist$V3)
+  # self-defined link_similarity_method for dist
+  dist <- NULL
+  if(link_similarity_method!="original"){
+    
+  }
+  lc <- getLinkCommunities(coterm_edgelist,hcmethod="average",bipartite=F,dist = dist)
+  community_member_list <- lapply(split(lc$nodeclusters$node,f = lc$nodeclusters$cluster),FUN = function(x){unlist(as.character(x))})
+  # step 4:doc_topic and topic_term matrix through community_member_list
+  # generate topic-term matrix through community
+  topic_term <- getTopicMemberBipartiteMatrix(community_member_list,weight = topic_term_weight,graph = coterm_graph)
+  # calculate similarity to get doc-topic matrix
+  doc_topic <- getDocTopicBipartiteMatrix(doc_member = corpus_dtm,topic_member = topic_term,method = doc_topic_method)
+  # step 5:plot Report
+  if(plotReport){
+    model <- NULL
+    # filenames and foldername
+    model$parameter <- paste(datatype,"linkcomm",MST_Threshold,link_similarity_method,topic_term_weight,doc_topic_method,sep = "_")
+    #partition Densities
+    model$partitiondensity <- 2*sum(LinkDensities(lc)*sapply(lc$clusters,FUN = length))/lc$numbers[1]
+    #entropy
+    model$entropy <- mean(apply(doc_topic,1,function(z) -sum(z*log(z))))
+    # folder
+    if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
+    write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,paste(model$parameter,"modeltest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+    # doc_topic for taggingtest
+    doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
+    # matrix plot
+    plotReport.bipartite.matrix(corpus_dtm,topic_term,doc_topic,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),drawNetwork=T,coterm_graph=coterm_graph,community_member_list=community_member_list)
+  }
+}
+topicDiscovery.linkcomm.bipartite <- function(data,datatype="keywords",weight="degree",
+                                    plotPath="output/demo",plotReport=TRUE,papers_tags_df=NULL,link_similarity_method="original"){
+  # step 1:preprocessing corpus and get bipartite from incidence matrix
+  corpus_dtm <- switch(datatype,
+                       "abstract" = preprocess.abstract.corpus(data),
+                       "keywords" = preprocess.keywords.corpus(data))
+  bi_graph <- graph_from_incidence_matrix(corpus_dtm)
+  # step 2:run Link community on bipartite
+  bi_edgelist <- as_edgelist(bi_graph)
+  # self-defined link_similarity_method for dist
+  dist <- NULL
+  if(link_similarity_method!="original"){
+    
+  }
+  lc <- getLinkCommunities(bi_edgelist,hcmethod="average",bipartite=T,dist = dist)
+  edge_community_df <- lc$edges
+  # step 3:doc_topic and topic_term matrix through edge_community_df
+  result <- getCommunityMemberBipartiteMatrix(edge_community_df,weight = weight)
+  topic_term <- result$topic_term
+  doc_topic <- result$doc_topic
+  # step 4:plot Report
+  if(plotReport){
+    model <- NULL
+    # filenames and foldername
+    model$parameter <- paste(datatype,"linkcomm_bipartite",link_similarity_method,weight,sep = "_")
+    #partition Densities
+    model$partitiondensity <- 2*sum(LinkDensities(lc)*sapply(lc$clusters,FUN = length))/lc$numbers[1]
+    #entropy
+    model$entropy <- mean(apply(doc_topic,1,function(z) -sum(z*log(z))))
+    # folder
+    if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
+    write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,paste(model$parameter,"modeltest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+    # doc_topic for taggingtest
+    doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
+    # matrix plot
+    plotReport.bipartite.matrix(corpus_dtm,topic_term,doc_topic,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),drawNetwork=F,coterm_graph=NULL,community_member_list=NULL,bipartite=T,edge_community_df=edge_community_df)
   }
 }
 #####
@@ -79,9 +206,70 @@ preprocess.keywords.corpus <- function(papers_keywords_df){
   corpus_dtm
 }
 #####
-# bipartite matrix plot report
+# community is like topic (from community to topic)
+# 1.community_member is a bianry bipartite matrix
+# 2.topic_member is a weighted community_member (also a bipartite matrix)
+# 3.one doc belongs to many communities/topics
+# 4.in some methods, one member belongs to many communities/topics
+# 5.supported network form are edgelist, matrix and belongto_list
 #####
-plotReport.bipartite.matrix <- function(corpus_dtm,topic_term,doc_topic,filename,path){
+# for return matrix
+# return an topic-term or topic-edge bipartite matrix
+# community-membership or called Topic-Member bipartite matrix
+getTopicMemberBipartiteMatrix <- function(community_member_list, weight = "binary",graph=NULL){
+  member <- unlist(community_member_list,use.names = F)
+  community <- rep(1:length(community_member_list),times = unlist(lapply(community_member_list,FUN = length)))
+  bi_matrix <- table(community,member)
+  if(weight == "degree"){
+    for(i in 1:length(community_member_list)){
+      g <- delete.vertices(graph,names(V(graph))[!names(V(graph)) %in% community_member_list[[i]]])
+      w <- degree(g)/sum(degree(g))
+      bi_matrix[i,names(w)] <- w
+    }
+  }
+  as.matrix(bi_matrix)
+}
+getDocTopicBipartiteMatrix <- function(doc_member,topic_member,method = "Moore-Penrose", scaling = FALSE){
+  calGeneralizedInverseMatrix <- function(){
+    doc_member %*% ginv(topic_member)
+  }
+  calTransposMatrix <- function(){
+    doc_member %*% t(topic_member)
+  }
+  calSimilarity.cos <- function(){
+    t(apply(doc_member,1,FUN = function(doc){doc/sqrt(sum(doc^2))})) %*% t(apply(topic_member,2,FUN = function(topic){topic/sqrt(sum(topic^2))}))
+  }
+  M <- switch(method,
+              "Moore-Penrose" = calGeneralizedInverseMatrix(),
+              "Transpose" = calTransposMatrix(),
+              "similarity.cos" = calSimilarity.cos())
+  if(scaling){
+    M <- t(scale(t(M),center = F,scale = T)) 
+  }
+  M
+}
+getCommunityMemberBipartiteMatrix <- function(edge_community_df, weight = "degree"){
+  result <- NULL
+  result$doc_topic <- table(edge_community_df$node1,edge_community_df$cluster)/rowSums(table(edge_community_df$node1,edge_community_df$cluster))
+  result$topic_term <- table(edge_community_df$cluster,edge_community_df$node2)/rowSums(table(edge_community_df$cluster,edge_community_df$node2))
+  if(weight=="binary"){
+    result$doc_topic[result$doc_topic>0] <- 1
+    result$topic_term[result$topic_term>0] <- 1
+  }
+  return(result)
+}
+#####
+# bipartite matrix and network plot report
+#####
+plotReport.bipartite.matrix <- function(corpus_dtm,topic_term,doc_topic,filename,path,drawNetwork=FALSE,coterm_graph=NULL,community_member_list=NULL,bipartite=F,edge_community_df=NULL){
+  if(drawNetwork){
+    if(bipartite){
+      # network of topics (edges)
+    }else{
+      # network of topics (nodes)
+      plotTopicNetworkReport(filename = filename,graph = coterm_graph,community_member_list,showNamesInPlot = TRUE,plotCommunity = TRUE,plotOverallTopics = TRUE,path = paste(path,"topic_term","network",sep = "/")) 
+    }
+  }
   # transpose = FALSE
   plotBipartiteMatrixReport(filename = filename,bi_matrix = corpus_dtm,path = paste(path,"document_term",sep = "/"),showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
   plotBipartiteMatrixReport(filename = filename,bi_matrix = topic_term,path = paste(path,"topic_term",sep = "/"),showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
