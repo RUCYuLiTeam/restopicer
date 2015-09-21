@@ -26,15 +26,6 @@ source("code/functions_for_network_processing.R")
 # 2.self-defined similarity method
 #####
 source("code/functions_for_community_detection.R")
-#####
-# community is like topic (from community to topic)
-# 1.community_member is a bianry bipartite matrix
-# 2.topic_member is a weighted community_member (also a bipartite matrix)
-# 3.one doc belongs to many communities/topics
-# 4.in some methods, one member belongs to many communities/topics
-# 5.supported network form are edgelist, matrix and belongto_list
-#####
-source("code/functions_for_community_to_topic.R")
 ######
 # community evaluation functions and plot report
 # on community_member test,topic_member test and doc_topic test
