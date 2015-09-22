@@ -19,6 +19,11 @@
 </dependency>
 ```
 
+or SBT
+```
+libraryDependencies += "org.elasticsearch" % "elasticsearch-spark_2.10" % "2.1.1"
+```
+
 3. elasticsearch configuration and writing in spark integration
 The basic information are from [here](https://www.elastic.co/guide/en/elasticsearch/hadoop/current/configuration.html)!
 
