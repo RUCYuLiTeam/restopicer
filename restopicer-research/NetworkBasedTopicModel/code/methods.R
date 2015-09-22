@@ -60,6 +60,7 @@ topicDiscovery.fastgreedy <- function(data,datatype="keywords",MST_Threshold=0,
   # step 3:run fastgreedy community
   fc <- fastgreedy.community(coterm_graph)
   community_member_list <- communities(fc)
+  community_term <- getTopicMemberBipartiteMatrix(community_member_list,weight = "binary")
   # step 4:doc_topic and topic_term matrix through community_member_list
   # generate topic-term matrix through community
   topic_term <- getTopicMemberBipartiteMatrix(community_member_list,weight = topic_term_weight,graph = coterm_graph)
@@ -82,11 +83,25 @@ topicDiscovery.fastgreedy <- function(data,datatype="keywords",MST_Threshold=0,
     # matrix plot
     plotReport.bipartite.matrix(corpus_dtm,topic_term,doc_topic,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),drawNetwork=T,coterm_graph=coterm_graph,community_member_list=community_member_list)
   }
+
+  df_bi_data <- unique(demoPapersKeywords)[,c("item_ut","author_keyword")]
+  df_bi_data$author_keyword <- tolower(df_bi_data$author_keyword)
+  df_bi_data <- unique(df_bi_data)
+  df_doc_tag <- unique(demoPapersSubjectCategory[,c("item_ut","subject_category")])
+  member_tag_df <- merge(df_bi_data,df_doc_tag)[,2:3]
+  
+  community.coverage<-calcommunity.coverage(community_term)
+  overlapcoverage<-caloverlap.coverage(community_term)
+  communityquality<-calcommunity.quality(community_term,coterm_graph)
+  overlapquality<-caloverlap.number.quality(community_member_list,member_tag_df)
+  fastgreedy<-c(community.coverage,overlapcoverage,communityquality,overlapquality)
+  
   result <- NULL
   result$model <- model
   result$topic_term <- topic_term
   result$doc_topic <- doc_topic
   result$community_member_list <- community_member_list
+  result$fastgreedy<-fastgreedy
   return(result)
 }
 topicDiscovery.linkcomm <- function(data,datatype="keywords",MST_Threshold=0,
@@ -114,6 +129,7 @@ topicDiscovery.linkcomm <- function(data,datatype="keywords",MST_Threshold=0,
   }
   lc <- getLinkCommunities(coterm_edgelist,hcmethod="average",bipartite=F,dist = dist)
   community_member_list <- lapply(split(lc$nodeclusters$node,f = lc$nodeclusters$cluster),FUN = function(x){unlist(as.character(x))})
+  community_term <- getTopicMemberBipartiteMatrix(community_member_list,weight = "binary")
   # step 4:doc_topic and topic_term matrix through community_member_list
   # generate topic-term matrix through community
   topic_term <- getTopicMemberBipartiteMatrix(community_member_list,weight = topic_term_weight,graph = coterm_graph)
@@ -136,11 +152,25 @@ topicDiscovery.linkcomm <- function(data,datatype="keywords",MST_Threshold=0,
     # matrix plot
     plotReport.bipartite.matrix(corpus_dtm,topic_term,doc_topic,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),drawNetwork=T,coterm_graph=coterm_graph,community_member_list=community_member_list)
   }
+  
+  df_bi_data <- unique(demoPapersKeywords)[,c("item_ut","author_keyword")]
+  df_bi_data$author_keyword <- tolower(df_bi_data$author_keyword)
+  df_bi_data <- unique(df_bi_data)
+  df_doc_tag <- unique(demoPapersSubjectCategory[,c("item_ut","subject_category")])
+  member_tag_df <- merge(df_bi_data,df_doc_tag)[,2:3]
+  
+  community.coverage<-calcommunity.coverage(community_term)
+  overlapcoverage<-caloverlap.coverage(community_term)
+  communityquality<-calcommunity.quality(community_term,coterm_graph)
+  overlapquality<-caloverlap.number.quality(community_member_list,member_tag_df)
+  linkcomm<-c(community.coverage,overlapcoverage,communityquality,overlapquality)
+  
   result <- NULL
   result$model <- model
   result$topic_term <- topic_term
   result$doc_topic <- doc_topic
   result$community_member_list <- community_member_list
+  result$linkcomm<-linkcomm
   return(result)
 }
 topicDiscovery.linkcomm.bipartite <- function(data,datatype="keywords",weight="degree",
