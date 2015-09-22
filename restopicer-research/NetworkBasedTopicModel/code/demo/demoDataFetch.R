@@ -30,19 +30,19 @@ res <- dbSendQuery(conn, "SELECT * FROM paper_with_issue WHERE abstract <> '' AN
 demoPapers <- dbFetch(res,n = -1)
 dbClearResult(res)
 # select demo papers-keywords from paper_keyword in demo papers
-res <- dbSendQuery(conn, paste("SELECT * FROM paper_keyword WHERE item_ut in","(",paste(demoPapers$item_ut,collapse = ","),")"))
+res <- dbSendQuery(conn, paste("SELECT * FROM paper_keyword WHERE item_ut in","('",paste(demoPapers$item_ut,collapse = "','"),"')"))
 demoPapersKeywords <- dbFetch(res,n = -1)
 dbClearResult(res)
 # select demo papers issue_subject_category from paper_issue_subject_category of demo papers
-res <- dbSendQuery(conn, paste("SELECT * FROM paper_issue_subject_category WHERE item_ut in","(",paste(demoPapers$item_ut,collapse = ","),")"))
+res <- dbSendQuery(conn, paste("SELECT * FROM paper_issue_subject_category WHERE item_ut in","('",paste(demoPapers$item_ut,collapse = "','"),"')"))
 demoPapersSubjectCategory <- dbFetch(res,n = -1)
 dbClearResult(res)
 # select demo papers-authors from paper_author_info in demo papers
-res <- dbSendQuery(conn, paste("SELECT * FROM paper_author_info WHERE item_ut in","(",paste(demoPapers$item_ut,collapse = ","),")"))
+res <- dbSendQuery(conn, paste("SELECT * FROM paper_author_info WHERE item_ut in","('",paste(demoPapers$item_ut,collapse = "','"),"')"))
 demoPapersAuthors <- dbFetch(res,n = -1)
 dbClearResult(res)
 # select demo papers reference from paper_reference in demo papers
-res <- dbSendQuery(conn, paste("SELECT * FROM paper_reference WHERE item_ut in","(",paste(demoPapers$item_ut,collapse = ","),")"))
+res <- dbSendQuery(conn, paste("SELECT * FROM paper_reference WHERE item_ut in","('",paste(demoPapers$item_ut,collapse = "','"),"')"))
 demoPapersReference <- dbFetch(res,n = -1)
 dbClearResult(res)
 # close
