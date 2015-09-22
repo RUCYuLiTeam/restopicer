@@ -40,7 +40,7 @@ topicDiscovery.LDA(data = demoPapersKeywords,datatype = "keywords",K = 10,LDA_me
 ## topic_term_weight: binary/degree
 ## doc_topic_method: similarity.cos
 #####
-topicDiscovery.fastgreedy(data = demoPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory)
+res_fastgreedy <-topicDiscovery.fastgreedy(data = demoPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory)
 #####
 # *
 # experiment 4:keywords_co_linkcomm
@@ -51,7 +51,7 @@ topicDiscovery.fastgreedy(data = demoPapersKeywords,datatype = "keywords",MST_Th
 ## topic_term_weight: binary/degree
 ## doc_topic_method: similarity.cos
 #####
-topicDiscovery.linkcomm(data = demoPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory,link_similarity_method="original")
+res_linkcomm <- topicDiscovery.linkcomm(data = demoPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory,link_similarity_method="original")
 #####
 # *
 # experiment 5:keywords_bi_linkcomm
@@ -62,6 +62,18 @@ topicDiscovery.linkcomm(data = demoPapersKeywords,datatype = "keywords",MST_Thre
 #####
 topicDiscovery.linkcomm.bipartite(data = demoPapersKeywords,datatype = "keywords",weight = "degree",plotPath = plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory,link_similarity_method="original")
 #####
+
+#####
+#plot composite performance
+#####
+# plotComPerformance(fastgreedy,linkcomm){
+#   res_linkcomm <- topicDiscovery.linkcomm(data = demoPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory,link_similarity_method="original")
+#   res_fastgreedy <-topicDiscovery.fastgreedy(data = demoPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory)
+# #   fastgreedy<-res_fastgreedy$fastgreedy
+# #   linkcomm<-res_linkcomm$linkcomm
+#   plotCompositePerformance(res_fastgreedy$fastgreedy,res_linkcomm$linkcomm)
+# }
+
 # *
 # experiment 6:keywords_co_linkcomm_coneighbor/innerlink
 # method:co_linkcomm

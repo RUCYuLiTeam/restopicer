@@ -170,3 +170,33 @@ doc.tagging.test <- function(taggingtest_data,filename,path = "output/", LeaveOn
   }
   write.table(taggingtest_result,file = file.path(path,paste(filename,"taggingtest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
 }
+
+
+#plot composite performance
+#install.packages("vcd")
+#library(vcd)
+
+plotCompositePerformance<- function(fastgreedy,linkcomm){
+  res_linkcomm <- topicDiscovery.linkcomm(data = demoPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory,link_similarity_method="original")
+  res_fastgreedy <-topicDiscovery.fastgreedy(data = demoPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory)
+  fastgreedy<-res_fastgreedy$fastgreedy
+  linkcomm<-res_linkcomm$linkcomm
+  if(fastgreedy && linkcomm){
+    comp_perfor<-cbind(linkcomm,fastgreedy)
+    rownames(comp_perfor)<-c("commmunity coverage","overlap coverage","community quality","overlap quality")
+  
+    t(apply(comp_perfor,MARGIN = 1,function(x) x/max(x)))
+    barplot(comp_perfor,border=FALSE,
+            main="Stacked Bar Plot",
+            xlab="Methods",ylab="composite performance",
+            col=c("red","yellow","green","blue"),
+            space=0,
+           
+           # legend=rownames(comp_perfor),legend(cexv=0.5)
+          )
+    legend("topright",col=c("red","yellow","green","blue"),legend=rownames(comp_perfor),pch=15,bty=0,cex = 0.5,horiz = F)
+}
+}
+
+
+
