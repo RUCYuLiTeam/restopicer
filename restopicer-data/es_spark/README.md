@@ -18,7 +18,6 @@
   <version>2.1.1</version>
 </dependency>
 ```
-
 or SBT
 ```
 libraryDependencies += "org.elasticsearch" % "elasticsearch-spark_2.10" % "2.1.1"
