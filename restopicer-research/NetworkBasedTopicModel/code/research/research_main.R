@@ -3,7 +3,8 @@ rm(list = ls(envir = globalenv()))
 #####
 # required data
 #####
-load(file = "rdata/research.RData")
+load(file = "rdata/research2013.RData")
+#load(file = "rdata/research20year.RData")
 # if no data, pls run
 # source("code/research/researchDataFetch.R")
 #####
@@ -20,7 +21,7 @@ plotPath="output/research"
 ## K: 10
 ## LDA_method: Gibbs/VEM
 #####
-topicDiscovery.LDA(data = demoPapers,datatype = "abstract",K = 10,LDA_method = "Gibbs",plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory)
+result_A <- topicDiscovery.LDA(data = researchPapers,datatype = "abstract",K = 10,LDA_method = "Gibbs",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory)
 #####
 # experiment 2:keywords_bi_lda
 # method:LDA
@@ -29,7 +30,7 @@ topicDiscovery.LDA(data = demoPapers,datatype = "abstract",K = 10,LDA_method = "
 ## K: 10
 ## LDA_method: Gibbs/VEM
 #####
-topicDiscovery.LDA(data = demoPapersKeywords,datatype = "keywords",K = 10,LDA_method = "Gibbs",plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory)
+result_B <- topicDiscovery.LDA(data = researchPapersKeywords,datatype = "keywords",K = 10,LDA_method = "Gibbs",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory)
 #####
 # experiment 3:keywords_co_fastgreedy
 # method:fastgreedy
@@ -40,7 +41,7 @@ topicDiscovery.LDA(data = demoPapersKeywords,datatype = "keywords",K = 10,LDA_me
 ## topic_term_weight: binary/degree
 ## doc_topic_method: similarity.cos
 #####
-topicDiscovery.fastgreedy(data = demoPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory)
+result_C <- topicDiscovery.fastgreedy(data = researchPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory)
 #####
 # *
 # experiment 4:keywords_co_linkcomm
@@ -51,7 +52,7 @@ topicDiscovery.fastgreedy(data = demoPapersKeywords,datatype = "keywords",MST_Th
 ## topic_term_weight: binary/degree
 ## doc_topic_method: similarity.cos
 #####
-topicDiscovery.linkcomm(data = demoPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory,link_similarity_method="original")
+result_D <- topicDiscovery.linkcomm(data = researchPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
 #####
 # *
 # experiment 5:keywords_bi_linkcomm
@@ -60,7 +61,7 @@ topicDiscovery.linkcomm(data = demoPapersKeywords,datatype = "keywords",MST_Thre
 ## datatype: keywords
 ## weight: degree
 #####
-topicDiscovery.linkcomm.bipartite(data = demoPapersKeywords,datatype = "keywords",weight = "degree",plotPath = plotPath,plotReport = T,papers_tags_df = demoPapersSubjectCategory,link_similarity_method="original")
+result_E <- topicDiscovery.linkcomm.bipartite(data = researchPapersKeywords,datatype = "keywords",weight = "degree",plotPath = plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
 #####
 # *
 # experiment 6:keywords_co_linkcomm_coneighbor/innerlink
