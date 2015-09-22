@@ -38,7 +38,7 @@ plotBipartiteMatrixReport <- function(filename, bi_matrix, transpose = FALSE, sh
       par(fig = c(0,1,0.1,1),mar = c(0,0,0,0))
       pal <- brewer.pal(9,"Blues")[4:9]
       color_cluster <- pal[ceiling(6*(line/max(line)))]
-      wordcloud(words=line_names,freq=line_freq,scale = c(4, 0),min.freq=1,max.words = Inf,
+      wordcloud(words=line_names,freq=line_freq,scale = c(4, 0),min.freq=1,max.words = 200,
                 random.order=F,random.color=F,rot.per=0,colors=color_cluster,ordered.colors=T,
                 use.r.layout=F,fixed.asp=F)
       par(fig = c(0,1,0,0.1), mar = c(3, 2, 0, 2), new=TRUE)
@@ -53,7 +53,7 @@ plotBipartiteMatrixReport <- function(filename, bi_matrix, transpose = FALSE, sh
     par(fig = c(0,1,0.1,1),mar = c(0,0,0,0))
     pal <- brewer.pal(9,"Blues")[4:9]
     color_cluster <- pal[ceiling(6*df_for_plot$sumTFIDF/max(df_for_plot$sumTFIDF))]
-    wordcloud(words=df_for_plot$columns,freq=df_for_plot$sumTF,scale = c(4, 0.5),min.freq=1,max.words = Inf,
+    wordcloud(words=df_for_plot$columns,freq=df_for_plot$sumTF,scale = c(4, 0.5),min.freq=1,max.words = 200,
               random.order=F,random.color=F,rot.per=0,colors=color_cluster,ordered.colors=T,
               use.r.layout=F,fixed.asp=F)
     par(fig = c(0,1,0,0.1), mar = c(3, 2, 0, 2), new=TRUE)
@@ -67,11 +67,12 @@ plotBipartiteMatrixReport <- function(filename, bi_matrix, transpose = FALSE, sh
     #plot textplot
     png(file.path(path,paste(type,filename,"rowcomparison.png",sep="-")),width=600,height=600)
     par(fig = c(0,1,0.1,1),mar = c(0,0,0,0))
-    comparison.cloud(term.matrix = t(data),title.size = 2,scale = c(4,0.5),rot.per = 0,max.words = Inf,colors = rep(brewer.pal(n = 12,name = "Paired"),ceiling(nrow(data)/12)))
+    comparison.cloud(term.matrix = t(data),title.size = 2,scale = c(4,0.5),rot.per = 0,max.words = 200,colors = rep(brewer.pal(n = 12,name = "Paired"),ceiling(nrow(data)/12)))
     par(fig = c(0,1,0,0.1), mar = c(3, 2, 0, 2), new=TRUE)
     display.brewer.pal(12, "Paired")
     dev.off()
   }
+  #if(nrow(bi_data)>100)plotRowDist <- FALSE
   if(plotRowDist){
     # different weightType of bi_data
     loc <- cmdscale(dist(bi_data,method = "minkowski", p = 2))

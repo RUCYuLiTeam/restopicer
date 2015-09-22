@@ -20,22 +20,27 @@ topicDiscovery.LDA <- function(data,datatype="abstract",
   doc_topic <- topic_posterior$topics
   topic_term <- topic_posterior$terms
   # step 4:plot Report
+  model <- NULL
+  # filenames and foldername
+  model$parameter <- paste(datatype,"LDA",K,LDA_method,sep = "_")
+  #perplexity
+  model$perplexity <- perplexity(corpus_topic,corpus_dtm)
+  #entropy
+  model$entropy <- mean(apply(doc_topic,1,function(z) -sum(z*log(z))))
+  # folder
+  if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
+  write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,paste(model$parameter,"modeltest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+  # doc_topic for taggingtest
+  doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
   if(plotReport){
-    model <- NULL
-    # filenames and foldername
-    model$parameter <- paste(datatype,"LDA",K,LDA_method,sep = "_")
-    #perplexity
-    model$perplexity <- perplexity(corpus_topic,corpus_dtm)
-    #entropy
-    model$entropy <- mean(apply(doc_topic,1,function(z) -sum(z*log(z))))
-    # folder
-    if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
-    write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,paste(model$parameter,"modeltest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
-    # doc_topic for taggingtest
-    doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
     # matrix plot
     plotReport.bipartite.matrix(corpus_dtm,topic_term,doc_topic,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"))
   }
+  result <- NULL
+  result$model <- model
+  result$topic_term <- topic_term
+  result$doc_topic <- doc_topic
+  return(result)
 }
 topicDiscovery.fastgreedy <- function(data,datatype="keywords",MST_Threshold=0,
                                       topic_term_weight="degree",doc_topic_method="similarity.cos",
@@ -61,22 +66,28 @@ topicDiscovery.fastgreedy <- function(data,datatype="keywords",MST_Threshold=0,
   # calculate similarity to get doc-topic matrix
   doc_topic <- getDocTopicBipartiteMatrix(doc_member = corpus_dtm,topic_member = topic_term,method = doc_topic_method)
   # step 5:plot Report
+  model <- NULL
+  # filenames and foldername
+  model$parameter <- paste(datatype,"fastgreedy",MST_Threshold,topic_term_weight,doc_topic_method,sep = "_")
+  #modularity
+  model$modularity <- modularity(fc)
+  #entropy
+  model$entropy <- mean(apply(doc_topic,1,function(z) -sum(z*log(z))))
+  # folder
+  if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
+  write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,paste(model$parameter,"modeltest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+  # doc_topic for taggingtest
+  doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
   if(plotReport){
-    model <- NULL
-    # filenames and foldername
-    model$parameter <- paste(datatype,"fastgreedy",MST_Threshold,topic_term_weight,doc_topic_method,sep = "_")
-    #modularity
-    model$modularity <- modularity(fc)
-    #entropy
-    model$entropy <- mean(apply(doc_topic,1,function(z) -sum(z*log(z))))
-    # folder
-    if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
-    write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,paste(model$parameter,"modeltest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
-    # doc_topic for taggingtest
-    doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
     # matrix plot
     plotReport.bipartite.matrix(corpus_dtm,topic_term,doc_topic,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),drawNetwork=T,coterm_graph=coterm_graph,community_member_list=community_member_list)
   }
+  result <- NULL
+  result$model <- model
+  result$topic_term <- topic_term
+  result$doc_topic <- doc_topic
+  result$community_member_list <- community_member_list
+  return(result)
 }
 topicDiscovery.linkcomm <- function(data,datatype="keywords",MST_Threshold=0,
                                     topic_term_weight="degree",doc_topic_method="similarity.cos",
@@ -109,22 +120,28 @@ topicDiscovery.linkcomm <- function(data,datatype="keywords",MST_Threshold=0,
   # calculate similarity to get doc-topic matrix
   doc_topic <- getDocTopicBipartiteMatrix(doc_member = corpus_dtm,topic_member = topic_term,method = doc_topic_method)
   # step 5:plot Report
+  model <- NULL
+  # filenames and foldername
+  model$parameter <- paste(datatype,"linkcomm",MST_Threshold,link_similarity_method,topic_term_weight,doc_topic_method,sep = "_")
+  #partition Densities
+  model$partitiondensity <- 2*sum(LinkDensities(lc)*sapply(lc$clusters,FUN = length))/lc$numbers[1]
+  #entropy
+  model$entropy <- mean(apply(doc_topic,1,function(z) -sum(z*log(z))))
+  # folder
+  if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
+  write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,paste(model$parameter,"modeltest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+  # doc_topic for taggingtest
+  doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
   if(plotReport){
-    model <- NULL
-    # filenames and foldername
-    model$parameter <- paste(datatype,"linkcomm",MST_Threshold,link_similarity_method,topic_term_weight,doc_topic_method,sep = "_")
-    #partition Densities
-    model$partitiondensity <- 2*sum(LinkDensities(lc)*sapply(lc$clusters,FUN = length))/lc$numbers[1]
-    #entropy
-    model$entropy <- mean(apply(doc_topic,1,function(z) -sum(z*log(z))))
-    # folder
-    if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
-    write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,paste(model$parameter,"modeltest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
-    # doc_topic for taggingtest
-    doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
     # matrix plot
     plotReport.bipartite.matrix(corpus_dtm,topic_term,doc_topic,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),drawNetwork=T,coterm_graph=coterm_graph,community_member_list=community_member_list)
   }
+  result <- NULL
+  result$model <- model
+  result$topic_term <- topic_term
+  result$doc_topic <- doc_topic
+  result$community_member_list <- community_member_list
+  return(result)
 }
 topicDiscovery.linkcomm.bipartite <- function(data,datatype="keywords",weight="degree",
                                     plotPath="output/demo",plotReport=TRUE,papers_tags_df=NULL,link_similarity_method="original"){
@@ -147,22 +164,28 @@ topicDiscovery.linkcomm.bipartite <- function(data,datatype="keywords",weight="d
   topic_term <- result$topic_term
   doc_topic <- result$doc_topic
   # step 4:plot Report
+  model <- NULL
+  # filenames and foldername
+  model$parameter <- paste(datatype,"linkcomm_bipartite",link_similarity_method,weight,sep = "_")
+  #partition Densities
+  model$partitiondensity <- 2*sum(LinkDensities(lc)*sapply(lc$clusters,FUN = length))/lc$numbers[1]
+  #entropy
+  model$entropy <- mean(apply(doc_topic,1,function(z) -sum(z*log(z))))
+  # folder
+  if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
+  write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,paste(model$parameter,"modeltest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+  # doc_topic for taggingtest
+  doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
   if(plotReport){
-    model <- NULL
-    # filenames and foldername
-    model$parameter <- paste(datatype,"linkcomm_bipartite",link_similarity_method,weight,sep = "_")
-    #partition Densities
-    model$partitiondensity <- 2*sum(LinkDensities(lc)*sapply(lc$clusters,FUN = length))/lc$numbers[1]
-    #entropy
-    model$entropy <- mean(apply(doc_topic,1,function(z) -sum(z*log(z))))
-    # folder
-    if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
-    write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,paste(model$parameter,"modeltest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
-    # doc_topic for taggingtest
-    doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
     # matrix plot
     plotReport.bipartite.matrix(corpus_dtm,topic_term,doc_topic,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),drawNetwork=F,coterm_graph=NULL,community_member_list=NULL,bipartite=T,edge_community_df=edge_community_df)
   }
+  result <- NULL
+  result$model <- model
+  result$topic_term <- topic_term
+  result$doc_topic <- doc_topic
+  result$edge_community_df <- edge_community_df
+  return(result)
 }
 #####
 # preprocessing method
