@@ -184,8 +184,7 @@ plotCompositePerformance<- function(fastgreedy,linkcomm){
   if(fastgreedy && linkcomm){
     comp_perfor<-cbind(linkcomm,fastgreedy)
     rownames(comp_perfor)<-c("commmunity coverage","overlap coverage","community quality","overlap quality")
-  
-    t(apply(comp_perfor,MARGIN = 1,function(x) x/max(x)))
+    comp_perfor<- t(apply(comp_perfor,MARGIN = 1,function(x) x/max(x)))
     barplot(comp_perfor,border=FALSE,
             main="Stacked Bar Plot",
             xlab="Methods",ylab="composite performance",
