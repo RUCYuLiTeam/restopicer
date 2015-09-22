@@ -112,7 +112,7 @@ topicDiscovery.linkcomm <- function(data,datatype="keywords",MST_Threshold=0,
   if(link_similarity_method!="original"){
     
   }
-  lc <- getLinkCommunities(coterm_edgelist,hcmethod="average",bipartite=F,dist = dist)
+  lc <- getLinkCommunities(coterm_edgelist,hcmethod="average",bipartite=F,dist = dist,plot = F)
   community_member_list <- lapply(split(lc$nodeclusters$node,f = lc$nodeclusters$cluster),FUN = function(x){unlist(as.character(x))})
   # step 4:doc_topic and topic_term matrix through community_member_list
   # generate topic-term matrix through community
@@ -157,7 +157,7 @@ topicDiscovery.linkcomm.bipartite <- function(data,datatype="keywords",weight="d
   if(link_similarity_method!="original"){
     
   }
-  lc <- getLinkCommunities(bi_edgelist,hcmethod="average",bipartite=T,dist = dist)
+  lc <- getLinkCommunities(bi_edgelist,hcmethod="average",bipartite=T,dist = dist,plot = F)
   edge_community_df <- lc$edges
   # step 3:doc_topic and topic_term matrix through edge_community_df
   result <- getCommunityMemberBipartiteMatrix(edge_community_df,weight = weight)
@@ -262,6 +262,7 @@ getDocTopicBipartiteMatrix <- function(doc_member,topic_member,method = "Moore-P
   calSimilarity.cos <- function(){
     t(apply(doc_member,1,FUN = function(doc){doc/sqrt(sum(doc^2))})) %*% t(apply(topic_member,2,FUN = function(topic){topic/sqrt(sum(topic^2))}))
   }
+  doc_member <- doc_member[,colnames(doc_member) %in% colnames(topic_member)]
   M <- switch(method,
               "Moore-Penrose" = calGeneralizedInverseMatrix(),
               "Transpose" = calTransposMatrix(),
