@@ -51,7 +51,7 @@ result_C <- topicDiscovery.fastgreedy(data = researchPapersKeywords,datatype = "
 save(result_C,file = "rdata/result_C.RData")
 #####
 # *
-# experiment 4:keywords_co_linkcomm
+# experiment 4-1:keywords_co_linkcomm
 # method:co_linkcomm
 # parameter:
 ## datatype: keywords
@@ -64,6 +64,19 @@ result_D <- topicDiscovery.linkcomm(data = researchPapersKeywords,datatype = "ke
 save(result_D,file = "rdata/result_D.RData")
 #####
 # *
+# experiment 4-2:keywords_co_linkcomm
+# method:co_linkcomm
+# parameter:
+## datatype: keywords
+## network_backbone_extract(MST_Threshold method): FULL
+## topic_term_weight: degree
+## doc_topic_method: Moore-Penrose
+#####
+rmTempObject()
+result_E <- topicDiscovery.linkcomm(data = researchPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "Moore-Penrose",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
+save(result_E,file = "rdata/result_E.RData")
+#####
+# *
 # experiment 5:keywords_bi_linkcomm
 # method:bi_linkcomm
 # parameter:
@@ -71,8 +84,8 @@ save(result_D,file = "rdata/result_D.RData")
 ## weight: degree
 #####
 rmTempObject()
-result_E <- topicDiscovery.linkcomm.bipartite(data = researchPapersKeywords,datatype = "keywords",weight = "degree",plotPath = plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
-save(result_E,file = "rdata/result_E.RData")
+result_F <- topicDiscovery.linkcomm.bipartite(data = researchPapersKeywords,datatype = "keywords",weight = "degree",plotPath = plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
+save(result_F,file = "rdata/result_F.RData")
 #####
 # *
 # experiment 6:keywords_co_linkcomm_coneighbor/innerlink
