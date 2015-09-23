@@ -98,7 +98,7 @@ topicDiscovery.linkcomm.bipartite(data = demoPapersKeywords,datatype = "keywords
 #####
 # for analysis
 #####
-plotCompositePerformance(fastgreedy=res_fastgreedy$fastgreedy,linkcomm=res_linkcomm$linkcomm)
+plotCompositePerformance(linkcomm=res_linkcomm$linkcomm,fastgreedy=res_fastgreedy$fastgreedy)
 #####
 # experiment END
 #####

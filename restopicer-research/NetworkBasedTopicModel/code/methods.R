@@ -299,11 +299,11 @@ plotReport.bipartite.matrix <- function(corpus_dtm,topic_term,doc_topic,filename
   # transpose = FALSE
   plotBipartiteMatrixReport(filename = filename,bi_matrix = corpus_dtm,path = paste(path,"document_term",sep = "/"),showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
   plotBipartiteMatrixReport(filename = filename,bi_matrix = topic_term,path = paste(path,"topic_term",sep = "/"),showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
-  plotBipartiteMatrixReport(filename = filename,bi_matrix = doc_topic,path = paste(path,"doc_term",sep = "/"),showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
+  plotBipartiteMatrixReport(filename = filename,bi_matrix = doc_topic,path = paste(path,"doc_topic",sep = "/"),showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
   # transpose = TRUE
   plotBipartiteMatrixReport(filename = filename,bi_matrix = corpus_dtm,transpose = TRUE,path = paste(path,"document_term",sep = "/"),showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = TRUE, plotModules = FALSE)
   plotBipartiteMatrixReport(filename = filename,bi_matrix = topic_term,transpose = TRUE,path = paste(path,"topic_term",sep = "/"),showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = TRUE, plotModules = FALSE)
-  plotBipartiteMatrixReport(filename = filename,bi_matrix = doc_topic,transpose = TRUE,path = paste(path,"doc_term",sep = "/"),showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = TRUE, plotModules = FALSE)
+  plotBipartiteMatrixReport(filename = filename,bi_matrix = doc_topic,transpose = TRUE,path = paste(path,"doc_topic",sep = "/"),showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = TRUE, plotModules = FALSE)
 }
 #####
 # document tagging test for doc_topic
