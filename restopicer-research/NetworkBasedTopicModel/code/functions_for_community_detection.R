@@ -8,14 +8,14 @@
 # http://igraph.wikidot.com/community-detection-in-r
 # g <- sample_gnp(100, 0.3)
 # k <- 6
-clique.community <- function(graph, k, threshold = 1) {
+clique.percolation.community <- function(graph, k, threshold = 1) {
   clq <- cliques(graph, min=k, max=k)
   edges <- c()
-  for (i in seq_along(clq)) {
-    for (j in (i+1):length(clq)) {
+  for (i in 1:length(clq)) {
+    for (j in i:length(clq)) {
       # (K-threshold)/(K+threshold)
       if ( length(unique(c(clq[[i]], clq[[j]]))) <= k+threshold ) {
-        edges <- c(edges, c(i,j)-1)
+        edges <- c(edges, c(i,j))
       }
     }
   }
@@ -25,6 +25,31 @@ clique.community <- function(graph, k, threshold = 1) {
   
   lapply(comps, function(x) {
     unique(unlist(clq[ V(x)$name ]))
+  })
+}
+linkcomm.percolation.community <- function(g_edgelist,bipartite=FALSE,dist=NULL,threshold=0.5){
+  lc <- getLinkCommunities(g_edgelist,hcmethod="average",bipartite=bipartite,dist = dist,plot = F)
+  community_member_list <- lapply(split(lc$nodeclusters$node,f = lc$nodeclusters$cluster),FUN = function(x){unlist(as.character(x))})
+  comm_pair <- c()
+  for (i in 1:length(community_member_list)) {
+    for (j in i:length(community_member_list)) {
+      comm_i <- community_member_list[[i]]
+      comm_j <- community_member_list[[j]]
+      num_support <- length(intersect(comm_i,comm_j))
+      num_anti_i <- length(setdiff(comm_i,comm_j))
+      num_anti_j <- length(setdiff(comm_j,comm_i))
+      # method A: num_support/max(num_anti_i,num_anti_j) >= threshold
+      # method B: num_support/(num_anti_i+num_anti_j) >= threshold
+      if ( num_support/max(num_anti_i,num_anti_j) >= threshold ) {
+        comm_pair <- c(comm_pair, c(i,j))
+      }
+    }
+  }
+  linkcomm.graph <- simplify(graph(comm_pair,directed = F))
+  V(linkcomm.graph)$name <- seq_len(vcount(linkcomm.graph))
+  comm_comps <- decompose.graph(linkcomm.graph)
+  lapply(comm_comps, function(x) {
+    unique(unlist(community_member_list[ V(x)$name ]))
   })
 }
 largeScaleCommunity <- function(g,mode="all"){

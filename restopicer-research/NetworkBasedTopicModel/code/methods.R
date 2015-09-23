@@ -145,6 +145,58 @@ topicDiscovery.linkcomm <- function(data,datatype="keywords",MST_Threshold=0,
   result$linkcomm<-comm_member.communitytest(community_member_list,bi_data_df = data,coterm_graph,papers_tags_df)
   return(result)
 }
+topicDiscovery.linkcomm.percolation <- function(data,datatype="keywords",MST_Threshold=0,percolation_threshold=0.5,
+                                    topic_term_weight="degree",doc_topic_method="similarity.cos",
+                                    plotPath="output/demo",plotReport=TRUE,papers_tags_df=NULL,link_similarity_method="original"){
+  # step 1:preprocessing corpus and get bipartite from incidence matrix
+  corpus_dtm <- switch(datatype,
+                       "abstract" = preprocess.abstract.corpus(data),
+                       "keywords" = preprocess.keywords.corpus(data))
+  bi_graph <- graph_from_incidence_matrix(corpus_dtm)
+  # step 2:projecting and network_backbone_extract
+  if(MST_Threshold!=0){
+    MST_Threshold
+  }else{
+    proj_graph <- bipartite_projection(bi_graph, types = NULL, multiplicity = TRUE,probe1 = NULL, which = "true", remove.type = TRUE)
+  }
+  coterm_graph <- simplify(proj_graph)
+  # step 3:run Link community
+  coterm_edgelist <- as.data.frame(cbind(get.edgelist(coterm_graph),get.edge.attribute(coterm_graph,name = "weight")),stringsAsFactors = F)
+  coterm_edgelist$V3 <- as.numeric(coterm_edgelist$V3)
+  # self-defined link_similarity_method for dist
+  dist <- NULL
+  if(link_similarity_method!="original"){
+    
+  }
+  community_member_list <- linkcomm.percolation.community(g_edgelist = coterm_edgelist,bipartite = F,dist = dist,threshold = percolation_threshold)
+  # step 4:doc_topic and topic_term matrix through community_member_list
+  # generate topic-term matrix through community
+  topic_term <- getTopicMemberBipartiteMatrix(community_member_list,weight = topic_term_weight,graph = coterm_graph)
+  # calculate similarity to get doc-topic matrix
+  doc_topic <- getDocTopicBipartiteMatrix(doc_member = corpus_dtm,topic_member = topic_term,method = doc_topic_method)
+  # step 5:plot Report
+  model <- NULL
+  # filenames and foldername
+  model$parameter <- paste(datatype,"linkcomm.percolation",MST_Threshold,percolation_threshold,link_similarity_method,topic_term_weight,doc_topic_method,sep = "_")
+  #entropy
+  model$entropy <- mean(apply(doc_topic,1,function(z) -sum(z*log(z))))
+  # folder
+  if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
+  write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,paste(model$parameter,"modeltest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+  # doc_topic for taggingtest
+  doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
+  if(plotReport){
+    # matrix plot
+    plotReport.bipartite.matrix(corpus_dtm,topic_term,doc_topic,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),drawNetwork=T,coterm_graph=coterm_graph,community_member_list=community_member_list)
+  }
+  result <- NULL
+  result$model <- model
+  result$topic_term <- topic_term
+  result$doc_topic <- doc_topic
+  result$community_member_list <- community_member_list
+  result$linkcomm<-comm_member.communitytest(community_member_list,bi_data_df = data,coterm_graph,papers_tags_df)
+  return(result)
+}
 topicDiscovery.linkcomm.bipartite <- function(data,datatype="keywords",weight="degree",
                                     plotPath="output/demo",plotReport=TRUE,papers_tags_df=NULL,link_similarity_method="original"){
   # step 1:preprocessing corpus and get bipartite from incidence matrix
