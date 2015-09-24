@@ -26,8 +26,10 @@ dbListFields(conn, "paper_reference")## very useful
 # generate research data for model explaination (small size)
 #####
 magazines <- c("MIS QUARTERLY","INFORMATION SYSTEMS RESEARCH","INFORMATION & MANAGEMENT",
-               "DECISION SUPPORT SYSTEMS","ACM TRANSACTIONS ON INFORMATION SYSTEMS")
-from_year <- 2013
+               "DECISION SUPPORT SYSTEMS","ACM TRANSACTIONS ON INFORMATION SYSTEMS",
+               "JOURNAL OF MANAGEMENT INFORMATION SYSTEMS","ELECTRONIC COMMERCE RESEARCH",
+               "INTERNATIONAL JOURNAL OF ELECTRONIC COMMERCE","JOURNAL OF ELECTRONIC COMMERCE RESEARCH")
+from_year <- 1994
 to_year <- 2013
 # select research papers from paper_with_issue
 res <- dbSendQuery(conn, paste("SELECT * FROM paper_with_issue WHERE abstract <> '' AND publication_year >=",from_year,"AND publication_year <=",to_year,"AND full_source_title in","('",paste(magazines,collapse = "','"),"')",sep=" "))
@@ -59,7 +61,7 @@ addPersistentObjects("researchPapersAuthors")
 addPersistentObjects("researchPapersReference")
 rmTempObject()
 # save .RData
-save(file = "rdata/research2013.RData",list = memoryWhiteList)
+save(file = "rdata/research_20Y_1994_2013.RData",list = memoryWhiteList)
 ##############
 # END FOR LTM research data Fetching From MySQL DB
 ##############
