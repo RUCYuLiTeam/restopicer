@@ -46,8 +46,8 @@ calcommunity.quality<-function(comm_member,coterm_g){
 # member_tag_df <- merge(df_bi_data,df_doc_tag)[,2:3]
 caloverlap.quality<- function(community_member_list,member_tag_df){
   colnames(member_tag_df) <- c("member","tag")
-  member_community_df <- ldply(community_member_list,.fun = function(member){
-    data.frame(member)
+  member_community_df <- ldply(1:length(community_member_list),.fun = function(i){
+    data.frame(i,community_member_list[[i]])
   })
   colnames(member_community_df) <- c("community","member")
   member_community_tag_df <- merge(member_community_df,member_tag_df)
@@ -61,8 +61,8 @@ caloverlap.quality<- function(community_member_list,member_tag_df){
 }
 caloverlap.number.quality<- function(community_member_list,member_tag_df){
   colnames(member_tag_df) <- c("member","tag")
-  member_community_df <- ldply(community_member_list,.fun = function(member){
-    data.frame(member)
+  member_community_df <- ldply(1:length(community_member_list),.fun = function(i){
+    data.frame(i,community_member_list[[i]])
   })
   colnames(member_community_df) <- c("community","member")
   v.model <- unlist(lapply(split(member_community_df,member_community_df$member),FUN = nrow))
@@ -139,7 +139,7 @@ doc.tagging.test <- function(taggingtest_data,filename,path = "output/", LeaveOn
     if(length(unique(result$fitted.values))>=2){
       ROC_plot <- roc(result$real.y, result$fitted.values,percent=T)
       # plot ROC
-      png(file.path(path,paste(filename,type,"ROC.png",sep="-")),width=500,height=500)
+      png(file.path(path,paste(type,"ROC.png",sep="-")),width=500,height=500)
       par(mar=c(5,4,4,2))
       plot(ROC_plot,max.auc.polygon=T,auc.polygon=T,grid=T,show.thres=T,print.auc=T,main=type,cex.main=1)
       dev.off()
@@ -152,7 +152,7 @@ doc.tagging.test <- function(taggingtest_data,filename,path = "output/", LeaveOn
       PRC_plot$specificities <- PRC_plot$recall <- ROC_plot$sensitivities
       #sensitivities
       PRC_plot$sensitivities <- PRC_plot$precision <- na.fill(PRC_precision@y.values[[1]] * 100,fill = 1)
-      png(file.path(path,paste(filename,type,"PRC.png",sep="-")),width=500,height=500)
+      png(file.path(path,paste(type,"PRC.png",sep="-")),width=500,height=500)
       par(mar=c(5,4,4,2))
       plot(PRC_plot,main=type,cex.main=1,max.auc.polygon=T,grid=T,
            asp=1,mar=c(4, 4, 2, 2)+.1,mgp=c(2.5, 1, 0),
@@ -168,7 +168,7 @@ doc.tagging.test <- function(taggingtest_data,filename,path = "output/", LeaveOn
                                  precision,detection_rate,f_measure)
     taggingtest_result <- rbind(taggingtest_result,result.measure)
   }
-  write.table(taggingtest_result,file = file.path(path,paste(filename,"taggingtest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+  write.table(taggingtest_result,file = file.path(path,"taggingtest.txt"),quote = F,sep = "\t",row.names = F,col.names = T)
 }
 
 

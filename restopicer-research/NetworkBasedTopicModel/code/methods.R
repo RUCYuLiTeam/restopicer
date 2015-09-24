@@ -29,7 +29,7 @@ topicDiscovery.LDA <- function(data,datatype="abstract",
   model$entropy <- mean(apply(doc_topic,1,function(z) -sum(z*log(z))))
   # folder
   if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
-  write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,paste(model$parameter,"modeltest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+  write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,"modeltest.txt"),quote = F,sep = "\t",row.names = F,col.names = T)
   # doc_topic for taggingtest
   doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
   if(plotReport){
@@ -42,7 +42,7 @@ topicDiscovery.LDA <- function(data,datatype="abstract",
   result$doc_topic <- doc_topic
   return(result)
 }
-topicDiscovery.fastgreedy <- function(data,datatype="keywords",MST_Threshold=0,
+topicDiscovery.fastgreedy <- function(data,datatype="keywords",MST_Threshold=0,K=0,
                                       topic_term_weight="degree",doc_topic_method="similarity.cos",
                                       plotPath="output/demo",plotReport=TRUE,papers_tags_df=NULL){
   # step 1:preprocessing corpus and get bipartite from incidence matrix
@@ -58,7 +58,13 @@ topicDiscovery.fastgreedy <- function(data,datatype="keywords",MST_Threshold=0,
   }
   coterm_graph <- simplify(proj_graph)
   # step 3:run fastgreedy community
-  fc <- fastgreedy.community(coterm_graph)
+  if(file.exists("rdata/tmp/fc.RData")){
+    load(file = "rdata/tmp/fc.RData")
+  }else{
+    fc <- fastgreedy.community(coterm_graph)
+    if(K!=0){fc$membership<-cutat(fc,no=K)}
+    save(fc,file = "rdata/tmp/fc.RData")
+  }
   community_member_list <- communities(fc)
   # step 4:doc_topic and topic_term matrix through community_member_list
   # generate topic-term matrix through community
@@ -68,14 +74,14 @@ topicDiscovery.fastgreedy <- function(data,datatype="keywords",MST_Threshold=0,
   # step 5:plot Report
   model <- NULL
   # filenames and foldername
-  model$parameter <- paste(datatype,"fastgreedy",MST_Threshold,topic_term_weight,doc_topic_method,sep = "_")
+  model$parameter <- paste(datatype,"fastgreedy",MST_Threshold,K,topic_term_weight,doc_topic_method,sep = "_")
   #modularity
   model$modularity <- modularity(fc)
   #entropy
-  model$entropy <- mean(apply(doc_topic,1,function(z) -sum(z*log(z))))
+  model$entropy <- mean(apply(doc_topic,1,function(z) -sum(ifelse(z==0,0,z*log(z)))))
   # folder
   if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
-  write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,paste(model$parameter,"modeltest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+  write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,"modeltest.txt"),quote = F,sep = "\t",row.names = F,col.names = T)
   # doc_topic for taggingtest
   doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
   if(plotReport){
@@ -90,7 +96,7 @@ topicDiscovery.fastgreedy <- function(data,datatype="keywords",MST_Threshold=0,
   result$fastgreedy<-comm_member.communitytest(community_member_list,bi_data_df = data,coterm_graph,papers_tags_df)
   return(result)
 }
-topicDiscovery.linkcomm <- function(data,datatype="keywords",MST_Threshold=0,
+topicDiscovery.linkcomm <- function(data,datatype="keywords",MST_Threshold=0,cutat = NULL,
                                     topic_term_weight="degree",doc_topic_method="similarity.cos",
                                     plotPath="output/demo",plotReport=TRUE,papers_tags_df=NULL,link_similarity_method="original"){
   # step 1:preprocessing corpus and get bipartite from incidence matrix
@@ -114,6 +120,9 @@ topicDiscovery.linkcomm <- function(data,datatype="keywords",MST_Threshold=0,
     
   }
   lc <- getLinkCommunities(coterm_edgelist,hcmethod="average",bipartite=F,dist = dist,plot = F)
+  if(!is.null(cutat)){
+    lc <- newLinkCommsAt(lc, cutat = cutat)
+  }
   community_member_list <- lapply(split(lc$nodeclusters$node,f = lc$nodeclusters$cluster),FUN = function(x){unlist(as.character(x))})
   # step 4:doc_topic and topic_term matrix through community_member_list
   # generate topic-term matrix through community
@@ -127,10 +136,10 @@ topicDiscovery.linkcomm <- function(data,datatype="keywords",MST_Threshold=0,
   #partition Densities
   model$partitiondensity <- 2*sum(LinkDensities(lc)*sapply(lc$clusters,FUN = length))/lc$numbers[1]
   #entropy
-  model$entropy <- mean(apply(doc_topic,1,function(z) -sum(z*log(z))))
+  model$entropy <- mean(apply(doc_topic,1,function(z) -sum(ifelse(z==0,0,z*log(z)))))
   # folder
   if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
-  write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,paste(model$parameter,"modeltest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+  write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,"modeltest.txt"),quote = F,sep = "\t",row.names = F,col.names = T)
   # doc_topic for taggingtest
   doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
   if(plotReport){
@@ -179,10 +188,10 @@ topicDiscovery.linkcomm.percolation <- function(data,datatype="keywords",MST_Thr
   # filenames and foldername
   model$parameter <- paste(datatype,"linkcomm.percolation",MST_Threshold,percolation_threshold,link_similarity_method,topic_term_weight,doc_topic_method,sep = "_")
   #entropy
-  model$entropy <- mean(apply(doc_topic,1,function(z) -sum(z*log(z))))
+  model$entropy <- mean(apply(doc_topic,1,function(z) -sum(ifelse(z==0,0,z*log(z)))))
   # folder
   if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
-  write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,paste(model$parameter,"modeltest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+  write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,"modeltest.txt"),quote = F,sep = "\t",row.names = F,col.names = T)
   # doc_topic for taggingtest
   doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
   if(plotReport){
@@ -224,10 +233,10 @@ topicDiscovery.linkcomm.bipartite <- function(data,datatype="keywords",weight="d
   #partition Densities
   model$partitiondensity <- 2*sum(LinkDensities(lc)*sapply(lc$clusters,FUN = length))/lc$numbers[1]
   #entropy
-  model$entropy <- mean(apply(doc_topic,1,function(z) -sum(z*log(z))))
+  model$entropy <- mean(apply(doc_topic,1,function(z) -sum(ifelse(z==0,0,z*log(z)))))
   # folder
   if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
-  write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,paste(model$parameter,"modeltest.txt",sep="-")),quote = F,sep = "\t",row.names = F,col.names = T)
+  write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,"modeltest.txt"),quote = F,sep = "\t",row.names = F,col.names = T)
   # doc_topic for taggingtest
   doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
   if(plotReport){
@@ -297,10 +306,14 @@ getTopicMemberBipartiteMatrix <- function(community_member_list, weight = "binar
   member <- unlist(community_member_list,use.names = F)
   community <- rep(1:length(community_member_list),times = unlist(lapply(community_member_list,FUN = length)))
   bi_matrix <- table(community,member)
-  if(weight == "degree"){
+  if(weight != "binary"){
     for(i in 1:length(community_member_list)){
       g <- delete.vertices(graph,names(V(graph))[!names(V(graph)) %in% community_member_list[[i]]])
-      w <- degree(g)/sum(degree(g))
+      w <- switch(EXPR = weight,
+                  "degree" = degree(g)/sum(degree(g)),
+                  "betweenness" = betweenness(g)/sum(betweenness(g)),
+                  "closeness" = closeness(g)/sum(closeness(g)),
+                  "evcent" = eigen_centrality(g)$vector/sum(eigen_centrality(g)$vector))
       bi_matrix[i,names(w)] <- w
     }
   }
@@ -316,7 +329,8 @@ getDocTopicBipartiteMatrix <- function(doc_member,topic_member,method = "Moore-P
   calSimilarity.cos <- function(){
     t(apply(doc_member,1,FUN = function(doc){doc/sqrt(sum(doc^2))})) %*% t(apply(topic_member,2,FUN = function(topic){topic/sqrt(sum(topic^2))}))
   }
-  doc_member <- doc_member[,colnames(doc_member) %in% colnames(topic_member)]
+  doc_member <- as.matrix(doc_member[,colnames(doc_member) %in% colnames(topic_member)])
+  topic_member <- as.matrix(topic_member)
   M <- switch(method,
               "Moore-Penrose" = calGeneralizedInverseMatrix(),
               "Transpose" = calTransposMatrix(),
@@ -324,6 +338,7 @@ getDocTopicBipartiteMatrix <- function(doc_member,topic_member,method = "Moore-P
   if(scaling){
     M <- t(scale(t(M),center = F,scale = T)) 
   }
+  M <- M/rowSums(M)
   M
 }
 getCommunityMemberBipartiteMatrix <- function(edge_community_df, weight = "degree"){

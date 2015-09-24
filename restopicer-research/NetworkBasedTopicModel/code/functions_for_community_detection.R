@@ -29,28 +29,33 @@ clique.percolation.community <- function(graph, k, threshold = 1) {
 }
 linkcomm.percolation.community <- function(g_edgelist,bipartite=FALSE,dist=NULL,threshold=0.5){
   lc <- getLinkCommunities(g_edgelist,hcmethod="average",bipartite=bipartite,dist = dist,plot = F)
-  community_member_list <- lapply(split(lc$nodeclusters$node,f = lc$nodeclusters$cluster),FUN = function(x){unlist(as.character(x))})
-  comm_pair <- c()
-  for (i in 1:length(community_member_list)) {
-    for (j in i:length(community_member_list)) {
-      comm_i <- community_member_list[[i]]
-      comm_j <- community_member_list[[j]]
-      num_support <- length(intersect(comm_i,comm_j))
-      num_anti_i <- length(setdiff(comm_i,comm_j))
-      num_anti_j <- length(setdiff(comm_j,comm_i))
-      # method A: num_support/max(num_anti_i,num_anti_j) >= threshold
-      # method B: num_support/(num_anti_i+num_anti_j) >= threshold
-      if ( num_support/max(num_anti_i,num_anti_j) >= threshold ) {
-        comm_pair <- c(comm_pair, c(i,j))
+  if(bipartite){
+    
+  }else{
+    community_member_list <- lapply(split(lc$nodeclusters$node,f = lc$nodeclusters$cluster),FUN = function(x){unlist(as.character(x))})
+    comm_pair <- c()
+    for (i in 1:length(community_member_list)) {
+      for (j in i:length(community_member_list)) {
+        comm_i <- community_member_list[[i]]
+        comm_j <- community_member_list[[j]]
+        num_support <- length(intersect(comm_i,comm_j))
+        num_anti_i <- length(setdiff(comm_i,comm_j))
+        num_anti_j <- length(setdiff(comm_j,comm_i))
+        # method A: num_support/max(num_anti_i,num_anti_j) >= threshold
+        # method B: num_support/(num_anti_i+num_anti_j) >= threshold
+        if ( num_support/max(num_anti_i,num_anti_j) >= threshold ) {
+          comm_pair <- c(comm_pair, c(i,j))
+        }
       }
     }
+    linkcomm.graph <- simplify(graph(comm_pair,directed = F))
+    V(linkcomm.graph)$name <- seq_len(vcount(linkcomm.graph))
+    comm_comps <- decompose.graph(linkcomm.graph)
+    result <- lapply(comm_comps, function(x) {
+      unique(unlist(community_member_list[ V(x)$name ]))
+    })
   }
-  linkcomm.graph <- simplify(graph(comm_pair,directed = F))
-  V(linkcomm.graph)$name <- seq_len(vcount(linkcomm.graph))
-  comm_comps <- decompose.graph(linkcomm.graph)
-  lapply(comm_comps, function(x) {
-    unique(unlist(community_member_list[ V(x)$name ]))
-  })
+  return(result)
 }
 largeScaleCommunity <- function(g,mode="all"){
   V(g)$group <- as.character(V(g))
