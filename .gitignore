@@ -42,3 +42,8 @@ restopicer-research/NetworkBasedTopicModel/temp
 restopicer-research/NetworkBasedTopicModel/linkcomm_diss
 restopicer-research/NetworkBasedTopicModel/rdata/research_20Year_1994_2013_10magazines.RData
 restopicer-research/NetworkBasedTopicModel/rdata/research2013_10magzines.RData
+restopicer-research/NetworkBasedTopicModel/rdata/tmp/fc.RData
+restopicer-research/NetworkBasedTopicModel/rdata/result_LDA_keywords_gibbs.RData
+restopicer-research/NetworkBasedTopicModel/rdata/result_LDA_abstarct_VEM.RData
+restopicer-research/NetworkBasedTopicModel/rdata/result_LDA_abstarct_gibbs.RData
+restopicer-research/NetworkBasedTopicModel/rdata/result_LDA_keywords_VEM.RData
