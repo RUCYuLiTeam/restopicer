@@ -15,47 +15,13 @@ plotPath="output/research"
 addPersistentObjects("plotPath")
 #####
 # experiment BEGIN
-# method:LDA
-# parameter:
-## datatype: abstract
-## K: 10
-## LDA_method: Gibbs
 #####
-rmTempObject()
-result_A <- topicDiscovery.LDA(data = researchPapers,datatype = "abstract",K = 10,LDA_method = "Gibbs",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory)
-save(result_A,file = "rdata/result_A.RData")
-#####
-# method:LDA
-# parameter:
-## datatype: keywords
-## K: 10
-## LDA_method: Gibbs
-#####
-rmTempObject()
-result_B <- topicDiscovery.LDA(data = researchPapersKeywords,datatype = "keywords",K = 10,LDA_method = "Gibbs",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory)
-save(result_B,file = "rdata/result_B.RData")
-#####
-# method:fastgreedy
-# parameter:
-## datatype: keywords
-## network_backbone_extract: FALSE -> MST_Threshold: 0
-## topic_term_weight: degree
-## doc_topic_method: similarity.cos
-#####
-rmTempObject()
-result_C <- topicDiscovery.fastgreedy(data = researchPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory)
-save(result_C,file = "rdata/result_C.RData")
-#####
-# method:co_linkcomm
-# parameter:
-## datatype: keywords
-## network_backbone_extract(MST_Threshold method): FULL
-## topic_term_weight: degree
-## doc_topic_method: similarity.cos
-#####
-rmTempObject()
-result_D <- topicDiscovery.linkcomm(data = researchPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
-save(result_D,file = "rdata/result_D.RData")
+### LDA abstarct
+### LDA Keywords
+### fastgreedy keywords
+### co_linkcomm keywords
+
+
 #####
 # method:co_linkcomm.percolation
 # parameter:
@@ -65,19 +31,8 @@ save(result_D,file = "rdata/result_D.RData")
 ## doc_topic_method: similarity.cos
 #####
 rmTempObject()
-result_E <- topicDiscovery.linkcomm.percolation(data = researchPapersKeywords,datatype = "keywords",MST_Threshold = 0,percolation_threshold=0.5,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
+result_E <- topicDiscovery.linkcomm.percolation(data = researchPapersKeywords,datatype = "keywords",MST_Threshold = 0,percolation_threshold=0.1,topic_term_weight = "degree",doc_topic_method = "similarity.cos",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
 save(result_E,file = "rdata/result_E.RData")
-#####
-# method:co_linkcomm
-# parameter:
-## datatype: keywords
-## network_backbone_extract(MST_Threshold method): FULL
-## topic_term_weight: degree
-## doc_topic_method: Moore-Penrose
-#####
-rmTempObject()
-result_F <- topicDiscovery.linkcomm(data = researchPapersKeywords,datatype = "keywords",MST_Threshold = 0,topic_term_weight = "degree",doc_topic_method = "Moore-Penrose",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
-save(result_F,file = "rdata/result_F.RData")
 #####
 # method:bi_linkcomm
 # parameter:

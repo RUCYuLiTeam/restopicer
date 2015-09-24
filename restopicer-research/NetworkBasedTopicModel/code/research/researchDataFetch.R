@@ -25,7 +25,7 @@ dbListFields(conn, "paper_reference")## very useful
 # research
 # generate research data for model explaination (small size)
 #####
-magazines <- c("MIS QUARTERLY","INFORMATION SYSTEMS RESEARCH","MANAGEMENT SCIENCE",
+magazines <- c("MIS QUARTERLY","INFORMATION SYSTEMS RESEARCH","INFORMATION & MANAGEMENT",
                "DECISION SUPPORT SYSTEMS","ACM TRANSACTIONS ON INFORMATION SYSTEMS")
 from_year <- 2013
 to_year <- 2013
