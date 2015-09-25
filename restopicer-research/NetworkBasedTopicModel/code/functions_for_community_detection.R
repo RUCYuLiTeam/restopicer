@@ -8,7 +8,7 @@
 # http://igraph.wikidot.com/community-detection-in-r
 # g <- sample_gnp(100, 0.3)
 # k <- 6
-clique.percolation.community <- function(graph, k, threshold = 1) {
+clique.percolation.community <- function(graph, k, threshold = 1,cutat=NULL) {
   clq <- cliques(graph, min=k, max=k)
   edges <- c()
   for (i in 1:length(clq)) {
@@ -27,33 +27,68 @@ clique.percolation.community <- function(graph, k, threshold = 1) {
     unique(unlist(clq[ V(x)$name ]))
   })
 }
-linkcomm.percolation.community <- function(g_edgelist,bipartite=FALSE,dist=NULL,threshold=0.5){
-  lc <- getLinkCommunities(g_edgelist,hcmethod="average",bipartite=bipartite,dist = dist,plot = F)
+linkcomm.percolation.community <- function(g_edgelist,bipartite=FALSE,dist=NULL,threshold=0.5,cutat=NULL){
+  if(file.exists("rdata/tmp/lc.RData")){
+    load(file = "rdata/tmp/lc.RData")
+  }else{
+    lc <- getLinkCommunities(g_edgelist,hcmethod="average",bipartite=bipartite,dist = dist,plot = F)
+    save(lc,file = "rdata/tmp/lc.RData")
+  }
   if(bipartite){
     
   }else{
     community_member_list <- lapply(split(lc$nodeclusters$node,f = lc$nodeclusters$cluster),FUN = function(x){unlist(as.character(x))})
-    comm_pair <- c()
-    for (i in 1:length(community_member_list)) {
-      for (j in i:length(community_member_list)) {
-        comm_i <- community_member_list[[i]]
-        comm_j <- community_member_list[[j]]
-        num_support <- length(intersect(comm_i,comm_j))
-        num_anti_i <- length(setdiff(comm_i,comm_j))
-        num_anti_j <- length(setdiff(comm_j,comm_i))
-        # method A: num_support/max(num_anti_i,num_anti_j) >= threshold
-        # method B: num_support/(num_anti_i+num_anti_j) >= threshold
-        if ( num_support/max(num_anti_i,num_anti_j) >= threshold ) {
-          comm_pair <- c(comm_pair, c(i,j))
+    if(file.exists("rdata/tmp/lc_percolation_sim.RData")){
+      load(file = "rdata/tmp/lc_percolation_sim.RData")
+    }else{
+      comm_pair_df <- data.frame()
+      for (i in 1:length(community_member_list)) {
+        for (j in i:length(community_member_list)) {
+          comm_i <- community_member_list[[i]]
+          comm_j <- community_member_list[[j]]
+          num_support <- length(intersect(comm_i,comm_j))
+          num_anti_i <- length(setdiff(comm_i,comm_j))
+          num_anti_j <- length(setdiff(comm_j,comm_i))
+          # method A: num_support/max(num_anti_i,num_anti_j) >= threshold used
+          # method B: num_support/(num_anti_i+num_anti_j) >= threshold
+          sim=num_support/max(num_anti_i,num_anti_j)
+          if(sim>0)comm_pair_df <- rbind(comm_pair_df,data.frame(i,j,sim))
         }
       }
+      save(comm_pair_df,file = "rdata/tmp/lc_percolation_sim.RData")
     }
-    linkcomm.graph <- simplify(graph(comm_pair,directed = F))
-    V(linkcomm.graph)$name <- seq_len(vcount(linkcomm.graph))
-    comm_comps <- decompose.graph(linkcomm.graph)
-    result <- lapply(comm_comps, function(x) {
-      unique(unlist(community_member_list[ V(x)$name ]))
-    })
+    if(is.null(cutat)){
+      linkcomm.graph <- simplify(graph_from_edgelist(as.matrix(comm_pair_df[comm_pair_df$sim >= threshold,c("i","j")]),directed = F))
+      V(linkcomm.graph)$name <- seq_len(vcount(linkcomm.graph))
+      comm_comps <- decompose.graph(linkcomm.graph)
+      result <- lapply(comm_comps, function(x) {
+        unique(unlist(community_member_list[ V(x)$name ]))
+      })
+    }else{
+      result <- community_member_list
+      if(length(community_member_list)<=cutat)return(result)
+      rm_list <- c()
+      for(step in 1:(length(community_member_list)-cutat)){
+        comm_pair_df <- comm_pair_df[comm_pair_df$sim!=Inf,]
+        c_pair <- comm_pair_df[which.max(comm_pair_df$sim)[1],]
+        result[[c_pair$i]] <- unique(unlist(result[c(c_pair$i,c_pair$j)]))
+        rm_list <- c(rm_list,c_pair$j)
+        # fix similarity
+        comm_pair_df <- comm_pair_df[!(comm_pair_df$i %in% c(c_pair$i,c_pair$j))|(comm_pair_df$j %in% c(c_pair$i,c_pair$j)),]
+        i <- c_pair$i
+        for (j in 1:length(result)) {
+          if(result[[j]] %in% rm_list)next
+          comm_i <- result[[i]]
+          comm_j <- result[[j]]
+          num_support <- length(intersect(comm_i,comm_j))
+          num_anti_i <- length(setdiff(comm_i,comm_j))
+          num_anti_j <- length(setdiff(comm_j,comm_i))
+          sim=num_support/max(num_anti_i,num_anti_j)
+          if(sim>0)comm_pair_df <- rbind(comm_pair_df,data.frame(i,j,sim))
+        }
+      }
+      result <- result[-rm_list]
+    }
   }
   return(result)
 }

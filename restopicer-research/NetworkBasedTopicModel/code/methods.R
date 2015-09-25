@@ -62,9 +62,9 @@ topicDiscovery.fastgreedy <- function(data,datatype="keywords",MST_Threshold=0,K
     load(file = "rdata/tmp/fc.RData")
   }else{
     fc <- fastgreedy.community(coterm_graph)
-    if(K!=0){fc$membership<-cutat(fc,no=K)}
     save(fc,file = "rdata/tmp/fc.RData")
   }
+  if(K!=0){fc$membership<-cutat(fc,no=K)}
   community_member_list <- communities(fc)
   # step 4:doc_topic and topic_term matrix through community_member_list
   # generate topic-term matrix through community
@@ -119,7 +119,12 @@ topicDiscovery.linkcomm <- function(data,datatype="keywords",MST_Threshold=0,cut
   if(link_similarity_method!="original"){
     
   }
-  lc <- getLinkCommunities(coterm_edgelist,hcmethod="average",bipartite=F,dist = dist,plot = F)
+  if(file.exists("rdata/tmp/lc.RData")){
+    load(file = "rdata/tmp/lc.RData")
+  }else{
+    lc <- getLinkCommunities(coterm_edgelist,hcmethod="average",bipartite=F,dist = dist,plot = F)
+    save(lc,file = "rdata/tmp/lc.RData")
+  }
   if(!is.null(cutat)){
     lc <- newLinkCommsAt(lc, cutat = cutat)
   }
@@ -154,7 +159,7 @@ topicDiscovery.linkcomm <- function(data,datatype="keywords",MST_Threshold=0,cut
   result$linkcomm<-comm_member.communitytest(community_member_list,bi_data_df = data,coterm_graph,papers_tags_df)
   return(result)
 }
-topicDiscovery.linkcomm.percolation <- function(data,datatype="keywords",MST_Threshold=0,percolation_threshold=0.5,
+topicDiscovery.linkcomm.percolation <- function(data,datatype="keywords",MST_Threshold=0,percolation_threshold=0.5,cutat = NULL,
                                     topic_term_weight="degree",doc_topic_method="similarity.cos",
                                     plotPath="output/demo",plotReport=TRUE,papers_tags_df=NULL,link_similarity_method="original"){
   # step 1:preprocessing corpus and get bipartite from incidence matrix
@@ -177,7 +182,7 @@ topicDiscovery.linkcomm.percolation <- function(data,datatype="keywords",MST_Thr
   if(link_similarity_method!="original"){
     
   }
-  community_member_list <- linkcomm.percolation.community(g_edgelist = coterm_edgelist,bipartite = F,dist = dist,threshold = percolation_threshold)
+  community_member_list <- linkcomm.percolation.community(g_edgelist = coterm_edgelist,bipartite = F,dist = dist,threshold = percolation_threshold,cutat = cutat)
   # step 4:doc_topic and topic_term matrix through community_member_list
   # generate topic-term matrix through community
   topic_term <- getTopicMemberBipartiteMatrix(community_member_list,weight = topic_term_weight,graph = coterm_graph)
@@ -186,7 +191,11 @@ topicDiscovery.linkcomm.percolation <- function(data,datatype="keywords",MST_Thr
   # step 5:plot Report
   model <- NULL
   # filenames and foldername
-  model$parameter <- paste(datatype,"linkcomm.percolation",MST_Threshold,percolation_threshold,link_similarity_method,topic_term_weight,doc_topic_method,sep = "_")
+  if(is.null(cutat)){
+    model$parameter <- paste(datatype,"linkcomm.percolation",MST_Threshold,percolation_threshold,link_similarity_method,topic_term_weight,doc_topic_method,sep = "_")
+  }else{
+    model$parameter <- paste(datatype,"linkcomm.percolation",MST_Threshold,percolation_threshold,cutat,link_similarity_method,topic_term_weight,doc_topic_method,sep = "_")
+  }
   #entropy
   model$entropy <- mean(apply(doc_topic,1,function(z) -sum(ifelse(z==0,0,z*log(z)))))
   # folder
