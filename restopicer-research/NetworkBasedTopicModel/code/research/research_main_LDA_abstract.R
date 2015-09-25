@@ -1,17 +1,39 @@
+rm(list = ls(envir = globalenv()))
+# not forget setwd("F:/Desktop/restopicer/restopicer-research/NetworkBasedTopicModel")
+#####
+# required data
+#####
+load(file = "rdata/research2013.RData")
+#load(file = "rdata/research_20Y_1994_2013.RData")
+# if no data, pls run
+# source("code/research/researchDataFetch.R")
+#####
+# required methods
+#####
+source("code/methods.R")
+foldername <- "research2013"
+plotPath=paste("output",foldername,sep="/")
+addPersistentObjects("plotPath")
+addPersistentObjects("foldername")
 #####
 # method:LDA
 # parameter:
 ## datatype: abstract
-## K: best 50 (we test 10,20,30,50,100,150)
+## K: best 50 (we test from = 10,to = 100,by = 10)
 ## LDA_method: Gibbs/VEM
 #####
 rmTempObject()
-result_LDA_abstarct_gibbs <- topicDiscovery.LDA(data = researchPapers,datatype = "abstract",K = 50,LDA_method = "Gibbs",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory)
-save(result_LDA_abstarct_gibbs,file = "rdata/result_LDA_abstarct_gibbs.RData")
-result_LDA_abstarct_VEM <- topicDiscovery.LDA(data = researchPapers,datatype = "abstract",K = 50,LDA_method = "VEM",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory)
-save(result_LDA_abstarct_VEM,file = "rdata/result_LDA_abstarct_VEM.RData")
-### LDA abstarct
-load("rdata/result_LDA_abstarct_gibbs.RData")
+result0 <- NULL
+for(k in seq(from = 10,to = 100,by = 10)){
+  result <- topicDiscovery.LDA(data = researchPapers,datatype = "abstract",K = k,LDA_method = "Gibbs",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory)
+  if(is.null(result0)||(result$model$perplexity<=result0$model$perplexity)){
+    result0 <- result
+  }
+}
+result_LDA_abstarct_gibbs <- result0
+save(result_LDA_abstarct_gibbs,file = paste("rdata",foldername,"result_LDA_abstarct_gibbs.RData",sep="/"))
+# analysis
+load(paste("rdata",foldername,"result_LDA_abstarct_gibbs.RData",sep="/"))
 # doc_topic.taggingtest
 result <- result_LDA_abstarct_gibbs
 doc_topic <- result$doc_topic
