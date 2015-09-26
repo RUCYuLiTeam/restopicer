@@ -336,7 +336,7 @@ getDocTopicBipartiteMatrix <- function(doc_member,topic_member,method = "Moore-P
     doc_member %*% t(topic_member)
   }
   calSimilarity.cos <- function(){
-    t(apply(doc_member,1,FUN = function(doc){doc/sqrt(sum(doc^2))})) %*% t(apply(topic_member,2,FUN = function(topic){topic/sqrt(sum(topic^2))}))
+    t(apply(doc_member,1,FUN = function(doc){doc/sqrt(sum(doc^2))})) %*% apply(topic_member,1,FUN = function(topic){topic/sqrt(sum(topic^2))})
   }
   doc_member <- as.matrix(doc_member[,colnames(doc_member) %in% colnames(topic_member)])
   topic_member <- as.matrix(topic_member)
