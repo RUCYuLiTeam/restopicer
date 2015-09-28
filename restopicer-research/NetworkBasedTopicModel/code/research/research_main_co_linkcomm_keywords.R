@@ -3,15 +3,15 @@ rm(list = ls(envir = globalenv()))
 #####
 # required data
 #####
-#load(file = "rdata/research2013.RData")
-load(file = "rdata/research_20Y_1994_2013.RData")
+load(file = "rdata/research2013.RData")
+#load(file = "rdata/research_20Y_1994_2013.RData")
 # if no data, pls run
 # source("code/research/researchDataFetch.R")
 #####
 # required methods
 #####
 source("code/methods.R")
-foldername <- "research_20Y"
+foldername <- "research2013_2"
 plotPath=paste("output",foldername,sep="/")
 addPersistentObjects("plotPath")
 addPersistentObjects("foldername")
@@ -49,6 +49,20 @@ for(cutat in c(20,40,60,80,100)){
   save(result_linkcomm.percolation_evcent_cos,result_linkcomm.percolation_evcent_ginv,
        file = paste("rdata/",foldername,"/result_linkcomm_cutat=",cutat,"_percolation.RData",sep=""))
 }
+# analysis
+load("rdata/research2013/result_linkcomm_th=0.15_percolation.RData")
+# doc_topic.taggingtest
+result <- result_linkcomm.percolation_evcent_cos
+doc_topic <- result$doc_topic
+papers_tags_df <- researchPapersSubjectCategory
+parameter <- result$model$parameter
+doc_topic.taggingtest(doc_topic,papers_tags_df,filename = parameter,path = paste(plotPath,parameter,"LeaveOneOut",sep = "/"),LeaveOneOut = T)
+# doc_topic.taggingtest
+result <- result_linkcomm.percolation_evcent_ginv
+doc_topic <- result$doc_topic
+papers_tags_df <- researchPapersSubjectCategory
+parameter <- result$model$parameter
+doc_topic.taggingtest(doc_topic,papers_tags_df,filename = parameter,path = paste(plotPath,parameter,"LeaveOneOut",sep = "/"),LeaveOneOut = T)
 #####
 # END
 #####

@@ -147,17 +147,23 @@ doc.tagging.test <- function(taggingtest_data,filename,path = "output/", LeaveOn
       AUC <- ROC_plot$auc
       # prc : precision/recall curve
       PRC_plot <- ROC_plot
-      PRC_precision <- performance(prediction(predictions = result$fitted.values,labels = result$real.y),"prec")
+      PRC_prec_rec <- performance(prediction(predictions = result$fitted.values,labels = result$real.y),"prec","rec")
       #specificities
-      PRC_plot$specificities <- PRC_plot$recall <- ROC_plot$sensitivities
+      #PRC_plot$recall <- ROC_plot$sensitivities
+      PRC_plot$recall <- na.fill(PRC_prec_rec@x.values[[1]] * 100,fill = 0)
+      PRC_plot$specificities <- PRC_plot$recall
       #sensitivities
-      PRC_plot$sensitivities <- PRC_plot$precision <- na.fill(PRC_precision@y.values[[1]] * 100,fill = 1)
+      PRC_plot$precision <- na.fill(PRC_prec_rec@y.values[[1]] * 100,fill = 1)
+      PRC_plot$sensitivities <- PRC_plot$precision
       png(file.path(path,paste(type,"PRC.png",sep="-")),width=500,height=500)
       par(mar=c(5,4,4,2))
       plot(PRC_plot,main=type,cex.main=1,max.auc.polygon=T,grid=T,
            asp=1,mar=c(4, 4, 2, 2)+.1,mgp=c(2.5, 1, 0),
            col=par("col"),lty=par("lty"),lwd=2,type="l",
            xlab="Recall (%)",ylab="Precision (%)",xlim=c(0,100),ylim=c(0,100))
+      lines(x = c(0,100),y = c(0,100))
+      min_pos <- which.min(abs(PRC_prec_rec@x.values[[1]]-PRC_prec_rec@y.values[[1]]))
+      points(x=PRC_plot$recall[min_pos],y=PRC_plot$precision[min_pos],pch=16,lwd=5,col="red")
       dev.off()
     }
     result.measure <- data.frame(filename,tagging.type=type,
