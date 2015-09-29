@@ -11,7 +11,7 @@ load(file = "rdata/research2013.RData")
 # required methods
 #####
 source("code/methods.R")
-foldername <- "research2013_2"
+foldername <- "research2013"
 plotPath=paste("output",foldername,sep="/")
 addPersistentObjects("plotPath")
 addPersistentObjects("foldername")

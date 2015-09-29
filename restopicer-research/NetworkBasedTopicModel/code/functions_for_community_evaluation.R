@@ -162,8 +162,8 @@ doc.tagging.test <- function(taggingtest_data,filename,path = "output/", LeaveOn
            col=par("col"),lty=par("lty"),lwd=2,type="l",
            xlab="Recall (%)",ylab="Precision (%)",xlim=c(0,100),ylim=c(0,100))
       lines(x = c(0,100),y = c(0,100))
-      min_pos <- which.min(abs(PRC_prec_rec@x.values[[1]]-PRC_prec_rec@y.values[[1]]))
-      points(x=PRC_plot$recall[min_pos],y=PRC_plot$precision[min_pos],pch=16,lwd=5,col="red")
+      ##min_pos <- which.min(abs(PRC_prec_rec@x.values[[1]]-PRC_prec_rec@y.values[[1]]))
+      ##points(x=PRC_plot$recall[min_pos],y=PRC_plot$precision[min_pos],pch=16,lwd=5,col="red")
       dev.off()
     }
     result.measure <- data.frame(filename,tagging.type=type,
