@@ -31,7 +31,7 @@ topicDiscovery.LDA <- function(data,datatype="abstract",
   if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
   write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,"modeltest.txt"),quote = F,sep = "\t",row.names = F,col.names = T)
   # doc_topic for taggingtest
-  doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
+  doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = T)
   if(plotReport){
     # matrix plot
     plotReport.bipartite.matrix(corpus_dtm,topic_term,doc_topic,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"))
@@ -83,7 +83,7 @@ topicDiscovery.fastgreedy <- function(data,datatype="keywords",MST_Threshold=0,K
   if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
   write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,"modeltest.txt"),quote = F,sep = "\t",row.names = F,col.names = T)
   # doc_topic for taggingtest
-  doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
+  doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = T)
   if(plotReport){
     # matrix plot
     plotReport.bipartite.matrix(corpus_dtm,topic_term,doc_topic,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),drawNetwork=T,coterm_graph=coterm_graph,community_member_list=community_member_list)
@@ -146,7 +146,7 @@ topicDiscovery.linkcomm <- function(data,datatype="keywords",MST_Threshold=0,cut
   if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
   write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,"modeltest.txt"),quote = F,sep = "\t",row.names = F,col.names = T)
   # doc_topic for taggingtest
-  doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
+  doc_topic.taggingtest(doc_topic = doc_topic,papers_tags_df = papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = T)
   if(plotReport){
     # matrix plot
     plotReport.bipartite.matrix(corpus_dtm,topic_term,doc_topic,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),drawNetwork=T,coterm_graph=coterm_graph,community_member_list=community_member_list)
@@ -202,7 +202,7 @@ topicDiscovery.linkcomm.percolation <- function(data,datatype="keywords",MST_Thr
   if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
   write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,"modeltest.txt"),quote = F,sep = "\t",row.names = F,col.names = T)
   # doc_topic for taggingtest
-  doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
+  doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = T)
   if(plotReport){
     # matrix plot
     plotReport.bipartite.matrix(corpus_dtm,topic_term,doc_topic,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),drawNetwork=T,coterm_graph=coterm_graph,community_member_list=community_member_list)
@@ -247,7 +247,7 @@ topicDiscovery.linkcomm.bipartite <- function(data,datatype="keywords",weight="d
   if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
   write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,"modeltest.txt"),quote = F,sep = "\t",row.names = F,col.names = T)
   # doc_topic for taggingtest
-  doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = F)
+  doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = T)
   if(plotReport){
     # matrix plot
     plotReport.bipartite.matrix(corpus_dtm,topic_term,doc_topic,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),drawNetwork=F,coterm_graph=NULL,community_member_list=NULL,bipartite=T,edge_community_df=edge_community_df)
@@ -384,7 +384,7 @@ plotReport.bipartite.matrix <- function(corpus_dtm,topic_term,doc_topic,filename
 #####
 # document tagging test for doc_topic
 #####
-doc_topic.taggingtest <- function(doc_topic,papers_tags_df,filename,path,LeaveOneOut = FALSE){
+doc_topic.taggingtest <- function(doc_topic,papers_tags_df=NULL,filename,path,LeaveOneOut = FALSE){
   taggingtest_doc_topic <- cbind(item_ut=rownames(doc_topic),as.data.frame(doc_topic))
   taggingtest_doc_sc <- unique(papers_tags_df[,c("item_ut","subject_category")])
   taggingtest_data <- merge(taggingtest_doc_topic, taggingtest_doc_sc)

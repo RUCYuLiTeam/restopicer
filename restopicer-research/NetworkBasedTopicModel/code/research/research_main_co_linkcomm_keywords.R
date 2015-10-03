@@ -33,33 +33,18 @@ save(result_linkcomm_evcent_cos,file = paste("rdata/",foldername,"/result_linkco
 ## doc_topic_method: cos/ginv
 #####
 rmTempObject()
-for(th in seq(from = 0.05,to = 0.30,by = 0.05)){
+for(th in seq(from = 0.05,to = 1.00,by = 0.05)){
   result_linkcomm.percolation_evcent_cos <- topicDiscovery.linkcomm.percolation(data = researchPapersKeywords,datatype = "keywords",MST_Threshold = 0,percolation_threshold=th,cutat = NULL,topic_term_weight = "evcent",doc_topic_method = "similarity.cos",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
-  result_linkcomm.percolation_evcent_ginv <- topicDiscovery.linkcomm.percolation(data = researchPapersKeywords,datatype = "keywords",MST_Threshold = 0,percolation_threshold=th,cutat = NULL,topic_term_weight = "evcent",doc_topic_method = "Moore-Penrose",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
-  save(result_linkcomm.percolation_evcent_cos,result_linkcomm.percolation_evcent_ginv,
+  save(result_linkcomm.percolation_evcent_cos,
        file = paste("rdata/",foldername,"/result_linkcomm_th=",th,"_percolation.RData",sep=""))
 }
-rmTempObject()
-for(cutat in c(20,40,60,80,100)){
-  result_linkcomm.percolation_evcent_cos <- topicDiscovery.linkcomm.percolation(data = researchPapersKeywords,datatype = "keywords",MST_Threshold = 0,percolation_threshold=0,cutat = cutat,topic_term_weight = "evcent",doc_topic_method = "similarity.cos",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
-  result_linkcomm.percolation_evcent_ginv <- topicDiscovery.linkcomm.percolation(data = researchPapersKeywords,datatype = "keywords",MST_Threshold = 0,percolation_threshold=0,cutat = cutat,topic_term_weight = "evcent",doc_topic_method = "Moore-Penrose",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
-  save(result_linkcomm.percolation_evcent_cos,result_linkcomm.percolation_evcent_ginv,
-       file = paste("rdata/",foldername,"/result_linkcomm_cutat=",cutat,"_percolation.RData",sep=""))
-}
-# analysis
-load("rdata/research2013/result_linkcomm_th=0.15_percolation.RData")
-# doc_topic.taggingtest
-result <- result_linkcomm.percolation_evcent_cos
-doc_topic <- result$doc_topic
-papers_tags_df <- researchPapersSubjectCategory
-parameter <- result$model$parameter
-doc_topic.taggingtest(doc_topic,papers_tags_df,filename = parameter,path = paste(plotPath,parameter,"LeaveOneOut",sep = "/"),LeaveOneOut = T)
-# doc_topic.taggingtest
-result <- result_linkcomm.percolation_evcent_ginv
-doc_topic <- result$doc_topic
-papers_tags_df <- researchPapersSubjectCategory
-parameter <- result$model$parameter
-doc_topic.taggingtest(doc_topic,papers_tags_df,filename = parameter,path = paste(plotPath,parameter,"LeaveOneOut",sep = "/"),LeaveOneOut = T)
+# rmTempObject()
+# for(cutat in c(20,40,60,80,100)){
+#   result_linkcomm.percolation_evcent_cos <- topicDiscovery.linkcomm.percolation(data = researchPapersKeywords,datatype = "keywords",MST_Threshold = 0,percolation_threshold=0,cutat = cutat,topic_term_weight = "evcent",doc_topic_method = "similarity.cos",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
+#   result_linkcomm.percolation_evcent_ginv <- topicDiscovery.linkcomm.percolation(data = researchPapersKeywords,datatype = "keywords",MST_Threshold = 0,percolation_threshold=0,cutat = cutat,topic_term_weight = "evcent",doc_topic_method = "Moore-Penrose",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
+#   save(result_linkcomm.percolation_evcent_cos,result_linkcomm.percolation_evcent_ginv,
+#        file = paste("rdata/",foldername,"/result_linkcomm_cutat=",cutat,"_percolation.RData",sep=""))
+# }
 #####
 # END
 #####
