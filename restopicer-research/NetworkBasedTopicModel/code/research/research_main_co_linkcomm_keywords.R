@@ -3,15 +3,14 @@ rm(list = ls(envir = globalenv()))
 #####
 # required data
 #####
-load(file = "rdata/research2013.RData")
-#load(file = "rdata/research_20Y_1994_2013.RData")
+load(file = "rdata/research_2011_2013.RData")
 # if no data, pls run
-# source("code/research/researchDataFetch.R")
+# fetchdata(from_year = 2009,to_year = 2013)
 #####
 # required methods
 #####
 source("code/methods.R")
-foldername <- "research2013"
+foldername <- "research_2011_2013"
 plotPath=paste("output",foldername,sep="/")
 addPersistentObjects("plotPath")
 addPersistentObjects("foldername")
@@ -24,9 +23,7 @@ addPersistentObjects("foldername")
 #####
 rmTempObject()
 result_linkcomm_evcent_cos <- topicDiscovery.linkcomm(data = researchPapersKeywords,datatype = "keywords",MST_Threshold = 0,cutat = NULL,topic_term_weight = "evcent",doc_topic_method = "similarity.cos",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
-result_linkcomm_evcent_ginv <- topicDiscovery.linkcomm(data = researchPapersKeywords,datatype = "keywords",MST_Threshold = 0,cutat = NULL,topic_term_weight = "evcent",doc_topic_method = "Moore-Penrose",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
-save(result_linkcomm_evcent_cos,result_linkcomm_evcent_ginv,
-     file = paste("rdata/",foldername,"/result_linkcomm.RData",sep=""))
+save(result_linkcomm_evcent_cos,file = paste("rdata/",foldername,"/result_linkcomm.RData",sep=""))
 #####
 # method:co_linkcomm.percolation
 # parameter:
