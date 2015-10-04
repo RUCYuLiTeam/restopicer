@@ -3,7 +3,7 @@ rm(list = ls(envir = globalenv()))
 #####
 # required data
 #####
-load(file = "rdata/research2013.RData")
+load(file = "rdata/research_3Y_2011_2013.RData")
 #load(file = "rdata/research_20Y_1994_2013.RData")
 # if no data, pls run
 # source("code/research/researchDataFetch.R")
@@ -11,7 +11,7 @@ load(file = "rdata/research2013.RData")
 # required methods
 #####
 source("code/methods.R")
-foldername <- "research2013"
+foldername <- "research_3Y_2011_2013_key"
 plotPath=paste("output",foldername,sep="/")
 addPersistentObjects("plotPath")
 addPersistentObjects("foldername")
