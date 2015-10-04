@@ -32,7 +32,7 @@ fetchdata <- function(from_year=1994,to_year=2013){
                  "INTERNATIONAL JOURNAL OF ELECTRONIC COMMERCE","JOURNAL OF ELECTRONIC COMMERCE RESEARCH")
 
   # select research papers from paper_with_issue
-  res <- dbSendQuery(conn, paste("SELECT * FROM paper_with_issue WHERE abstract <> '' AND publication_year >=",from_year,"AND publication_year <=",to_year,"AND full_source_title in","('",paste(magazines,collapse = "','"),"')",sep=" "))
+  res <- dbSendQuery(conn, paste("SELECT * FROM paper_with_issue WHERE abstract <> '' AND publication_year >= ",from_year," AND publication_year <= ",to_year," AND full_source_title in ","('",paste(magazines,collapse = "','"),"')",sep=""))
   researchPapers <- dbFetch(res,n = -1)
   dbClearResult(res)
   # select research papers-keywords from paper_keyword in research papers
