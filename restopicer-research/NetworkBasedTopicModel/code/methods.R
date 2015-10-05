@@ -454,11 +454,11 @@ comm_member.communitytest <- function(community_member_list,bi_data_df,coterm_gr
   df_doc_tag <- unique(papers_tags_df[,c("item_ut","subject_category")])
   member_tag_df <- merge(bi_data_df,df_doc_tag)[,c("author_keyword","subject_category")]
   # calculate community test indices
-  community.coverage<-calcommunity.coverage(community_term)
+  communitycoverage<-calcommunity.coverage(community_term)
   overlapcoverage<-caloverlap.coverage(community_term)
   communityquality<-calcommunity.quality(community_term,coterm_graph)
   overlapquality<-caloverlap.number.quality(community_member_list,member_tag_df)
-  return(c(community.coverage,overlapcoverage,communityquality,overlapquality))
+  return(c(communitycoverage,overlapcoverage,communityquality,overlapquality))
 }
 #####
 # required functions
