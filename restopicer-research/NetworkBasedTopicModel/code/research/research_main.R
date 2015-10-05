@@ -1,41 +1,18 @@
-
 #####
-# experiment BEGIN
+# experiment result analysis BEGIN
 #####
-### LDA abstarct
-### LDA Keywords
-### fastgreedy keywords
-### co_linkcomm keywords
-
-#####
-# method:bi_linkcomm
-# parameter:
-## datatype: keywords
-## weight: degree
-#####
-rmTempObject()
-result_G <- topicDiscovery.linkcomm.bipartite(data = researchPapersKeywords,datatype = "keywords",weight = "degree",plotPath = plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory,link_similarity_method="original")
-save(result_G,file = "rdata/result_G.RData")
-#####
-# method:co_linkcomm
-# parameter:
-## datatype: keywords
-## link similarity method: ?
-## topic_term_weight: degree
-## doc_topic_method: similarity.cos
-#####
-
-#####
-# *
-# experiment 7:keywords_bi_linkcomm_?
-# method:bi_linkcomm
-# parameter:
-## datatype: keywords
-## link similarity method: ?
-## topic_term_weight: degree
-## doc_topic_weight: degree
-#####
-
+source("code/methods.R")
+save(result_linkcomm,result_cnm,
+     result_linkcomm_0.1_percolation,
+     result_linkcomm_0.15_percolation,
+     result_linkcomm_0.2_percolation,
+     file = "rdata/research_2011_2013/myanalysis.RData")
+linkcomm <- result_linkcomm$linkcomm
+CNM <- result_cnm$fastgreedy
+linkcomm_0.1_percolation <- result_linkcomm_0.1_percolation$linkcomm
+linkcomm_0.15_percolation <- result_linkcomm_0.15_percolation$linkcomm
+linkcomm_0.2_percolation <- result_linkcomm_0.2_percolation$linkcomm
+plotCompositePerformance(linkcomm=linkcomm,linkcomm_0.2_percolation,linkcomm_0.15_percolation,linkcomm_0.1_percolation,CNM=CNM)
 #####
 # experiment END
 #####

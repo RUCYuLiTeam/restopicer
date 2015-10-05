@@ -190,7 +190,7 @@ plotCompositePerformance<- function(...){
           xlab="Methods",ylab="composite performance",
           col=c("red","yellow","green","blue"),
           space=0
-         # legend=rownames(comp_perfor),legend(cexv=0.5)
+          #legend=rownames(comp_perfor),legend(cexv=0.5)
          )
-  legend("topright",col=c("red","yellow","green","blue"),legend=rownames(comp_perfor),pch=15,bty=0,cex = 0.5,horiz = F)
+  legend("topright",col=c("red","yellow","green","blue"),legend=rownames(comp_perfor),pch=15,bty="n",cex = 0.5,horiz = F)
 }
