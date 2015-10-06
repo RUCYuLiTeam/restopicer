@@ -181,16 +181,23 @@ doc.tagging.test <- function(taggingtest_data,filename,path = "output/", LeaveOn
 #plot composite performance
 #install.packages("vcd")
 #library(vcd)
-plotCompositePerformance<- function(...){
+plotCompositePerformance<- function(filename,path = "output/",cols=c("red","yellow","green","blue"),...){
+  # folder
+  if(!file.exists(path)) dir.create(path,recursive = TRUE)
+  #calculation
   comp_perfor<-cbind(...)
   rownames(comp_perfor)<-c("commmunity coverage","overlap coverage","community quality","overlap quality")
   comp_perfor<- t(apply(comp_perfor,MARGIN = 1,function(x) x/max(x)))
+  #plot
+  png(file.path(path,paste(filename,"CompositePerformance.png",sep="-")),width=650,height=500)
+  par(mar=c(3,4,4,1))
   barplot(comp_perfor,border=FALSE,
-          main="Stacked Bar Plot",
-          xlab="Methods",ylab="composite performance",
-          col=c("red","yellow","green","blue"),
+          main="社区发现复合性能比较",
+          xlab="",ylab="复合性能(composite performance)",
+          col=cols,
           space=0
           #legend=rownames(comp_perfor),legend(cexv=0.5)
          )
-  legend("topright",col=c("red","yellow","green","blue"),legend=rownames(comp_perfor),pch=15,bty="n",cex = 0.5,horiz = F)
+  legend("topright",col= cols[length(cols):1],legend=rownames(comp_perfor)[length(rownames(comp_perfor)):1],cex=1.2,pch=15,bty="n",horiz = F)
+  dev.off()
 }
