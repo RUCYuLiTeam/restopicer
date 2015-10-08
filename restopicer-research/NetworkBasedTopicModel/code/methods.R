@@ -1,3 +1,4 @@
+#http://stats.stackexchange.com/questions/25007/fitting-the-parameters-of-a-stable-distribution
 #####
 # topic discovery
 #####
