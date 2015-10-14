@@ -1,3 +1,4 @@
+options(encoding = "UTF-8")
 #https://en.wikipedia.org/wiki/Community_structure#Minimum-cut_method
 #http://stats.stackexchange.com/questions/25007/fitting-the-parameters-of-a-stable-distribution
 #####

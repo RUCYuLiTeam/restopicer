@@ -1,4 +1,5 @@
 rm(list = ls(envir = globalenv()))
+options(encoding = "UTF-8")
 #####
 # experiment result analysis BEGIN
 #####
