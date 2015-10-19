@@ -95,25 +95,28 @@ linkcomm.percolation.community <- function(g_edgelist,bipartite=FALSE,dist=NULL,
   }
   return(result)
 }
-linkcomm.percolation.topic <- function(g_edgelist,bipartite=FALSE,dist=NULL,threshold=0.15,cutat=NULL){
+linkcomm.percolation <- function(g_edgelist,bipartite=FALSE,dist=NULL,threshold=0.15,cutat=NULL){
   if(file.exists("rdata/tmp/lc.RData")){
     load(file = "rdata/tmp/lc.RData")
   }else{
     lc <- getLinkCommunities(g_edgelist,hcmethod="average",bipartite=bipartite,dist = dist,plot = F)
     save(lc,file = "rdata/tmp/lc.RData")
   }
+  if(!is.null(cutat)){
+    lc <- newLinkCommsAt(lc, cutat = cutat)
+  }
   if(bipartite){
     
   }else{
-    community_member_list <- lapply(split(lc$nodeclusters$node,f = lc$nodeclusters$cluster),FUN = function(x){unlist(as.character(x))})
+    community_node_list <- lapply(split(lc$nodeclusters$node,f = lc$nodeclusters$cluster),FUN = function(x){unlist(as.character(x))})
     if(file.exists("rdata/tmp/lc_percolation_sim.RData")){
       load(file = "rdata/tmp/lc_percolation_sim.RData")
     }else{
       comm_pair_df <- data.frame()
-      for (i in 1:length(community_member_list)) {
-        for (j in i:length(community_member_list)) {
-          comm_i <- community_member_list[[i]]
-          comm_j <- community_member_list[[j]]
+      for (i in 1:length(community_node_list)) {
+        for (j in i:length(community_node_list)) {
+          comm_i <- community_node_list[[i]]
+          comm_j <- community_node_list[[j]]
           num_support <- length(intersect(comm_i,comm_j))
           num_anti_i <- length(setdiff(comm_i,comm_j))
           num_anti_j <- length(setdiff(comm_j,comm_i))
@@ -129,7 +132,7 @@ linkcomm.percolation.topic <- function(g_edgelist,bipartite=FALSE,dist=NULL,thre
     V(linkcomm.graph)$name <- seq_len(vcount(linkcomm.graph))
     comm_comps <- decompose.graph(linkcomm.graph)
     result <- lapply(comm_comps, function(x) {
-      unique(unlist(community_member_list[ V(x)$name ]))
+      unique(unlist(lc$clusters[ V(x)$name ]))
     })
   }
   return(result)

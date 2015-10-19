@@ -324,8 +324,8 @@ topicDiscovery.linkcomm.percolation <- function(data,datatype="keywords",MST_Thr
   return(result)
 }
 
-topicDiscovery.linktopic <- function(data,datatype="keywords",MST_Threshold=0,percolation_threshold=0.5,cutat = NULL,
-                                                topic_term_weight="degree",doc_topic_method="similarity.cos",
+topicDiscovery.linkcomm.percolation.new <- function(data,datatype="keywords",MST_Threshold=0,percolation_threshold=0.5,cutat = NULL,
+                                                topic_term_weight="evcent",doc_topic_method="similarity.cos",
                                                 plotPath="output/demo",plotReport=TRUE,papers_tags_df=NULL,link_similarity_method="original"){
   # step 1:preprocessing corpus and get bipartite from incidence matrix
   corpus_dtm <- switch(datatype,
@@ -347,10 +347,11 @@ topicDiscovery.linktopic <- function(data,datatype="keywords",MST_Threshold=0,pe
   if(link_similarity_method!="original"){
     
   }
-  community_member_list <- linkcomm.percolation.topic(g_edgelist = coterm_edgelist,bipartite = F,dist = dist,threshold = percolation_threshold,cutat = cutat)
+  #coterm_edgelist as edge id
+  community_member_list <- linkcomm.percolation(g_edgelist = coterm_edgelist,bipartite = F,dist = dist,threshold = percolation_threshold,cutat = cutat)
   # step 4:doc_topic and topic_term matrix through community_member_list
   # generate topic-term matrix through community
-  topic_term <- getTopicMemberBipartiteMatrix(community_member_list,weight = topic_term_weight,graph = coterm_graph)
+  topic_term <- getTopicMemberBipartiteMatrix(community_member_list,weight = topic_term_weight,graph = coterm_graph,memberType="edge")
   # calculate similarity to get doc-topic matrix
   doc_topic <- getDocTopicBipartiteMatrix(doc_member = corpus_dtm,topic_member = topic_term,method = doc_topic_method)
   # step 5:plot Report
@@ -477,20 +478,22 @@ preprocess.keywords.corpus <- function(papers_keywords_df){
 # for return matrix
 # return an topic-term or topic-edge bipartite matrix
 # community-membership or called Topic-Member bipartite matrix
-getTopicMemberBipartiteMatrix <- function(community_member_list, weight = "binary",graph=NULL){
-  member <- unlist(community_member_list,use.names = F)
-  community <- rep(1:length(community_member_list),times = unlist(lapply(community_member_list,FUN = length)))
-  bi_matrix <- table(community,member)
-  if(weight != "binary"){
-    for(i in 1:length(community_member_list)){
-      g <- delete.vertices(graph,names(V(graph))[!names(V(graph)) %in% community_member_list[[i]]])
-      w <- switch(EXPR = weight,
-                  "degree" = degree(g)/sum(degree(g)),
-                  "betweenness" = betweenness(g)/sum(betweenness(g)),
-                  "closeness" = closeness(g)/sum(closeness(g)),
-                  "evcent" = eigen_centrality(g)$vector/sum(eigen_centrality(g)$vector))
-      bi_matrix[i,names(w)] <- w
+getTopicMemberBipartiteMatrix <- function(community_member_list, weight = "binary",graph=NULL,memberType="vertex"){
+  bi_matrix <- matrix(data = 0,nrow = length(community_member_list),ncol = length(V(graph)),dimnames = c(list(1:length(community_member_list)),list(V(graph)$name)))
+  for(i in 1:length(community_member_list)){
+    if(memberType=="edge"){
+      g <- delete.edges(graph,E(graph)[!(E(graph) %in% community_member_list[[i]])])
     }
+    if(memberType=="vertex"){
+      g <- delete.vertices(graph,names(V(graph))[!(names(V(graph)) %in% community_member_list[[i]])])
+    }
+    w <- switch(EXPR = weight,
+                "binary" = rep(1,length(V(g))),
+                "degree" = degree(g)/sum(degree(g)),
+                "betweenness" = betweenness(g)/sum(betweenness(g)),
+                "closeness" = closeness(g)/sum(closeness(g)),
+                "evcent" = eigen_centrality(g)$vector/sum(eigen_centrality(g)$vector))
+    bi_matrix[i,names(w)] <- w
   }
   as.matrix(bi_matrix)
 }
