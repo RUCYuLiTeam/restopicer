@@ -22,5 +22,6 @@ searchLocation <- paste(es_location,"_search",sep = "/")
 relevent_N <- 5
 preference_w <- 0.5
 quality_w <- 0.5
-composite_N <- 5
-explore_N <- 0
+composite_N <- 4
+explore_N <- 1
+topic <- "one RData saved object"
