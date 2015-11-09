@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: 2015-09-04 18:03:20
+-- Generation Time: 2015-11-08 16:30:07
 -- 服务器版本： 5.6.17
 -- PHP Version: 5.5.12
 
@@ -25,97 +25,23 @@ USE `restopicer_user_profile`;
 -- --------------------------------------------------------
 
 --
--- 表的结构 `preference_keyword`
+-- 表的结构 `mission_category_rating`
 --
 
-CREATE TABLE IF NOT EXISTS `preference_keyword` (
+DROP TABLE IF EXISTS `mission_category_rating`;
+CREATE TABLE IF NOT EXISTS `mission_category_rating` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) NOT NULL,
-  `keyword` varchar(1500) NOT NULL,
-  `type` int(11) NOT NULL DEFAULT '1',
-  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
---
--- 插入之前先把表清空（truncate） `preference_keyword`
---
-
-TRUNCATE TABLE `preference_keyword`;
--- --------------------------------------------------------
-
---
--- 表的结构 `preference_paper`
---
-
-CREATE TABLE IF NOT EXISTS `preference_paper` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) NOT NULL,
-  `item_ut` char(15) NOT NULL,
-  `rating` int(11) NOT NULL DEFAULT '0',
-  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
---
--- 插入之前先把表清空（truncate） `preference_paper`
---
-
-TRUNCATE TABLE `preference_paper`;
--- --------------------------------------------------------
-
---
--- 表的结构 `subject_category`
---
-
-CREATE TABLE IF NOT EXISTS `subject_category` (
+  `mission_id` bigint(20) NOT NULL,
   `sc_code` varchar(2) NOT NULL,
-  `subject_category` varchar(100) NOT NULL,
-  PRIMARY KEY (`sc_code`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- 插入之前先把表清空（truncate） `subject_category`
---
-
-TRUNCATE TABLE `subject_category`;
---
--- 转存表中的数据 `subject_category`
---
-
-INSERT INTO `subject_category` (`sc_code`, `subject_category`) VALUES
-('DI', 'BUSINESS'),
-('EP', 'COMPUTER SCIENCE, ARTIFICIAL INTELLIGENCE'),
-('ET', 'COMPUTER SCIENCE, INFORMATION SYSTEMS'),
-('EW', 'COMPUTER SCIENCE, SOFTWARE ENGINEERING'),
-('NU', 'INFORMATION SCIENCE & LIBRARY SCIENCE'),
-('PC', 'MANAGEMENT'),
-('PE', 'OPERATIONS RESEARCH & MANAGEMENT SCIENCE');
-
--- --------------------------------------------------------
-
---
--- 表的结构 `user_filter_category`
---
-
-CREATE TABLE IF NOT EXISTS `user_filter_category` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) NOT NULL,
-  `sc_code` varchar(2) NOT NULL,
-  `selected` int(11) NOT NULL DEFAULT '1',
+  `rating` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=15 ;
 
 --
--- 插入之前先把表清空（truncate） `user_filter_category`
+-- 转存表中的数据 `mission_category_rating`
 --
 
-TRUNCATE TABLE `user_filter_category`;
---
--- 转存表中的数据 `user_filter_category`
---
-
-INSERT INTO `user_filter_category` (`id`, `user_id`, `sc_code`, `selected`) VALUES
+INSERT INTO `mission_category_rating` (`id`, `mission_id`, `sc_code`, `rating`) VALUES
 (1, 2, 'DI', 1),
 (2, 2, 'EP', 1),
 (3, 2, 'ET', 1),
@@ -134,29 +60,184 @@ INSERT INTO `user_filter_category` (`id`, `user_id`, `sc_code`, `selected`) VALU
 -- --------------------------------------------------------
 
 --
--- 表的结构 `user_info`
+-- 表的结构 `mission_info`
 --
 
-CREATE TABLE IF NOT EXISTS `user_info` (
-  `user_id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `beginning_year` year(4) NOT NULL DEFAULT '1955',
-  `ending_year` year(4) NOT NULL DEFAULT '2015',
-  PRIMARY KEY (`user_id`),
-  UNIQUE KEY `userid` (`user_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
+DROP TABLE IF EXISTS `mission_info`;
+CREATE TABLE IF NOT EXISTS `mission_info` (
+  `mission_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `beginning_year` year(4) NOT NULL DEFAULT '1975',
+  `ending_year` year(4) NOT NULL DEFAULT '2014',
+  `round` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`mission_id`),
+  UNIQUE KEY `userid` (`mission_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=7 ;
 
 --
--- 插入之前先把表清空（truncate） `user_info`
+-- 转存表中的数据 `mission_info`
 --
 
-TRUNCATE TABLE `user_info`;
+INSERT INTO `mission_info` (`mission_id`, `beginning_year`, `ending_year`, `round`) VALUES
+(3, 1975, 2014, 1),
+(2, 1975, 2014, 17);
+
+-- --------------------------------------------------------
+
 --
--- 转存表中的数据 `user_info`
+-- 表的结构 `preference_keyword`
 --
 
-INSERT INTO `user_info` (`user_id`, `beginning_year`, `ending_year`) VALUES
-(2, 1955, 2015),
-(3, 1955, 2015);
+DROP TABLE IF EXISTS `preference_keyword`;
+CREATE TABLE IF NOT EXISTS `preference_keyword` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `mission_id` bigint(20) NOT NULL,
+  `keyword` varchar(1500) NOT NULL,
+  `type` int(11) NOT NULL DEFAULT '1',
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=6 ;
+
+--
+-- 转存表中的数据 `preference_keyword`
+--
+
+INSERT INTO `preference_keyword` (`id`, `mission_id`, `keyword`, `type`, `time`) VALUES
+(5, 2, 'data mining', 1, '2015-11-08 14:47:21'),
+(4, 2, 'good', 1, '2015-10-28 08:51:13');
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `preference_paper`
+--
+
+DROP TABLE IF EXISTS `preference_paper`;
+CREATE TABLE IF NOT EXISTS `preference_paper` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `mission_id` bigint(20) NOT NULL,
+  `item_ut` char(15) NOT NULL,
+  `rating` int(11) NOT NULL DEFAULT '-1',
+  `round` int(11) NOT NULL,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=86 ;
+
+--
+-- 转存表中的数据 `preference_paper`
+--
+
+INSERT INTO `preference_paper` (`id`, `mission_id`, `item_ut`, `rating`, `round`, `time`) VALUES
+(1, 2, 'A1990CV70800002', 2, 1, '2015-11-08 07:52:09'),
+(2, 2, 'A1993LE85000002', 3, 1, '2015-11-08 07:52:09'),
+(3, 2, '000187967200002', 3, 1, '2015-11-08 07:52:09'),
+(4, 2, '000171422600007', 4, 1, '2015-11-08 07:52:09'),
+(5, 2, 'A1995UD49200002', 5, 1, '2015-11-08 07:52:09'),
+(6, 2, '000224136800009', 1, 2, '2015-11-08 15:05:25'),
+(7, 2, '000272366100014', 1, 2, '2015-11-08 15:05:25'),
+(8, 2, '000297889400026', 1, 2, '2015-11-08 15:05:25'),
+(9, 2, '000327365600014', 1, 2, '2015-11-08 15:05:25'),
+(10, 2, '000087937400005', 1, 2, '2015-11-08 15:05:25'),
+(11, 2, '000243866300004', 3, 3, '2015-11-08 15:05:35'),
+(12, 2, '000315057000001', 1, 3, '2015-11-08 15:05:35'),
+(13, 2, '000300648300021', 1, 3, '2015-11-08 15:05:35'),
+(14, 2, '000295998300001', 1, 3, '2015-11-08 15:05:35'),
+(15, 2, '000171995100004', 1, 3, '2015-11-08 15:05:35'),
+(16, 2, '000263706000023', 3, 4, '2015-11-08 15:05:37'),
+(17, 2, '000168696800005', 4, 4, '2015-11-08 15:05:37'),
+(18, 2, '000242209700024', 1, 4, '2015-11-08 15:05:37'),
+(19, 2, '000089185800001', 1, 4, '2015-11-08 15:05:37'),
+(20, 2, '000286851400007', 1, 4, '2015-11-08 15:05:37'),
+(21, 2, '000297889400005', 3, 5, '2015-11-08 15:05:39'),
+(22, 2, '000167836400009', 4, 5, '2015-11-08 15:05:39'),
+(23, 2, '000313152200041', 2, 5, '2015-11-08 15:05:39'),
+(24, 2, '000290193100009', 1, 5, '2015-11-08 15:05:39'),
+(25, 2, 'A1997YL08500002', 1, 5, '2015-11-08 15:05:39'),
+(26, 2, '000180433400006', 3, 6, '2015-11-08 15:05:41'),
+(27, 2, '000242306600018', 4, 6, '2015-11-08 15:05:41'),
+(28, 2, '000084379100006', 2, 6, '2015-11-08 15:05:41'),
+(29, 2, '000286851400002', 1, 6, '2015-11-08 15:05:41'),
+(30, 2, '000240606800004', 1, 6, '2015-11-08 15:05:41'),
+(31, 2, '000320493400037', 3, 7, '2015-11-08 15:05:49'),
+(32, 2, '000242209700047', 4, 7, '2015-11-08 15:05:49'),
+(33, 2, '000309719400003', 2, 7, '2015-11-08 15:05:49'),
+(34, 2, '000182550800003', 1, 7, '2015-11-08 15:05:49'),
+(35, 2, '000274093000005', 1, 7, '2015-11-08 15:05:49'),
+(36, 2, '000286851300013', 3, 8, '2015-11-08 15:05:50'),
+(37, 2, '000286851300002', 4, 8, '2015-11-08 15:05:50'),
+(38, 2, '000300210800016', 2, 8, '2015-11-08 15:05:50'),
+(39, 2, '000232639800002', 1, 8, '2015-11-08 15:05:50'),
+(40, 2, '000169487000005', 1, 8, '2015-11-08 15:05:50'),
+(41, 2, '000181817600008', 3, 9, '2015-11-08 15:05:52'),
+(42, 2, '000286851300008', 4, 9, '2015-11-08 15:05:52'),
+(43, 2, '000311832400008', 2, 9, '2015-11-08 15:05:52'),
+(44, 2, '000313152200013', 4, 9, '2015-11-08 15:05:52'),
+(45, 2, '000174248100001', 1, 9, '2015-11-08 15:05:52'),
+(46, 2, '000180433400009', 3, 10, '2015-11-08 15:06:04'),
+(47, 2, '000221634400003', 4, 10, '2015-11-08 15:06:04'),
+(48, 2, '000179230300002', 2, 10, '2015-11-08 15:06:04'),
+(49, 2, '000271549600027', 4, 10, '2015-11-08 15:06:04'),
+(50, 2, '000184889800003', 1, 10, '2015-11-08 15:06:04'),
+(51, 2, '000246057300014', 2, 11, '2015-11-08 15:06:12'),
+(52, 2, '000232712000006', 4, 11, '2015-11-08 15:06:12'),
+(53, 2, '000260713900008', 2, 11, '2015-11-08 15:06:12'),
+(54, 2, '000186164200004', 4, 11, '2015-11-08 15:06:12'),
+(55, 2, '000225611200001', 1, 11, '2015-11-08 15:06:12'),
+(56, 2, '000262947500010', 2, 12, '2015-11-08 15:06:17'),
+(57, 2, '000221963500002', 5, 12, '2015-11-08 15:06:17'),
+(58, 2, '000166694300003', 2, 12, '2015-11-08 15:06:17'),
+(59, 2, '000271549600009', 4, 12, '2015-11-08 15:06:17'),
+(60, 2, '000228362400006', 1, 12, '2015-11-08 15:06:17'),
+(61, 2, '000183163300005', 2, 13, '2015-11-08 15:06:20'),
+(62, 2, '000279317300009', 5, 13, '2015-11-08 15:06:20'),
+(63, 2, '000242209700017', 5, 13, '2015-11-08 15:06:20'),
+(64, 2, '000300210800001', 4, 13, '2015-11-08 15:06:20'),
+(65, 2, '000226703000009', 1, 13, '2015-11-08 15:06:20'),
+(66, 2, '000229161800005', 2, 14, '2015-11-08 15:06:25'),
+(67, 2, '000286851300011', 5, 14, '2015-11-08 15:06:25'),
+(68, 2, '000222291700001', 5, 14, '2015-11-08 15:06:25'),
+(69, 2, '000306891300017', 2, 14, '2015-11-08 15:06:25'),
+(70, 2, '000287436700008', 1, 14, '2015-11-08 15:06:25'),
+(71, 2, '000186248300008', 2, 15, '2015-11-08 15:06:29'),
+(72, 2, '000168037400004', 5, 15, '2015-11-08 15:06:29'),
+(73, 2, '000317448900022', 5, 15, '2015-11-08 15:06:29'),
+(74, 2, '000084396700011', 2, 15, '2015-11-08 15:06:29'),
+(75, 2, '000179037600005', 3, 15, '2015-11-08 15:06:29'),
+(76, 2, '000275738300005', 2, 16, '2015-11-08 15:06:34'),
+(77, 2, '000284654800019', 5, 16, '2015-11-08 15:06:34'),
+(78, 2, 'A1995RN55000003', 5, 16, '2015-11-08 15:06:34'),
+(79, 2, '000274512100007', 2, 16, '2015-11-08 15:06:34'),
+(80, 2, 'A1994NW49400008', 3, 16, '2015-11-08 15:06:34'),
+(81, 2, '000284654800022', -1, 17, '2015-11-08 15:06:46'),
+(82, 2, '000182550800002', -1, 17, '2015-11-08 15:06:46'),
+(83, 2, '000220283200009', -1, 17, '2015-11-08 15:06:46'),
+(84, 2, '000232712000011', -1, 17, '2015-11-08 15:06:46'),
+(85, 2, '000237883600004', -1, 17, '2015-11-08 15:06:46');
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `subject_category`
+--
+
+DROP TABLE IF EXISTS `subject_category`;
+CREATE TABLE IF NOT EXISTS `subject_category` (
+  `sc_code` varchar(2) NOT NULL,
+  `subject_category` varchar(100) NOT NULL,
+  PRIMARY KEY (`sc_code`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- 转存表中的数据 `subject_category`
+--
+
+INSERT INTO `subject_category` (`sc_code`, `subject_category`) VALUES
+('DI', 'BUSINESS'),
+('EP', 'COMPUTER SCIENCE, ARTIFICIAL INTELLIGENCE'),
+('ET', 'COMPUTER SCIENCE, INFORMATION SYSTEMS'),
+('EW', 'COMPUTER SCIENCE, SOFTWARE ENGINEERING'),
+('NU', 'INFORMATION SCIENCE & LIBRARY SCIENCE'),
+('PC', 'MANAGEMENT'),
+('PE', 'OPERATIONS RESEARCH & MANAGEMENT SCIENCE');
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
