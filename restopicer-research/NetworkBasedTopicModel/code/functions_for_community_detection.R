@@ -27,6 +27,7 @@ clique.percolation.community <- function(graph, k, threshold = 1,cutat=NULL) {
     unique(unlist(clq[ V(x)$name ]))
   })
 }
+# percolation on the nodes directly, not good and right
 linkcomm.percolation.community <- function(g_edgelist,bipartite=FALSE,dist=NULL,threshold=0.15,cutat=NULL){
   if(file.exists("rdata/tmp/lc.RData")){
     load(file = "rdata/tmp/lc.RData")
@@ -95,6 +96,7 @@ linkcomm.percolation.community <- function(g_edgelist,bipartite=FALSE,dist=NULL,
   }
   return(result)
 }
+# percolation using the nodes on the edges/graph, which is good and right
 linkcomm.percolation <- function(g_edgelist,bipartite=FALSE,dist=NULL,threshold=0.15,cutat=NULL){
   if(file.exists("rdata/tmp/lc.RData")){
     load(file = "rdata/tmp/lc.RData")
