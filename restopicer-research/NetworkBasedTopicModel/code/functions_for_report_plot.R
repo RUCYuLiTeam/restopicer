@@ -75,7 +75,7 @@ plotBipartiteMatrixReport <- function(filename, bi_matrix, transpose = FALSE, sh
   #if(nrow(bi_data)>100)plotRowDist <- FALSE
   if(plotRowDist){
     # different weightType of bi_data
-    loc <- cmdscale(dist(bi_data,method = "minkowski", p = 2))
+    loc <- cmdscale(dist(bi_data,method = "minkowski", p = 1))
     if(!showNamesInPlot) rownames(loc) <- 1:nrow(loc)
     #plot textplot
     png(file.path(path,paste(type,filename,weightType,"rowdist.png",sep="-")),width=600,height=600)

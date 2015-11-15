@@ -14,6 +14,6 @@ x <- result_linkcomm.percolation_evcent_cos$topic_term[lapply(result_linkcomm.pe
 
 filename=result_linkcomm.percolation_evcent_cos$model$parameter
 topic_term=result_linkcomm.percolation_evcent_cos$topic_term[lapply(result_linkcomm.percolation_evcent_cos$community_member_list, function(x){length(x)})>20,]
-topic_term[c(3,5,6,7,8,9,10,11,13,14),]
+topic_term=topic_term[c(3,5,6,7,8,9,10,11,13,14),]
 path="output/analysis"
 plotBipartiteMatrixReport(filename = filename,bi_matrix = topic_term,path = paste(path,"topic_term",sep = "/"),showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = TRUE, plotWordCloud = F, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
