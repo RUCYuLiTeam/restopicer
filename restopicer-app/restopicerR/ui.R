@@ -1,6 +1,6 @@
 dashboardPage(
   dashboardHeader(#dropdownMenuOutput("taskMenu"),
-                  title = strong("Restopicer")),
+    title = strong("Restopicer")),
   dashboardSidebar(
     strong(textOutput("missionid",inline = T)),
     sidebarMenuOutput("menu"),
@@ -16,9 +16,27 @@ dashboardPage(
   dashboardBody(
     tabItems(
       # questionaire
-      tabItem(tabName = "questionaire",
-              h2("questionaire")
-      ),
+      tabItem(tabName = "questionaire",h2("Initiate Your Preference"),
+              fluidRow(
+                fluidRow(column(4,h4("BUSINESS")),
+                         column(width = 8,sliderInput("rating1","Your Rating",min=1,max=5,value=0,step = 1))),
+                fluidRow(column(4,h4("COMPUTER SCIENCE, ARTIFICIAL INTELLIGENCE")),
+                         column(width = 8,sliderInput("rating2","Your Rating",min=1,max=5,value=0,step = 1))),
+                fluidRow(column(4,h4("COMPUTER SCIENCE, INFORMATION SYSTEMS")),
+                         column(width = 8,sliderInput("rating3","Your Rating",min=1,max=5,value=0,step = 1))),
+                fluidRow(column(4,h4("COMPUTER SCIENCE, SOFTWARE ENGINEERING")),
+                         column(width = 8,sliderInput("rating4","Your Rating",min=1,max=5,value=0,step = 1))),
+                fluidRow(column(4,h4("INFORMATION SCIENCE & LIBRARY SCIENCE")),
+                         column(width = 8,sliderInput("rating5","Your Rating",min=1,max=5,value=0,step = 1))),
+                fluidRow(column(4,h4("MANAGEMENT")),
+                         column(width = 8,sliderInput("rating6","Your Rating",min=1,max=5,value=0,step = 1))),
+                fluidRow(column(4,h4("OPERATIONS RESEARCH & MANAGEMENT SCIENCE")),
+                         column(width = 8,sliderInput("rating7","Your Rating",min=1,max=5,value=0,step = 1))),
+                fluidRow(
+                  actionButton("newmission","submit")))
+              
+              
+      ) ,       
       tabItem(tabName = "login",
               textInput("loginmissionid", "Input Your Mission ID:", "1",width="300px"),
               actionButton("loginmission", "Mission Continues!",icon("bolt"),width="300px")

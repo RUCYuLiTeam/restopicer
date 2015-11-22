@@ -1,25 +1,35 @@
 function(input, output, session) {
   mission_info <- data.frame()
   recommend_paper <- data.frame()
+  missionid <- data.frame()
   # taskMenu dropdownMenuOutput for showing taskprogress
   #output$taskMenu <- renderMenu({
   #  input$loginmission
   #  dropdownMenu(taskItem("Task Progress", value = taskprogress, color = "aqua", href = NULL),type = "tasks",badgeStatus = NULL)
   #})
   # text for missionid
+  
   output$missionid <- renderText({
     input$loginmission
     input$recommend
-    if(nrow(mission_info)==1){
+    
+    if(input$newmission ){
+      paste("Your Mission Id: ",missionid$missionid+1,sep = "")
+    }
+    else if(nrow(mission_info)==1){
+      paste("Your Mission Id: ",mission_info$mission_id," (Round ",mission_info$round,")",sep = "")
+    }
+    else if(nrow(mission_info)==1){
       paste("Your Mission Id: ",mission_info$mission_id," (Round ",mission_info$round,")",sep = "")
     }else{
       "Sorry, No Mission Found!"
     }
   })
   # sidebarMenuOutput
+  
   output$menu <- renderMenu({
     input$loginmission
-    if(nrow(mission_info)==1){
+    if(nrow(mission_info)==1 || input$newmission){
       sidebarMenu(
         menuItem("Scientific Papers", tabName = "papers", icon = icon("files-o")),
         menuItem("Preference Dashboard", tabName = "dashboard", icon = icon("dashboard"))
@@ -32,6 +42,7 @@ function(input, output, session) {
       )
     }
   })
+  
   
   # show recommended papers
   output$title1 <- renderText({
@@ -107,6 +118,23 @@ function(input, output, session) {
       recommend_paper <<- goRecommendation(mission_info$mission_id,mission_info$round) 
     }
   })
+  #new mission
+  observe({
+    #input$newmission
+    missionid <<- maxMissionid()
+    if(input$newmission){
+      addinitialPrefence(missionid$missionid+1,isolate(input$rating1),isolate(input$rating2),isolate(input$rating3),isolate(input$rating4),
+                         isolate(input$rating5),isolate(input$rating6),isolate(input$rating7))
+    }
+    
+  })
+  #delete mission
+  observe({
+    
+    if(input$finished){
+      deleteCurrentMission(missionid$missionid+1)
+    }
+  })
   # add searching keywords
   observe({
     input$addkeyword
@@ -114,15 +142,16 @@ function(input, output, session) {
       addPreferenceKeyword(mission_info$mission_id,isolate(input$searchkeyword))
     }
   })
+  
   # go recommend
   observe({
     input$recommend
     if(nrow(mission_info)==1&&nrow(recommend_paper)==5){
-      rating(mission_info$mission_id,recommend_paper$item_ut[1],input$rate1)
-      rating(mission_info$mission_id,recommend_paper$item_ut[2],input$rate2)
-      rating(mission_info$mission_id,recommend_paper$item_ut[3],input$rate3)
-      rating(mission_info$mission_id,recommend_paper$item_ut[4],input$rate4)
-      rating(mission_info$mission_id,recommend_paper$item_ut[5],input$rate5)
+      rating(mission_info$mission_id,recommend_paper$item_ut[1],isolate(input$rate1))
+      rating(mission_info$mission_id,recommend_paper$item_ut[2],isolate(input$rate2))
+      rating(mission_info$mission_id,recommend_paper$item_ut[3],isolate(input$rate3))
+      rating(mission_info$mission_id,recommend_paper$item_ut[4],isolate(input$rate4))
+      rating(mission_info$mission_id,recommend_paper$item_ut[5],isolate(input$rate5))
       recommend_paper <<- goRecommendation(mission_info$mission_id,mission_info$round)
       mission_info <<- getMissionInfo(mission_info$mission_id)
     }
