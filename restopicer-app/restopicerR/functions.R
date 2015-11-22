@@ -74,7 +74,7 @@ goRecommendation <- function(mission_id,round){
   }else{
     # searching elastic search (relevent_N)
     result_relevent <- searchingByKeywords(keywords = paste(preferencedKeywords$keyword,sep = " ",collapse = " "),item_ut_already_list=rated_paper$item_ut,relevent_N = relevent_N)
-    # retrieve by preference and quality (composite_N) and active learning 
+    # retrieve by preference and quality (composite_N) and active learning (explore_N)
     result <- exploreRecommend(result_relevent,topic,rated_paper,preference_w,quality_w,composite_N,explore_N)
     # save to mysql
     for(item_ut in result$item_ut){
@@ -91,40 +91,40 @@ goRecommendation <- function(mission_id,round){
 searchingByKeywords <- function(keywords,relevent_N,item_ut_already_list){
   must_not_body <- paste(lapply(item_ut_already_list, function(item_ut){
     paste('{
-          \"query_string\": { \"default_field\": \"paper.item_ut\",\"query\": \"',item_ut,'\"}
-  }',sep="",collapse = "")
+              \"query_string\": { \"default_field\": \"paper.item_ut\",\"query\": \"',item_ut,'\"}
+           }',sep="",collapse = "")
   }),sep = "",collapse = ",")
   jsonbody <- paste('{
-                    \"query\": {
-                    \"bool\": {
-                    \"must\": 
-                    [{
-                    \"range\": {
-                    \"paper.publication_year\": {
-                    \"from\": \"1975\",
-                    \"to\": \"2013\"
-                    }
-                    }
-                    },
-{
-                    \"query_string\": {
-                    \"default_field\": \"paper.document_type\",
-                    \"query\": \"Article\"
-}
-}],
-                    \"must_not\":[',must_not_body,'],
-                    \"should\": 
-                    [{
-                    \"query_string\": {
-                    \"default_field\": \"_all\",
-                    \"query\": "',keywords,'"
-                    }
-                    }]
-                    }
-                    },
-                    \"from\": 0,
-                    \"size\": ',relevent_N,'
-                    }',sep = "")
+      \"query\": {
+        \"bool\": {
+          \"must\": 
+          [{
+            \"range\": {
+              \"paper.publication_year\": {
+                \"from\": \"1975\",
+                \"to\": \"2013\"
+              }
+            }
+          },
+          {
+            \"query_string\": {
+              \"default_field\": \"paper.document_type\",
+                  \"query\": \"Article\"
+            }
+          }],
+          \"must_not\":[',must_not_body,'],
+          \"should\": 
+          [{
+            \"query_string\": {
+              \"default_field\": \"_all\",
+              \"query\": "',keywords,'"
+            }
+          }]
+        }
+      },
+      \"from\": 0,
+      \"size\": ',relevent_N,'
+    }',sep = "")
   result <- try(fromJSON(httpPOST(searchLocation,postfields = jsonbody)),silent = T)
   df <- rbind_all(lapply(result$hits$hits,function(x){data.frame(item_ut=x$`_source`["item_ut"],
                                                                  article_title=x$`_source`["article_title"],
