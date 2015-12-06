@@ -1,0 +1,9 @@
+Package: restopicerRESTful
+Type: Package
+Title: A RESTful Scientific Computing Service for Restopicer
+Version: 1.0
+Date: 2015-12-06
+Author: Joshua ZHANG
+Maintainer: Joshua ZHANG <joshua_zhang@foxmail.com>
+Description: A sub-project of Restopicer
+License: MIT
