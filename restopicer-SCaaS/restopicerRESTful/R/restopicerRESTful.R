@@ -1,9 +1,9 @@
 ##### dependencies #####
-if(!require(RMySQL)){install.packages("RMySQL")}
-if(!require(compiler)){install.packages("compiler")}
-if(!require(RJSONIO)){install.packages("RJSONIO")}
-if(!require(RCurl)){install.packages("RCurl")}
-if(!require(dplyr)){install.packages("dplyr")}
+# if(!require(RMySQL)){install.packages("RMySQL")}
+# if(!require(compiler)){install.packages("compiler")}
+# if(!require(RJSONIO)){install.packages("RJSONIO")}
+# if(!require(RCurl)){install.packages("RCurl")}
+# if(!require(dplyr)){install.packages("dplyr")}
 ##### create new mission with unique username #####
 createMission <- function(username){
   #initial emvironment
