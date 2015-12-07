@@ -1,6 +1,9 @@
 ##### dependencies #####
 if(!require(RMySQL)){install.packages("RMySQL")}
 if(!require(compiler)){install.packages("compiler")}
+if(!require(RJSONIO)){install.packages("RJSONIO")}
+if(!require(RCurl)){install.packages("RCurl")}
+if(!require(dplyr)){install.packages("dplyr")}
 ##### create new mission with unique username #####
 createMission <- function(username){
   #initial emvironment
@@ -47,16 +50,7 @@ addPreferenceKeywords <- function(username,newkeywords){
   dbDisconnect(conn)
 }
 ##### goRecommendation for current mission #####
-getRecommender<-function(recommendername){
-  cmpfun(
-    switch(recommendername,
-           hybridRecommender=hybridRecommend
-    ))
-}
-goRecommendation <- function(username,relevent_N,recommendername="hybridRecommender",
-                             hybrid_N=relevent_N,
-                             preference_w=1,quality_w=1,summary_w=1,fresh_w=1,explore_w=1,
-                             topics_filepath=""){
+goRecommendation <- function(username,relevent_N,recommendername="noneRecommender",composite_N=relevent_N,...){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
@@ -77,12 +71,9 @@ goRecommendation <- function(username,relevent_N,recommendername="hybridRecommen
   }else{
     # searching elastic search (relevent_N)
     result_relevent <- searchingByKeywords(keywords = paste(preferencedKeywords$keyword,sep = " ",collapse = " "),item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N)
-    # retrieve by preference and quality (composite_N) and active learning (explore_N)
+    # retrieve by recommender (composite_N)
     doRecommend<- getRecommender(recommendername = recommendername)
-    result <- doRecommend(result_relevent=result_relevent,
-                              topics_filepath=topics_filepath,rated_papers=recommendedPapers,
-                              preference_w=preference_w,quality_w=quality_w,summary_w=summary_w,fresh_w=fresh_w,explore_w=explore_w,
-                              hybrid_N=hybrid_N)
+    result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,...)
     mission_round <- mission_round + 1
     # save to mysql
     for(item_ut in result$item_ut){

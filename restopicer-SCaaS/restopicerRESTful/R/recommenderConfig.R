@@ -1,0 +1,41 @@
+getRecommender<-function(recommendername){
+  cmpfun(
+    switch(recommendername,
+           noneRecommender=function(result_relevent,composite_N){
+             result_relevent[1:min(nrow(result_relevent),composite_N),]
+           },
+           weightedHybridRecommender=weightedhybridRecommend,
+           allotHybridRecommender=allothybridRecommend
+    ))
+}
+# sub-measures in every recommender
+getPreferenceEvaluator<-function(name){
+  cmpfun(
+    switch(name,
+           cosPreferenceEval=cosPreferenceEval
+    ))
+}
+getQualityEvaluator<-function(name){
+  cmpfun(
+    switch(name,
+           citedQualityEval=citedQualityEval
+    ))
+}
+getSummaryValueEvaluator<-function(name){
+  cmpfun(
+    switch(name,
+           topicSummaryEval=topicSummaryEval
+    ))
+}
+getFreshEvaluator<-function(name){
+  cmpfun(
+    switch(name,
+           yearDiffReciprocalFreshEval=yearDiffReciprocalFreshEval
+    ))
+}
+getExploreValueEvaluator<-function(name){
+  cmpfun(
+    switch(name,
+           activeExploreEval=activeExploreEval
+    ))
+}
