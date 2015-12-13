@@ -97,22 +97,27 @@ linkcomm.percolation.community <- function(g_edgelist,bipartite=FALSE,dist=NULL,
   return(result)
 }
 # percolation using the nodes on the edges/graph, which is good and right
-linkcomm.percolation <- function(g_edgelist,bipartite=FALSE,dist=NULL,threshold=0.15,cutat=NULL){
+linkcomm.percolation <- function(g_edgelist,bipartite=FALSE,dist=NULL,threshold=0.15,cutat_th=NULL){
   if(file.exists("rdata/tmp/lc.RData")){
     load(file = "rdata/tmp/lc.RData")
   }else{
     lc <- getLinkCommunities(g_edgelist,hcmethod="average",bipartite=bipartite,dist = dist,plot = F)
     save(lc,file = "rdata/tmp/lc.RData")
   }
-  if(!is.null(cutat)){
-    lc <- newLinkCommsAt(lc, cutat = cutat)
+  if(!is.null(cutat_th)){
+    if(file.exists(paste("rdata/tmp/","lc_cutat=",cutat_th,".RData",sep=""))){
+      load(file = paste("rdata/tmp/","lc_cutat=",cutat_th,".RData",sep=""))
+    }else{
+      lc <- newLinkCommsAt(lc, cutat = cutat_th)
+      save(lc,file = paste("rdata/tmp/","lc_cutat=",cutat_th,".RData",sep=""))
+    }
   }
   if(bipartite){
     
   }else{
     community_node_list <- lapply(split(lc$nodeclusters$node,f = lc$nodeclusters$cluster),FUN = function(x){unlist(as.character(x))})
-    if(file.exists("rdata/tmp/lc_percolation_sim.RData")){
-      load(file = "rdata/tmp/lc_percolation_sim.RData")
+    if(file.exists(paste("rdata/tmp/","lc_cutat=",cutat_th,"_sim.RData",sep=""))){
+      load(file = paste("rdata/tmp/","lc_cutat=",cutat_th,"_sim.RData",sep=""))
     }else{
       comm_pair_df <- data.frame()
       for (i in 1:length(community_node_list)) {
@@ -124,11 +129,12 @@ linkcomm.percolation <- function(g_edgelist,bipartite=FALSE,dist=NULL,threshold=
           num_anti_j <- length(setdiff(comm_j,comm_i))
           # method A: num_support/max(num_anti_i,num_anti_j) >= threshold used
           # method B: num_support/(num_anti_i+num_anti_j) >= threshold
+          # method C: num_support/(num_anti_i+num_support+num_anti_j) >= threshold
           sim=num_support/max(num_anti_i,num_anti_j)
           if(sim>0)comm_pair_df <- rbind(comm_pair_df,data.frame(i,j,sim))
         }
       }
-      save(comm_pair_df,file = "rdata/tmp/lc_percolation_sim.RData")
+      save(comm_pair_df,file = paste("rdata/tmp/","lc_cutat=",cutat_th,"_sim.RData",sep=""))
     }
     linkcomm.graph <- simplify(graph_from_edgelist(as.matrix(comm_pair_df[comm_pair_df$sim >= threshold,c("i","j")]),directed = F))
     V(linkcomm.graph)$name <- seq_len(vcount(linkcomm.graph))
