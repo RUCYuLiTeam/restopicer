@@ -1,8 +1,8 @@
 getRecommender<-function(recommendername){
   cmpfun(
     switch(recommendername,
-           noneRecommender=function(result_relevent,composite_N){
-             result_relevent[1:min(nrow(result_relevent),composite_N),]
+           noneRecommender=function(result_relevent,composite_N,...){
+             result_relevent[1:min(length(result_relevent),composite_N)]
            },
            weightedHybridRecommender=weightedhybridRecommend,
            allotHybridRecommender=allothybridRecommend

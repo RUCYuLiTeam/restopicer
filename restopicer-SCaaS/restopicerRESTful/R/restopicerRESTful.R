@@ -70,9 +70,9 @@ goRecommendation <- function(username,relevent_N,recommendername="noneRecommende
     result <- searchingByItemUT(recommendedPapers[recommendedPapers$rating==-1,"item_ut"])
   }else{
     # searching elastic search (relevent_N)
-    result_relevent <- searchingByKeywords(keywords = paste(preferencedKeywords$keyword,sep = " ",collapse = " "),item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N)
+    result_relevent <- searchingByKeywords(keywords = paste(preferenceKeywords$keyword,sep = " ",collapse = " "),item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N)
     # retrieve by recommender (composite_N)
-    doRecommend<- getRecommender(recommendername = recommendername)
+    doRecommend <- getRecommender(recommendername = recommendername)
     result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,...)
     mission_round <- mission_round + 1
     # save to mysql
