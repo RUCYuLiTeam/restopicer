@@ -24,7 +24,7 @@ addPersistentObjects("foldername")
 #####
 rmTempObject()
 #list(NULL,0.6,0.5,0.4)
-for(cutat_th in list(0.6,0.5,0.4)){
+for(cutat_th in list(NULL,0.6,0.5,0.4)){
   #seq(from = 0.1,to = 1,by = 0.05)
   #c(0.05,0.1,0.15,0.2,0.25)
   for(th in c(0.1,0.15,0.2,0.25)){
