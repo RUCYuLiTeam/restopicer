@@ -10,17 +10,28 @@ calcommunity.entropy <- function(doc_topic){
 calcommunity.coverage<- function(comm_member,trival_th=2){
   # cal non-trival comm_member matrix
   nontrival_comm<-comm_member[rowSums(comm_member)>trival_th,]
-  nontrival_comm_nodes<-nontrival_comm[,colSums(nontrival_comm)>0]
+  if(class(nontrival_comm)!="matrix"){
+    nontrival_nodes_num <- sum(nontrival_comm)
+  }else{
+    nontrival_comm_nodes <- nontrival_comm[,colSums(nontrival_comm)>0]
+    nontrival_nodes_num <- ncol(nontrival_comm_nodes)
+  }
+  
   # cal community coverage
-  community.coverage<-ncol(nontrival_comm_nodes)/ncol(comm_member)
+  community.coverage <- nontrival_nodes_num/ncol(comm_member)
   community.coverage
 }
 #[1,Inf)
 caloverlap.coverage<-function(comm_member,trival_th=2){
   # cal non-trival comm_member matrix
   nontrival_comm<-comm_member[rowSums(comm_member)>trival_th,]
-  nontrival_comm_nodes<-nontrival_comm[,colSums(nontrival_comm)>0]
-  mean(colSums(nontrival_comm_nodes))  
+  if(class(nontrival_comm)!="matrix"){
+    nodes_of_nontrival <- 1
+  }else{
+    nontrival_comm_nodes<-nontrival_comm[,colSums(nontrival_comm)>0]
+    nodes_of_nontrival <- colSums(nontrival_comm_nodes)
+  }
+  mean(nodes_of_nontrival)  
 }
 #the larger the denser
 calcommunity.quality<-function(comm_member,coterm_g){
