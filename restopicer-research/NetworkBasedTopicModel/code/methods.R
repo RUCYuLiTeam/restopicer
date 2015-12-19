@@ -363,7 +363,7 @@ topicDiscovery.linkcomm.percolation.edge <- function(data,datatype="keywords",MS
     model$parameter <- paste(datatype,"linkcomm.percolation",MST_Threshold,percolation_threshold,cutat_th,link_similarity_method,topic_term_weight,doc_topic_method,sep = "_")
   }
   #entropy
-  model$entropy <- mean(apply(doc_topic,1,function(z) -sum(ifelse(z==0,0,z*log(z)))))
+  #model$entropy <- mean(apply(doc_topic,1,function(z) -sum(ifelse(z==0,0,z*log(z)))))
   # folder
   if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
   write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,"modeltest.txt"),quote = F,sep = "\t",row.names = F,col.names = T)
@@ -484,6 +484,7 @@ getTopicMemberBipartiteMatrix <- function(community_member_list, weight = "binar
   for(i in 1:length(community_member_list)){
     if(memberType=="edge"){
       g <- delete.edges(graph,E(graph)[!(E(graph) %in% community_member_list[[i]])])
+      g <- delete.vertices(g,names(V(g))[(names(V(g)) %in% names(V(g))[degree(g)==0])])
     }
     if(memberType=="vertex"){
       g <- delete.vertices(graph,names(V(graph))[!(names(V(graph)) %in% community_member_list[[i]])])
@@ -494,7 +495,8 @@ getTopicMemberBipartiteMatrix <- function(community_member_list, weight = "binar
                 "betweenness" = betweenness(g)/sum(betweenness(g)),
                 "closeness" = closeness(g)/sum(closeness(g)),
                 "evcent" = eigen_centrality(g)$vector/sum(eigen_centrality(g)$vector))
-    bi_matrix[i,names(w)] <- w
+    #bi_matrix[i,names(w)] <- w
+    bi_matrix[i,names(V(g))] <- w
   }
   as.matrix(bi_matrix)
 }

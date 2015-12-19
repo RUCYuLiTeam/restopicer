@@ -2,20 +2,23 @@
 # community evaluation functions and plot report
 # on community_member test,topic_member test and doc_topic test
 ######
+calcommunity.entropy <- function(doc_topic){
+  mean(apply(doc_topic,1,function(z) -sum(ifelse(z==0,0,z*log(z)))))/log(ncol(doc_topic))
+}
 # comunity.coverage<-calcommunity.coverage(topic_term)
 # [0,1], the larger the better
-calcommunity.coverage<- function(comm_member){
+calcommunity.coverage<- function(comm_member,trival_th=2){
   # cal non-trival comm_member matrix
-  nontrival_comm<-comm_member[rowSums(comm_member)>2,]
+  nontrival_comm<-comm_member[rowSums(comm_member)>trival_th,]
   nontrival_comm_nodes<-nontrival_comm[,colSums(nontrival_comm)>0]
   # cal community coverage
   community.coverage<-ncol(nontrival_comm_nodes)/ncol(comm_member)
   community.coverage
 }
 #[1,Inf)
-caloverlap.coverage<-function(comm_member){
+caloverlap.coverage<-function(comm_member,trival_th=2){
   # cal non-trival comm_member matrix
-  nontrival_comm<-comm_member[rowSums(comm_member)>2,]
+  nontrival_comm<-comm_member[rowSums(comm_member)>trival_th,]
   nontrival_comm_nodes<-nontrival_comm[,colSums(nontrival_comm)>0]
   mean(colSums(nontrival_comm_nodes))  
 }
@@ -71,6 +74,25 @@ caloverlap.number.quality<- function(community_member_list,member_tag_df){
   v.real <- v.real[order(names(v.real),decreasing = F)]
   # cal the cross entropy
   entropy::KL.plugin(v.model,v.real,unit = "log2")
+}
+calPartitionDensity <- function(community_node_list,community_edge_list,coterm_g,type="edge"){
+  density <- 0
+  comm_num <- length(community_node_list)
+  if(type=="edge"){
+    for(i in 1:length(community_node_list)){
+      d <- (length(community_edge_list[[i]])-(length(community_node_list[[i]])-1))/(choose(length(community_node_list[[i]]),2)-(length(community_node_list[[i]])-1))
+      density <- density + d
+    }
+  }
+  if(type=="node"){
+    for(i in 1:length(community_node_list)){
+      g <- delete.vertices(coterm_g,community_node_list[[i]])
+      m <- length(V(g))
+      d <- (m-(length(community_node_list[[i]])-1))/(choose(length(community_node_list[[i]]),2)-(length(community_node_list[[i]])-1))
+      density <- density + d
+    }
+  }
+  density/comm_num
 }
 # Testing the significance of a community
 community.significance.test <- function(graph, vs, ...) {
