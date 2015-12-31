@@ -33,6 +33,13 @@ caloverlap.coverage<-function(comm_member,trival_th=2){
   }
   mean(nodes_of_nontrival)  
 }
+
+calcommunity.balance<-function(comm_member,trival_th=2){
+  # cal non-trival comm_member matrix
+  nontrival_comm<-comm_member[rowSums(comm_member)>trival_th,]
+  nrow(nontrival_comm)/nrow(comm_member)
+}
+
 #the larger the denser
 calcommunity.quality<-function(comm_member,coterm_g){
   coterm_matrix <- get.adjacency(coterm_g,attr = "weight",type = "upper")

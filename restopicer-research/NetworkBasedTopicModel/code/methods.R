@@ -378,8 +378,27 @@ topicDiscovery.linkcomm.percolation.edge <- function(data,datatype="keywords",MS
   result$topic_term <- topic_term
   result$doc_topic <- doc_topic
   result$community_member_list <- community_member_list
+  community_node_list <- lapply(community_member_list,FUN = function(x,coterm_g){
+    g <- delete.edges(coterm_g,E(coterm_g)[!(E(coterm_g) %in% x)])
+    g <- delete.vertices(g,names(V(g))[(names(V(g)) %in% names(V(g))[degree(g)==0])])
+    names(V(g))
+  },coterm_g=coterm_graph)
+  community_term <- getTopicMemberBipartiteMatrix(community_member_list=community_member_list, weight = "binary",graph=coterm_graph,memberType="edge")
+  result$community_node_list <- community_node_list
+  result$community_term <- community_term
   #result$linkcomm<-comm_member.communitytest(community_member_list,bi_data_df = data,coterm_graph,papers_tags_df)
   result$coterm_graph <- coterm_graph
+  
+  result$size <- ncol(doc_topic)
+  result$entropy <- calcommunity.entropy(doc_topic = doc_topic)
+  result$Qc <- calcommunity.quality(comm_member = community_term,coterm_g = coterm_graph)
+  df_doc_tag <- unique(papers_tags_df[,c("item_ut","subject_category")])
+  member_tag_df <- merge(data,df_doc_tag)[,c("author_keyword","subject_category")]
+  result$Qo <- caloverlap.number.quality(community_member_list = community_node_list,member_tag_df)
+  result$Cc <- calcommunity.coverage(community_term,trival_th = 100)
+  result$Co <- caloverlap.coverage(community_term,trival_th = 100)
+  result$validcomm <- calcommunity.balance(community_term,trival_th = 100)
+  
   return(result)
 }
 
