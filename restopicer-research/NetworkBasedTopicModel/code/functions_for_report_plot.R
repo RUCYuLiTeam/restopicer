@@ -38,7 +38,7 @@ plotBipartiteMatrixReport <- function(filename, bi_matrix, transpose = FALSE, sh
       par(fig = c(0,1,0.1,1),mar = c(0,0,0,0))
       pal <- brewer.pal(9,"Blues")[4:9]
       color_cluster <- pal[ceiling(6*(line/max(line)))]
-      wordcloud(words=line_names,freq=line_freq,scale = c(4, 0),min.freq=1,max.words = 1000,
+      wordcloud(words=line_names,freq=line_freq,scale = c(4, 0),min.freq=2,max.words = 100,
                 random.order=F,random.color=F,rot.per=0,colors=color_cluster,ordered.colors=T,
                 use.r.layout=F,fixed.asp=F)
       par(fig = c(0,1,0,0.1), mar = c(3, 2, 0, 2), new=TRUE)
@@ -75,7 +75,7 @@ plotBipartiteMatrixReport <- function(filename, bi_matrix, transpose = FALSE, sh
   #if(nrow(bi_data)>100)plotRowDist <- FALSE
   if(plotRowDist){
     # different weightType of bi_data
-    loc <- cmdscale(dist(bi_data,method = "minkowski", p = 1/2))
+    loc <- cmdscale(dist(bi_data,method = "minkowski", p = 1))
     if(!showNamesInPlot) rownames(loc) <- 1:nrow(loc)
     #plot textplot
     png(file.path(path,paste(type,filename,weightType,"rowdist.png",sep="-")),width=600,height=600)
