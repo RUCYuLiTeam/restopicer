@@ -23,14 +23,15 @@ addPersistentObjects("foldername")
 ## LDA_method: Gibbs/VEM
 #####
 rmTempObject()
-result0 <- NULL
-for(k in seq(from = 10,to = 100,by = 10)){
-  result <- topicDiscovery.LDA(data = researchPapers,datatype = "abstract",K = k,LDA_method = "Gibbs",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory)
-  if(is.null(result0)||(result$model$perplexity<=result0$model$perplexity)){
-    result0 <- result
-  }
-}
-result_LDA_abstarct_gibbs <- result0
+k <- 50
+#result0 <- NULL
+#for(k in seq(from = 10,to = 100,by = 10)){
+  result <- topicDiscovery.LDA(data = researchPapers,datatype = "abstract",K = k,LDA_method = "VEM",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory)
+#  if(is.null(result0)||(result$model$perplexity<=result0$model$perplexity)){
+#    result0 <- result
+#  }
+#}
+result_LDA_abstarct_gibbs <- result
 save(result_LDA_abstarct_gibbs,file = paste("rdata",foldername,"result_LDA_abstarct_gibbs.RData",sep="/"))
 # analysis
 load(paste("rdata",foldername,"result_LDA_abstarct_gibbs.RData",sep="/"))

@@ -8,4 +8,4 @@ Maintainer: Joshua ZHANG <joshua_zhang@foxmail.com>
 Description: A sub-project of Restopicer
 License: MIT
 Depends:
-    RMySQL,compiler,RJSONIO,RCurl,dplyr
+    RMySQL,compiler,RJSONIO,RCurl,dplyr,elasticnet

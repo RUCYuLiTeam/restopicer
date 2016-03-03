@@ -7,7 +7,7 @@ options(encoding = "UTF-8")
 # http://yuedu.baidu.com/ebook/d0b441a8ccbff121dd36839a
 # http://blog.csdn.net/pirage/article/details/9467547
 topicDiscovery.LDA <- function(data,datatype="abstract",
-                               K=10,LDA_method="Gibbs",
+                               K=100,LDA_method="Gibbs",
                                plotPath="output/demo",plotReport=TRUE,papers_tags_df=NULL){
   # step 1:preprocessing corpus
   corpus_dtm <- switch(datatype,
@@ -16,7 +16,7 @@ topicDiscovery.LDA <- function(data,datatype="abstract",
   # step 2:runing LDA model 
   SEED <- 19910513
   corpus_topic <- switch(LDA_method,
-                       "Gibbs" = LDA(corpus_dtm, k = K, method = LDA_method, control = list(seed = SEED, burnin = 1000, thin = 100, iter = 1000)),
+                       "Gibbs" = LDA(corpus_dtm, k = K, method = LDA_method, control = list(seed = SEED, burnin = 1000, thin = 100, iter = 10000)),
                        "VEM" = LDA(corpus_dtm, k = K,method = LDA_method, control = list(seed = SEED)))
   # step 3:doc_topic and topic_term matrix
   topic_posterior <- posterior(corpus_topic)
