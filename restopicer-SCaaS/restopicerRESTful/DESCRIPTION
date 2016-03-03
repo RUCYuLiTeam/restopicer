@@ -9,3 +9,4 @@ Description: A sub-project of Restopicer
 License: MIT
 Depends:
     RMySQL,compiler,RJSONIO,RCurl,dplyr,elasticnet
+LazyData: no
