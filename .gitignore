@@ -59,3 +59,11 @@ restopicer-app/restopicerR/.RData
 restopicer-research/NetworkBasedTopicModel/linkcomm_metaclusters.txt
 restopicer-research/materials/
 restopicer-SCaaS/restopicerRESTful/.RData
+*.xlsx
+*.txt
+*.csv
+*.pdf
+*.zip
+*.jpg
+*.html
+*.net
