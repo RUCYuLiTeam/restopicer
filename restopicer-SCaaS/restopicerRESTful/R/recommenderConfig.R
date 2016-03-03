@@ -4,6 +4,7 @@ getRecommender<-function(recommendername){
            noneRecommender=function(result_relevent,composite_N,...){
              result_relevent[1:min(length(result_relevent),composite_N)]
            },
+           activeRecommender=activeRecommend,
            weightedHybridRecommender=weightedhybridRecommend,
            allotHybridRecommender=allothybridRecommend
     ))
@@ -18,7 +19,8 @@ getPreferenceEvaluator<-function(name){
 getQualityEvaluator<-function(name){
   cmpfun(
     switch(name,
-           citedQualityEval=citedQualityEval
+           citedQualityEval=citedQualityEval,
+           SCIImpactFactorEval=SCIImpactFactorEval
     ))
 }
 getSummaryValueEvaluator<-function(name){
