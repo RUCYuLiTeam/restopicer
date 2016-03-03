@@ -5,6 +5,7 @@
 # if(!require(RCurl)){install.packages("RCurl")}
 # if(!require(dplyr)){install.packages("dplyr")}
 # if(!require(elasticnet)){install.packages("elasticnet")}
+# relevent_N <- 100
 ##### create new mission with unique username #####
 createMission <- function(username){
   #initial emvironment
@@ -71,7 +72,8 @@ goRecommendation <- function(username,relevent_N,recommendername="noneRecommende
     result <- searchingByItemUT(recommendedPapers[recommendedPapers$rating==-1,"item_ut"])
   }else{
     # searching elastic search (relevent_N)
-    result_relevent <- searchingByKeywords(keywords = paste(preferenceKeywords$keyword,sep = " ",collapse = " "),item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N)
+    #result_relevent <- searchingByKeywords(keywords = paste(preferenceKeywords$keyword,sep = " ",collapse = " "),item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N)
+    result_relevent <- searchingByKeywords(keywords = preferenceKeywords[which.max(preferenceKeywords$id),"keyword"],item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N)
     # retrieve by recommender (composite_N)
     doRecommend <- getRecommender(recommendername = recommendername)
     result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,...)
