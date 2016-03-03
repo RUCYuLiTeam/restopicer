@@ -1,3 +1,13 @@
-SCIImpactFactorEval <- function(){
-  
+SCIImpactFactorEval <- function(magazine){
+  switch(toupper(magazine),
+         "ACM TRANSACTIONS ON INFORMATION SYSTEMS" = 1.021,
+         "DECISION SUPPORT SYSTEMS" = 2.313,
+         "ELECTRONIC COMMERCE RESEARCH" = 1.773,
+         "INFORMATION SYSTEMS RESEARCH" = 2.436,
+         "INFORMATION & MANAGEMENT" = 1.865,
+         "INTERNATIONAL JOURNAL OF ELECTRONIC COMMERCE" = 1.872,
+         "JOURNAL OF ELECTRONIC COMMERCE RESEARCH" = 1.229,
+         "JOURNAL OF MANAGEMENT INFORMATION SYSTEMS" = 2.062,
+         "MIS QUARTERLY" = 5.311,
+         1)
 }

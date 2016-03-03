@@ -4,15 +4,23 @@ getRecommender<-function(recommendername){
            noneRecommender=function(result_relevent,composite_N,...){
              result_relevent[1:min(length(result_relevent),composite_N)]
            },
-           activeRecommender=activeRecommend,
-           weightedHybridRecommender=weightedhybridRecommend,
+           weightedHybridRecommender=weightedHybridRecommend,
            allotHybridRecommender=allothybridRecommend
     ))
 }
+# recommender control
+getRecommendController<-function(controllername){
+  cmpfun(
+    switch(controllername,
+           simpleWeightControl=simpleWeightControl
+    ))
+}
 # sub-measures in every recommender
+data(result_LDA_abstarct_gibbs, envir=environment())
 getPreferenceEvaluator<-function(name){
   cmpfun(
     switch(name,
+           elasticNetPreferenceEval=elasticNetPreferenceEval,
            cosPreferenceEval=cosPreferenceEval
     ))
 }
