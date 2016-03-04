@@ -74,7 +74,7 @@ searchingByItemUT <- function(papers){
     if(is.null(result_list)){
       result_list <- tmp
     }else{
-      result_list <- list(result_list,tmp)
+      result_list <- append(result_list,tmp)
     }
   }
   result_list
