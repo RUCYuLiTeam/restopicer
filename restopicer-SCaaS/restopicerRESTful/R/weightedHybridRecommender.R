@@ -15,6 +15,7 @@ weightedHybridRecommend <- function(result_relevent,rated_papers,
     #plot(enetmodel)
   }
   # generate topic by LDA and preprocess for relevent and rated papers
+  # http://stats.stackexchange.com/questions/9315/topic-prediction-using-latent-dirichlet-allocation
   corpus_relevent <- preprocess.abstract.corpus(result_lst = result_relevent)
   predict_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_relevent)
   # get evaluator
