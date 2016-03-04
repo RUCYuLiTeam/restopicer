@@ -41,8 +41,9 @@ topicDiscovery.LDA <- function(data,datatype="abstract",
   }
   result <- NULL
   result$model <- model
-  result$topic_term <- topic_term
-  result$doc_topic <- doc_topic
+  #result$topic_term <- topic_term
+  #result$doc_topic <- doc_topic
+  result$corpus_topic <- corpus_topic
   return(result)
 }
 
@@ -463,6 +464,7 @@ preprocess.abstract.corpus <- function(papers_df){
   })
   # fpattern <- content_transformer(function(x, pattern) gsub(pattern, "", x))
   # complainCorpus <- tm_map(complainCorpus, fpattern, "z*")
+  corpus <- tm_map(corpus, removeWords, c("Elsevier B.V. All rights reserved"))
   corpus <- tm_map(corpus, removePunctuation)
   corpus <- tm_map(corpus, removeNumbers)
   corpus <- tm_map(corpus, content_transformer(tolower))
