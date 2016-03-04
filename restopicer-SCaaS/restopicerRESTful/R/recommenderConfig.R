@@ -16,7 +16,7 @@ getRecommendController<-function(controllername){
     ))
 }
 # sub-measures in every recommender
-data(result_LDA_abstarct_gibbs, envir=environment())
+data(result_LDA_abstarct_VEM, envir=environment())
 getPreferenceEvaluator<-function(name){
   cmpfun(
     switch(name,
@@ -34,7 +34,7 @@ getQualityEvaluator<-function(name){
 getSummaryValueEvaluator<-function(name){
   cmpfun(
     switch(name,
-           topicSummaryEval=topicSummaryEval
+           topicEntropySummaryEval=topicEntropySummaryEval
     ))
 }
 getFreshEvaluator<-function(name){
