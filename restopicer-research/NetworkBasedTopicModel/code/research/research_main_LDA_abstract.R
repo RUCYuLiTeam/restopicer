@@ -3,7 +3,7 @@ rm(list = ls(envir = globalenv()))
 #####
 # required data
 #####
-#load(file = "rdata/research_2011_2013.RData")
+load(file = "rdata/research_2011_2013.RData")
 #load(file = "rdata/research_20Y_1994_2013.RData")
 # if no data, pls run
 # source("code/research/researchDataFetch.R")
@@ -31,16 +31,17 @@ k <- 50
 #    result0 <- result
 #  }
 #}
-result_LDA_abstarct_gibbs <- result
-save(result_LDA_abstarct_gibbs,file = paste("rdata",foldername,"result_LDA_abstarct_gibbs.RData",sep="/"))
+result$model$perplexity
+result_LDA_abstarct_VEM <- result
+save(result_LDA_abstarct_VEM,file = paste("rdata",foldername,"result_LDA_abstarct_VEM.RData",sep="/"))
 # analysis
-load(paste("rdata",foldername,"result_LDA_abstarct_gibbs.RData",sep="/"))
-# doc_topic.taggingtest
-result <- result_LDA_abstarct_gibbs
-doc_topic <- result$doc_topic
-papers_tags_df <- researchPapersSubjectCategory
-parameter <- result$model$parameter
-doc_topic.taggingtest(doc_topic,papers_tags_df,filename = parameter,path = paste(plotPath,parameter,"LeaveOneOut",sep = "/"),LeaveOneOut = T)
+# load(paste("rdata",foldername,"result_LDA_abstarct_gibbs.RData",sep="/"))
+# # doc_topic.taggingtest
+# result <- result_LDA_abstarct_gibbs
+# doc_topic <- result$doc_topic
+# papers_tags_df <- researchPapersSubjectCategory
+# parameter <- result$model$parameter
+# doc_topic.taggingtest(doc_topic,papers_tags_df,filename = parameter,path = paste(plotPath,parameter,"LeaveOneOut",sep = "/"),LeaveOneOut = T)
 #####
 # END
 #####
