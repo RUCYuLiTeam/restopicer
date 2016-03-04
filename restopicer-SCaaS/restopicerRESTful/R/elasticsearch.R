@@ -72,9 +72,9 @@ searchingByItemUT <- function(papers){
                 authors=x$`_source`["authors"],
                 keywords=x$`_source`["keywords"])
     if(is.null(result_list)){
-      result_list <- tmp
+      result_list <- list(tmp)
     }else{
-      result_list <- append(result_list,tmp)
+      result_list <- append(result_list,list(tmp))
     }
   }
   result_list
