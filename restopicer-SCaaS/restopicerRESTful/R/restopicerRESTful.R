@@ -56,7 +56,7 @@ addPreferenceKeywords <- function(username,newkeywords){
   dbDisconnect(conn)
 }
 ##### goRecommendation for current mission #####
-goRecommendation <- function(username,relevent_N,recommendername="noneRecommender",composite_N=relevent_N,...){
+goRecommendation <- function(username,relevent_N=10,recommendername="weightedHybridRecommender",composite_N=5,...){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
