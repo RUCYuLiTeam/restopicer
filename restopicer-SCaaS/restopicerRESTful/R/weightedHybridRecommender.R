@@ -31,6 +31,7 @@ weightedHybridRecommend <- function(result_relevent,rated_papers,
   for(i in 1:length(result_relevent)){
     relevent_lst <- result_relevent[[i]]
     # cal exploration_ability
+    exploration_ability <- 1
     if(exists(x = "enetmodel")){
       exploration_ability <- doEVE(enetmodel = enetmodel,
                                    new_doc_i = i,test_docs = predict_doc$topics,
