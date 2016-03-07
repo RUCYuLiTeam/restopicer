@@ -83,7 +83,8 @@ goRecommendation <- function(username,relevent_N=10,recommendername="weightedHyb
     result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,mission_round=mission_round)
     mission_round <- mission_round + 1
     # save to mysql
-    for(item_ut in result$item_ut){
+    for(tmp in result){
+      item_ut <- tmp$item_ut$item_ut
       dbSendQuery(conn, paste("INSERT INTO preference_paper(mission_id,item_ut,rating,mission_round) VALUES ('",mission_id,"','",item_ut,"',",-1,",",mission_round,")",sep = ""))
     }
     dbSendQuery(conn, paste("UPDATE mission_info SET mission_round=",mission_round," WHERE mission_id=",mission_id,sep = ""))
