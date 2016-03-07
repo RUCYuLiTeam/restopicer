@@ -80,8 +80,8 @@ goRecommendation <- function(username,relevent_N=10,recommendername="weightedHyb
     result_relevent <- searchingByKeywords(keywords = preferenceKeywords[which.max(preferenceKeywords$id),"keyword"],item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N)
     # retrieve by recommender (composite_N)
     doRecommend <- getRecommender(recommendername = recommendername)
-    result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,mission_round=mission_round)
     mission_round <- mission_round + 1
+    result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,mission_round=mission_round)
     # save to mysql
     for(tmp in result){
       item_ut <- tmp$item_ut$item_ut
