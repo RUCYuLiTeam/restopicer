@@ -34,9 +34,9 @@ result_fin <- lapply(result_all,function(res,papers_tags_df){
 },papers_tags_df=researchPapersSubjectCategory)
 #start plot
 plotcolor <- c("brown","green","red","yellow","blue")
-plotlegend <- c("LDA", "InfoMap","CNM","LinkComm","连边渗透(0.15)")
-plot_id <- c(1,4,5)
-path="output/"
+plotlegend <- c("LDA", "InfoMap","CNM","LinkComm","LCP")
+plot_id <- c(1,2,3,5)
+path="output/ROC/"
 taggingtype <- unique(result_fin[[1]][,dim(result_fin[[1]])[2]])
 for(type in taggingtype){
   if(file.exists(paste(type,"leaveoneout.RData",sep = "-"))){
