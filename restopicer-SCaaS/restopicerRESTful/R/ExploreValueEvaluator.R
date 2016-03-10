@@ -5,7 +5,7 @@
 activeExploreEval <- function(enetmodel,#learn a preference approximation function based on the current training set
                               new_doc_i,test_docs,train_docs,train_rating){
   ### extract the coefficient vector with L1 norm fraction=0.5
-  #coef <- predict.enet(enetmodel, s=0.25, type="coef", mode="fraction")
+  #coef <- predict.enet(enetmodel, s=0.5, type="coef", mode="fraction")
   #sum(coef$coefficients!=0)
   test_fits <- predict.enet(object = enetmodel, newx = test_docs, s = 0.5, type = "fit",mode = "fraction")
   # generate new training set : add a hypothetical training point
