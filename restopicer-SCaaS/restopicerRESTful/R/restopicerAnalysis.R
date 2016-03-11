@@ -97,16 +97,16 @@ showERRORPath <- function(username){
   train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
   # build elastic model and get mean square error
   fit_error <- c()
-  for(round in 1:mission_round){
+  for(round in 1:(mission_round-1)){
     enetmodel <- enet(x = I(train_doc$topics[rated_papers$mission_round<=round,]),
                       y = rated_papers$rating[rated_papers$mission_round<=round],
                       lambda=0.5,normalize = F,intercept = T)
     fits <- predict.enet(object = enetmodel,
-                         newx = train_doc$topics,
+                         newx = train_doc$topics[rated_papers$mission_round==round+1,],
                          s = 0.5,type = "fit",mode = "fraction")
-    fit_error <- c(fit_error,mean((fits$fit - rated_papers$rating)^2))
+    fit_error <- c(fit_error,mean((fits$fit - rated_papers$rating[rated_papers$mission_round==round+1])^2))
   }
-  plot(x = 1:mission_round,y = fit_error,type = "o",
+  plot(x = 1:(mission_round-1),y = fit_error,type = "o",
        xlab = "Round",ylab = "Fitted Mean Square Error")
 }
 showPreferenceWordCloud <- function(username,showround=0){
