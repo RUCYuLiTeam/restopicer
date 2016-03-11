@@ -6,12 +6,12 @@ options(encoding = "UTF-8")
 #####
 # http://yuedu.baidu.com/ebook/d0b441a8ccbff121dd36839a
 # http://blog.csdn.net/pirage/article/details/9467547
-topicDiscovery.LDA <- function(data,datatype="abstract",
+topicDiscovery.LDA <- function(data,datatype="abstract",keyword_dic=NULL,
                                K=100,LDA_method="Gibbs",
                                plotPath="output/demo",plotReport=TRUE,papers_tags_df=NULL){
   # step 1:preprocessing corpus
   corpus_dtm <- switch(datatype,
-              "abstract" = preprocess.abstract.corpus(data),
+              "abstract" = preprocess.abstract.corpus(data,keyword_dic=keyword_dic),
               "keywords" = preprocess.keywords.corpus(data))
   # step 2:runing LDA model 
   SEED <- 19910513
@@ -34,7 +34,7 @@ topicDiscovery.LDA <- function(data,datatype="abstract",
   if(!file.exists(file.path(plotPath,model$parameter))) dir.create(file.path(plotPath,model$parameter),recursive = TRUE)
   write.table(as.data.frame(model),file = file.path(plotPath,model$parameter,"modeltest.txt"),quote = F,sep = "\t",row.names = F,col.names = T)
   # doc_topic for taggingtest
-  doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = T)
+  #doc_topic.taggingtest(doc_topic,papers_tags_df,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"),LeaveOneOut = T)
   if(plotReport){
     # matrix plot
     plotReport.bipartite.matrix(corpus_dtm,topic_term,doc_topic,filename = model$parameter,path = paste(plotPath,model$parameter,sep = "/"))
@@ -450,7 +450,7 @@ topicDiscovery.linkcomm.bipartite <- function(data,datatype="keywords",weight="d
 #####
 # preprocessing method
 #####
-preprocess.abstract.corpus <- function(papers_df){
+preprocess.abstract.corpus <- function(papers_df,keyword_dic){
   data <- unique(papers_df)
   corpus <- VCorpus(VectorSource(data$abstract))
   l_ply(.data = 1:length(corpus),.fun = function(i){
@@ -477,9 +477,9 @@ preprocess.abstract.corpus <- function(papers_df){
   # control <- list(weighting = weightTf, tokenize= strsplit_space_tokenizer,
   #                 tolower = TRUE, removePunctuation = TRUE, removeNumbers = TRUE, stopwords = TRUE, stemming = TRUE,
   #                 dictionary = NULL, bounds = list(local = c(1, Inf)), wordLengths = c(3, Inf))
-  control <- list(weighting = weightTf, tokenize= words,
+  control <- list(weighting = weightTf, tokenize = words,
                   tolower = TRUE, removePunctuation = TRUE, removeNumbers = TRUE, stopwords = TRUE, stemming = FALSE,
-                  dictionary = NULL, bounds = list(local = c(1, Inf)), wordLengths = c(3, Inf))
+                  dictionary = keyword_dic, bounds = list(local = c(1, Inf)), wordLengths = c(3, Inf))
   corpus_dtm <- DocumentTermMatrix(corpus,control)
   corpus_dtm
 }
@@ -566,13 +566,13 @@ plotReport.bipartite.matrix <- function(corpus_dtm,topic_term,doc_topic,filename
     }
   }
   # transpose = FALSE
-  plotBipartiteMatrixReport(filename = filename,bi_matrix = corpus_dtm,path = paste(path,"document_term",sep = "/"),showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
-  plotBipartiteMatrixReport(filename = filename,bi_matrix = topic_term,path = paste(path,"topic_term",sep = "/"),showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
-  plotBipartiteMatrixReport(filename = filename,bi_matrix = doc_topic,path = paste(path,"doc_topic",sep = "/"),showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
+  #plotBipartiteMatrixReport(filename = filename,bi_matrix = corpus_dtm,path = paste(path,"document_term",sep = "/"),showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
+  plotBipartiteMatrixReport(filename = filename,bi_matrix = topic_term,path = paste(path,"topic_term",sep = "/"),showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = F, plotRowDist = TRUE, plotModules = FALSE)
+  #plotBipartiteMatrixReport(filename = filename,bi_matrix = doc_topic,path = paste(path,"doc_topic",sep = "/"),showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = TRUE, plotWordCloud = TRUE, plotRowComparison = TRUE, plotRowDist = TRUE, plotModules = FALSE)
   # transpose = TRUE
-  plotBipartiteMatrixReport(filename = filename,bi_matrix = corpus_dtm,transpose = TRUE,path = paste(path,"document_term",sep = "/"),showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = TRUE, plotModules = FALSE)
-  plotBipartiteMatrixReport(filename = filename,bi_matrix = topic_term,transpose = TRUE,path = paste(path,"topic_term",sep = "/"),showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = TRUE, plotModules = FALSE)
-  plotBipartiteMatrixReport(filename = filename,bi_matrix = doc_topic,transpose = TRUE,path = paste(path,"doc_topic",sep = "/"),showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = TRUE, plotModules = FALSE)
+  #plotBipartiteMatrixReport(filename = filename,bi_matrix = corpus_dtm,transpose = TRUE,path = paste(path,"document_term",sep = "/"),showNamesInPlot = FALSE, weightType = "tfidf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = TRUE, plotModules = FALSE)
+  #plotBipartiteMatrixReport(filename = filename,bi_matrix = topic_term,transpose = TRUE,path = paste(path,"topic_term",sep = "/"),showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = TRUE, plotModules = FALSE)
+  #plotBipartiteMatrixReport(filename = filename,bi_matrix = doc_topic,transpose = TRUE,path = paste(path,"doc_topic",sep = "/"),showNamesInPlot = FALSE, weightType = "tf", plotRowWordCloud = FALSE, plotWordCloud = FALSE, plotRowComparison = FALSE, plotRowDist = TRUE, plotModules = FALSE)
 }
 #####
 # document tagging test for doc_topic

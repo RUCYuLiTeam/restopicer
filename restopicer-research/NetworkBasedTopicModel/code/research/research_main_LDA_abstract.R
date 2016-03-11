@@ -3,7 +3,8 @@ rm(list = ls(envir = globalenv()))
 #####
 # required data
 #####
-load(file = "rdata/research_2011_2013.RData")
+#load(file = "rdata/research_2011_2013.RData")
+load(file = "rdata/research_2009_2013.RData")
 #load(file = "rdata/research_20Y_1994_2013.RData")
 # if no data, pls run
 # source("code/research/researchDataFetch.R")
@@ -24,9 +25,10 @@ addPersistentObjects("foldername")
 #####
 rmTempObject()
 k <- 50
+#keyword_dic <- unique(researchPapersKeywords$author_keyword)
 #result0 <- NULL
 #for(k in seq(from = 10,to = 100,by = 10)){
-  result <- topicDiscovery.LDA(data = researchPapers,datatype = "abstract",K = k,LDA_method = "VEM",plotPath,plotReport = F,papers_tags_df = researchPapersSubjectCategory)
+  result <- topicDiscovery.LDA(data = researchPapers,keyword_dic = NULL,datatype = "abstract",K = k,LDA_method = "VEM",plotPath,plotReport = T,papers_tags_df = researchPapersSubjectCategory)
 #  if(is.null(result0)||(result$model$perplexity<=result0$model$perplexity)){
 #    result0 <- result
 #  }
