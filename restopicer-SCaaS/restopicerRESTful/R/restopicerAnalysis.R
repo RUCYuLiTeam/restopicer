@@ -151,3 +151,22 @@ showPreferenceWordCloud <- function(username,showround=0){
   par(fig = c(0,1,0,0.1), mar = c(0, 1, 0, 1), new=TRUE)
   display.brewer.pal(9, "Blues")
 }
+showRatingPath <- function(username){
+  currentMission <- getCurrentMissionInfo(username = username)
+  mission_id <- currentMission$mission_id
+  mission_round <- currentMission$mission_round - 1
+  # get connect
+  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+  #dbListTables(conn)
+  # get All recmmended papers
+  res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
+  recommendedPapers <- dbFetch(res,n = -1)
+  dbClearResult(res)
+  dbDisconnect(conn)
+  rated_papers <- recommendedPapers[recommendedPapers$rating != -1,]
+  if(mission_round<=1) return(NULL)
+  # get average ratings
+  df <- rated_papers %>% group_by(mission_round) %>% summarize(mrating=mean(rating))
+  plot(x = df$mission_round,y = df$mrating,type = "o",
+       xlab = "Round",ylab = "Mean Ratings")
+}
