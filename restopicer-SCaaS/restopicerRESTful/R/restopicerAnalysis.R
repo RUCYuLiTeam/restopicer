@@ -138,8 +138,9 @@ showPreferenceWordCloud <- function(username,showround=0){
   tmp <- coef$coefficients %*% train_doc$terms - min(coef$coefficients %*% train_doc$terms)
   tmp <- as.numeric(tmp)
   names(tmp) <- colnames(train_doc$terms)
-  tmp <- (tmp + mean(tmp))*10
-  summary(tmp)
+  tmp <- (tmp + mean(tmp))*10+1
+  #tmp<- tmp+min(tmp)
+  #summary(tmp)
   # word cloud
   par(fig = c(0,1,0.1,1),mar = c(0,0,0,0))
   pal <- brewer.pal(9,"Blues")[4:9]
