@@ -56,23 +56,45 @@ addPreferenceKeywords <- function(username,newkeywords){
   }
   dbDisconnect(conn)
 }
+
+
 ##### goRecommendation for current mission #####
-goRecommendation <- function(username,relevent_N=10,recommendername="weightedHybridRecommender",composite_N=5,...){
+goRecommendation <- function(username,relevent_N=50,recommendername="weightedHybridRecommender",composite_N=5,...){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
   # get connect
   conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
   #dbListTables(conn)
+
+  
+  if(mission_round==1){
+    
+    res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id=",mission_id," AND rating <> -1",sep = ""))
+    recommendedPapers1 <- dbFetch(res,n = -1)
+    dbClearResult(res)
+    
+    normrating=  rnorm(5, mean = 0, sd = 0.5)
+    i<-1
+    for(lrating in normrating){
+      ratevalue= lrating + recommendedPapers1[i,]$rating
+      repaperitem_ut <- recommendedPapers1[i,]$item_ut
+      dbSendQuery(conn, paste("UPDATE preference_paper SET rating=",ratevalue," WHERE item_ut=",repaperitem_ut,sep = ""))
+      i<-i+1
+    }
+  }
   # get All recmmended papers
   res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
   recommendedPapers <- dbFetch(res,n = -1)
   dbClearResult(res)
+  
+
+  
   # get All preference keywords
   res <- dbSendQuery(conn, paste("SELECT * FROM preference_keyword WHERE mission_id = ",mission_id))
   preferenceKeywords <- dbFetch(res,n = -1)
   dbClearResult(res)
-  if(any(recommendedPapers$rating==-1)){
+  if(any(recommendedPapers$rating <= 0)){
     # searching elastic search
     result <- searchingByItemUT(recommendedPapers[recommendedPapers$rating==-1,"item_ut"])
   }else{
@@ -88,6 +110,7 @@ goRecommendation <- function(username,relevent_N=10,recommendername="weightedHyb
       item_ut <- tmp$item_ut$item_ut
       dbSendQuery(conn, paste("INSERT INTO preference_paper(mission_id,item_ut,rating,mission_round) VALUES ('",mission_id,"','",item_ut,"',",-1,",",mission_round,")",sep = ""))
     }
+
     dbSendQuery(conn, paste("UPDATE mission_info SET mission_round=",mission_round," WHERE mission_id=",mission_id,sep = ""))
   }
   dbDisconnect(conn)
