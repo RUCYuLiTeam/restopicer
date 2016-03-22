@@ -7,6 +7,8 @@ searchLocation <- paste(es_location,"_search",sep = "/")
 # 1975 to 2013
 # Article
 searchingByKeywords <- function(keywords,relevent_N,item_ut_already_list){
+  query_must <- preferenceKeywords[which.max(preferenceKeywords$id),"keyword"]
+  query_should <- paste(preferenceKeywords[-which.max(preferenceKeywords$id),"keyword"],sep = " ",collapse = " ")
   must_not_body <- paste(lapply(item_ut_already_list, function(item_ut){
     paste('{
           \"query_string\": { \"default_field\": \"paper.item_ut\",\"query\": \"',item_ut,'\"}
@@ -20,29 +22,42 @@ searchingByKeywords <- function(keywords,relevent_N,item_ut_already_list){
               \"range\": {
                   \"paper.publication_year\": {
                   \"from\": \"1975\",
-                  \"to\": \"2013\"
+                  \"to\": \"2014\"
                 }
               }
             },
             {
-              \"query_string\": {
-                \"default_field\": \"paper.document_type\",
-                \"query\": \"Article\"
+              \"term\": {
+                \"paper.document_type\": \"Article\"
               }
             }],
-              \"must_not\":[',must_not_body,'],
-              \"should\": 
-                [{
-                  \"query_string\": {
-                    \"default_field\": \"_all\",
-                    \"query\": "',keywords,'"
+            \"must_not\":[',must_not_body,'],
+            \"should\": 
+              [{
+                  \"multi_match\": {
+                    \"query\": "',query_must,'",
+                    \"type\": \"best_fields\",
+                    \"fields\": [ \"paper.article_title^3\",\"paper.abstract^3\",\"paper.keywords\" ],
+                    \"operator\": \"and\",
+                    \"tie_breaker\": 0.3,
+                    \"boost\": 3
               }
-          }]
-        }
-      },
-      \"from\": 0,
-      \"size\": ',relevent_N,'
-    }',sep = "")
+            },
+            {
+              \"multi_match\": {
+                \"query\": "',query_should,'",
+                \"type\": \"best_fields\",
+                \"fields\": [ \"paper.article_title^3\",\"paper.abstract^3\",\"paper.keywords\" ],
+                \"operator\": \"or\",
+                \"tie_breaker\": 0.3,
+                \"boost\": 1
+              }
+            }]
+          }
+        },
+        \"from\": 0,
+        \"size\": ',relevent_N,'
+      }',sep = "")
   result <- try(fromJSON(httpPOST(searchLocation,postfields = jsonbody)),silent = T)
   result_list <- lapply(result$hits$hits,function(x){
     list(item_ut=x$`_source`["item_ut"],
@@ -53,7 +68,8 @@ searchingByKeywords <- function(keywords,relevent_N,item_ut_already_list){
          issue=x$`_source`["issue"],
          publication_year=x$`_source`["publication_year"],
          authors=x$`_source`["authors"],
-         keywords=x$`_source`["keywords"])
+         keywords=x$`_source`["keywords"],
+         score=x$`_score`)
   })
   result_list
 }
@@ -70,7 +86,8 @@ searchingByItemUT <- function(papers){
                 issue=x$`_source`["issue"],
                 publication_year=x$`_source`["publication_year"],
                 authors=x$`_source`["authors"],
-                keywords=x$`_source`["keywords"])
+                keywords=x$`_source`["keywords"],
+                score=x$`_score`)
     if(is.null(result_list)){
       result_list <- list(tmp)
     }else{
