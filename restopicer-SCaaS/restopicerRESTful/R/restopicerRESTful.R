@@ -59,7 +59,7 @@ addPreferenceKeywords <- function(username,newkeywords){
 
 
 ##### goRecommendation for current mission #####
-goRecommendation <- function(username,relevent_N=1000,recommendername="preferenceHybridRecommender",composite_N=5,...){
+goRecommendation <- function(username,relevent_N=1000,recommendername="exploreHybridRecommender",composite_N=5,...){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
