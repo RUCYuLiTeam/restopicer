@@ -4,6 +4,8 @@ getRecommender<-function(recommendername){
            noneRecommender=function(result_relevent,composite_N,...){
              result_relevent[1:min(length(result_relevent),composite_N)]
            },
+           preferenceOnlyRecommender=preferenceOnlyRecommend,
+           exploreHybridRecommender=exploreHybridRecommend,
            weightedHybridRecommender=weightedHybridRecommend,
            allotHybridRecommender=allothybridRecommend
     ))
