@@ -27,8 +27,9 @@ searchingByKeywords <- function(keywords,relevent_N,item_ut_already_list){
               }
             },
             {
-              \"term\": {
-                \"paper.document_type\": \"Article\"
+              \"query_string\": {
+                \"default_field\": \"paper.document_type\",
+                \"query\": \"Article\"
               }
             }],
             \"must_not\":[',must_not_body,'],
