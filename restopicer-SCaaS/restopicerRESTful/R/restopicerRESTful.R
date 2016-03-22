@@ -89,7 +89,6 @@ goRecommendation <- function(username,relevent_N=1000,recommendername="preferenc
       item_ut <- tmp$item_ut$item_ut
       dbSendQuery(conn, paste("INSERT INTO preference_paper(mission_id,item_ut,rating,mission_round) VALUES ('",mission_id,"','",item_ut,"',",-1,",",mission_round,")",sep = ""))
     }
-
     dbSendQuery(conn, paste("UPDATE mission_info SET mission_round=",mission_round," WHERE mission_id=",mission_id,sep = ""))
   }
   dbDisconnect(conn)
