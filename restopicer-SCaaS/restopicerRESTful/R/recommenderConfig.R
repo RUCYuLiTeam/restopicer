@@ -14,12 +14,13 @@ getRecommender<-function(recommendername){
 getRecommendController<-function(controllername){
   cmpfun(
     switch(controllername,
-           simpleWeightControl=simpleWeightControl
+           simpleWeightControl=simpleWeightControl,
+           hybridWeightControl=hybridWeightControl
     ))
 }
 # sub-measures in every recommender
 data(result_LDA_abstarct_VEM, envir=environment())
-getPreferenceEvaluator<-function(name){
+getRatingEvaluator<-function(name){
   cmpfun(
     switch(name,
            elasticNetPreferenceEval=elasticNetPreferenceEval,
@@ -45,7 +46,7 @@ getFreshEvaluator<-function(name){
            yearDiffReciprocalFreshEval=yearDiffReciprocalFreshEval
     ))
 }
-getExploreValueEvaluator<-function(name){
+getLearnValueEvaluator<-function(name){
   cmpfun(
     switch(name,
            activeExploreEval=activeExploreEval
