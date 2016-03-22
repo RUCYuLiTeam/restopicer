@@ -8,7 +8,7 @@
 # if(!require(topicmodels)){install.packages("topicmodels")}
 # if(!require(tm)){install.packages("tm")}
 # if(!require(wordcloud)){install.packages("wordcloud")}
-# relevent_N <- 100
+# relevent_N <- 1000
 # composite_N <- 5
 # recommendername <- "weightedHybridRecommender"
 ##### create new mission with unique username #####
@@ -59,37 +59,17 @@ addPreferenceKeywords <- function(username,newkeywords){
 
 
 ##### goRecommendation for current mission #####
-goRecommendation <- function(username,relevent_N=50,recommendername="weightedHybridRecommender",composite_N=5,...){
+goRecommendation <- function(username,relevent_N=1000,recommendername="preferenceHybridRecommender",composite_N=5,...){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
   # get connect
   conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
   #dbListTables(conn)
-
-  
-  if(mission_round==1){
-    
-    res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id=",mission_id," AND rating <> -1",sep = ""))
-    recommendedPapers1 <- dbFetch(res,n = -1)
-    dbClearResult(res)
-    
-    normrating=  rnorm(5, mean = 0, sd = 0.5)
-    i<-1
-    for(lrating in normrating){
-      ratevalue= lrating + recommendedPapers1[i,]$rating
-      repaperitem_ut <- recommendedPapers1[i,]$item_ut
-      dbSendQuery(conn, paste("UPDATE preference_paper SET rating=",ratevalue," WHERE item_ut=",repaperitem_ut,sep = ""))
-      i<-i+1
-    }
-  }
   # get All recmmended papers
   res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
   recommendedPapers <- dbFetch(res,n = -1)
   dbClearResult(res)
-  
-
-  
   # get All preference keywords
   res <- dbSendQuery(conn, paste("SELECT * FROM preference_keyword WHERE mission_id = ",mission_id))
   preferenceKeywords <- dbFetch(res,n = -1)
@@ -99,8 +79,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="weightedHyb
     result <- searchingByItemUT(recommendedPapers[recommendedPapers$rating==-1,"item_ut"])
   }else{
     # searching elastic search (relevent_N)
-    #result_relevent <- searchingByKeywords(keywords = paste(preferenceKeywords$keyword,sep = " ",collapse = " "),item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N)
-    result_relevent <- searchingByKeywords(keywords = preferenceKeywords[which.max(preferenceKeywords$id),"keyword"],item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N)
+    result_relevent <- searchingByKeywords(keywords = preferenceKeywords$keyword,item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N)
     # retrieve by recommender (composite_N)
     doRecommend <- getRecommender(recommendername = recommendername)
     mission_round <- mission_round + 1
