@@ -56,7 +56,7 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
                                            row.names = F,stringsAsFactors = F))
   }
   # cal preference of rating
-  if(exists(x = "enetmodel"))  df_result_relevent$exploitation_rating <- doLE(enetmodel = enetmodel,predict_new_docs = predict_doc$topics)
+  if(exists(x = "enetmodel"))  df_result_relevent$exploitation_rating <- doRE(enetmodel = enetmodel,predict_new_docs = predict_doc$topics)
   # scaling
   df_result_relevent$exploitation_relevent <- scale(df_result_relevent$exploitation_relevent,center = F,scale = T)
   df_result_relevent$exploitation_relevent <- df_result_relevent$exploitation_relevent/max(df_result_relevent$exploitation_relevent)
