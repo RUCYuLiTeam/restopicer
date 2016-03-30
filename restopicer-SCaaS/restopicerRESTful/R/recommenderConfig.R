@@ -4,10 +4,10 @@ getRecommender<-function(recommendername){
            noneRecommender=function(result_relevent,composite_N,...){
              result_relevent[1:min(length(result_relevent),composite_N)]
            },
-           preferenceOnlyRecommender=preferenceOnlyRecommend,
-           exploreHybridRecommender=exploreHybridRecommend,
-           weightedHybridRecommender=weightedHybridRecommend,
-           allotHybridRecommender=allothybridRecommend
+           exploreHybridRecommend= exploreHybridRecommend,
+           preferenceOnlyRecommend= preferenceOnlyRecommend,
+           weightedHybridRecommend= weightedHybridRecommend,
+           allotHybridRecommend= allotHybridRecommend
     ))
 }
 # recommender control
@@ -20,7 +20,7 @@ getRecommendController<-function(controllername){
 }
 # sub-measures in every recommender
 data(result_LDA_abstarct_VEM, envir=environment())
-getRatingEvaluator<-function(name){
+getPreferenceEvaluator<-function(name){
   cmpfun(
     switch(name,
            elasticNetPreferenceEval=elasticNetPreferenceEval,
@@ -46,7 +46,7 @@ getFreshEvaluator<-function(name){
            yearDiffReciprocalFreshEval=yearDiffReciprocalFreshEval
     ))
 }
-getLearnValueEvaluator<-function(name){
+getExploreValueEvaluator<-function(name){
   cmpfun(
     switch(name,
            activeExploreEval=activeExploreEval
