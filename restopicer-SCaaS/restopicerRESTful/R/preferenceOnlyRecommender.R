@@ -27,7 +27,8 @@ preferenceOnlyRecommend <- function(result_relevent,rated_papers,
   predict_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_relevent)
   # get evaluator
   # for preference (rating exploitation)
-  doRE <- getRatingEvaluator(name = "elasticNetPreferenceEval")
+  doRE <- getPreferenceEvaluator(name = "elasticNetPreferenceEval")
+  doLVE <- getExploreValueEvaluator(name = "activeExploreEval")
   # for exploration
   # ready to loop
   df_result_relevent <- data.frame()
