@@ -6,7 +6,7 @@ searchLocation <- paste(es_location,"_search",sep = "/")
 #searching on elastic search
 # 1975 to 2013
 # Article
-searchingByKeywords <- function(keywords,relevent_N,item_ut_already_list){
+searchingByKeywords <- function(keywords,relevent_N,item_ut_already_list,preferenceKeywords){
   query_must <- preferenceKeywords[which.max(preferenceKeywords$id),"keyword"]
   query_should <- paste(preferenceKeywords[-which.max(preferenceKeywords$id),"keyword"],sep = " ",collapse = " ")
   must_not_body <- paste(lapply(item_ut_already_list, function(item_ut){
@@ -38,7 +38,7 @@ searchingByKeywords <- function(keywords,relevent_N,item_ut_already_list){
                   \"multi_match\": {
                     \"query\": "',query_must,'",
                     \"type\": \"best_fields\",
-                    \"fields\": [ \"paper.article_title^3\",\"paper.abstract^3\",\"paper.keywords\" ],
+                    \"fields\": [ \"paper.article_title^5\",\"paper.abstract^2\",\"paper.keywords^3\" ],
                     \"operator\": \"and\",
                     \"tie_breaker\": 0.3,
                     \"boost\": 3
@@ -48,7 +48,7 @@ searchingByKeywords <- function(keywords,relevent_N,item_ut_already_list){
               \"multi_match\": {
                 \"query\": "',query_should,'",
                 \"type\": \"best_fields\",
-                \"fields\": [ \"paper.article_title^3\",\"paper.abstract^3\",\"paper.keywords\" ],
+                \"fields\": [ \"paper.article_title^5\",\"paper.abstract^2\",\"paper.keywords^3\" ],
                 \"operator\": \"or\",
                 \"tie_breaker\": 0.3,
                 \"boost\": 1
