@@ -57,7 +57,7 @@ addPreferenceKeywords <- function(username,newkeywords){
   dbDisconnect(conn)
 }
 ##### goRecommendation for current mission #####
-goRecommendation <- function(username,relevent_N=1000,recommendername="exploreHybridRecommender",composite_N=5,...){
+goRecommendation <- function(username,relevent_N=1000,recommendername="exploreHybridRecommend",composite_N=5,...){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
@@ -74,10 +74,18 @@ goRecommendation <- function(username,relevent_N=1000,recommendername="exploreHy
   dbClearResult(res)
   if(any(recommendedPapers$rating <= 0)){
     # searching elastic search
-    result <- searchingByItemUT(recommendedPapers[recommendedPapers$rating==-1,"item_ut"])
+    result <- searchingByItemUT(recommendedPapers[recommendedPapers$rating==-1,"item_ut"])    
+    for(i in 1:length(result)){
+      result_title <- result[[i]]$item_ut
+      # get rec_score
+      result_weightHybrid<- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score"]
+      #result_weightHybrid<- result_weightHybrid[1]
+      result[[i]]$weightedHybrid<-result_weightHybrid
+    }
+    
   }else{
     # searching elastic search (relevent_N)
-    result_relevent <- searchingByKeywords(keywords = preferenceKeywords$keyword,item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N)
+    result_relevent <- searchingByKeywords(keywords = preferenceKeywords$keyword,item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N,preferenceKeywords=preferenceKeywords)
     # retrieve by recommender (composite_N)
     doRecommend <- getRecommender(recommendername = recommendername)
     mission_round <- mission_round + 1
@@ -85,7 +93,8 @@ goRecommendation <- function(username,relevent_N=1000,recommendername="exploreHy
     # save to mysql
     for(tmp in result){
       item_ut <- tmp$item_ut$item_ut
-      dbSendQuery(conn, paste("INSERT INTO preference_paper(mission_id,item_ut,rating,mission_round) VALUES ('",mission_id,"','",item_ut,"',",-1,",",mission_round,")",sep = ""))
+      rec_score<- tmp$weightedHybrid
+      dbSendQuery(conn, paste("INSERT INTO preference_paper(mission_id,item_ut,rating,mission_round,rec_score) VALUES ('",mission_id,"','",item_ut,"',",-1,",",mission_round,",",rec_score,")",sep = ""))
     }
     dbSendQuery(conn, paste("UPDATE mission_info SET mission_round=",mission_round," WHERE mission_id=",mission_id,sep = ""))
   }
