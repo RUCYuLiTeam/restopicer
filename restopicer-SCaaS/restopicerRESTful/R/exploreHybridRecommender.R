@@ -27,9 +27,9 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
   predict_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_relevent)
   # get evaluator
   # for preference (rating exploitation)
-  doRE <- getRatingEvaluator(name = "elasticNetPreferenceEval")
+  doRE <- getPreferenceEvaluator(name = "elasticNetPreferenceEval")
   # for exploration
-  doLVE <- getLearnValueEvaluator(name = "activeExploreEval")
+  doLVE <- getExploreValueEvaluator(name = "activeExploreEval")
   doQE <- getQualityEvaluator(name = "SCIImpactFactorEval")
   doSVE <- getSummaryValueEvaluator(name = "topicEntropySummaryEval")
   doFE <- getFreshEvaluator(name = "yearDiffReciprocalFreshEval")
@@ -80,7 +80,19 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
     df_result_relevent$exploration_quality * weight_lst$exploration_quality_w +
     df_result_relevent$exploration_summary * weight_lst$exploration_summary_w +
     df_result_relevent$exploration_fresh * weight_lst$exploration_fresh_w
+  #scale
+  df_result_relevent$weightedHybrid <- scale(df_result_relevent$weightedHybrid,center = F,scale = T)
+  df_result_relevent$weightedHybrid <- 5*df_result_relevent$weightedHybrid/max(df_result_relevent$weightedHybrid)
+  for(i in 1:length(result_relevent)){
+    relevent_title <- result_relevent[[i]]$item_ut
+    # get weightHybrid
+    relevent_weightHybrid<- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"weightedHybrid"]
+    relevent_weightHybrid<-relevent_weightHybrid[1]
+    result_relevent[[i]]$weightedHybrid<-relevent_weightHybrid
+  }
+  
   result_relevent[order(df_result_relevent$weightedHybrid,decreasing = T)[1:min(length(result_relevent),composite_N)]]
+  
 }
 # preprocessing for abstract corpus
 preprocess.abstract.corpus <- function(result_lst){
