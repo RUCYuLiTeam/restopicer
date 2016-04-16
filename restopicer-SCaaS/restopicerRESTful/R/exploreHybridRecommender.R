@@ -1,7 +1,7 @@
 exploreHybridRecommend <- function(result_relevent,rated_papers,
                                    topics_filepath,
                                    mission_round,
-                                   composite_N,...){
+                                   composite_N,dropped_topic,...){
   # for not new mission to train enet model
   if(mission_round!=1 && !is.null(rated_papers) && nrow(rated_papers)>=2){
     # preprocess for relevent and rated papers
@@ -9,6 +9,8 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
     corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
     # generate topic by LDA
     train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
+    #dropped topics for enet
+    if(length(dropped_topic$topic_drop)!=0)  train_doc$topics <- train_doc$topics[,-dropped_topic$topic_drop]
     # model bug fix needed (new feature selection method, should not use LASSO)
     # all the rating are equal
     rated_bool <- (rated_papers$rating!=-1)
@@ -25,6 +27,8 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
   # http://stats.stackexchange.com/questions/9315/topic-prediction-using-latent-dirichlet-allocation
   corpus_relevent <- preprocess.abstract.corpus(result_lst = result_relevent)
   predict_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_relevent)
+  #dropped topics for enet
+  if(length(dropped_topic$topic_drop)!=0)  predict_doc$topics <- predict_doc$topics[,-dropped_topic$topic_drop]
   # get evaluator
   # for preference (rating exploitation)
   doRE <- getPreferenceEvaluator(name = "elasticNetPreferenceEval")
@@ -34,6 +38,7 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
   doSVE <- getSummaryValueEvaluator(name = "topicEntropySummaryEval")
   doFE <- getFreshEvaluator(name = "yearDiffReciprocalFreshEval")
   # ready to loop
+  #df_result_relevent <- data.frame()
   df_result_relevent <- data.frame()
   for(i in 1:length(result_relevent)){
     relevent_lst <- result_relevent[[i]]
@@ -41,8 +46,8 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
     learn_ability <- 1
     if(exists(x = "enetmodel")){
       learn_ability <- doLVE(enetmodel = enetmodel,
-                                   new_doc_i = i,test_docs = predict_doc$topics,
-                                   train_docs = train_doc$topics,train_rating = rated_papers$rating)
+                             new_doc_i = i,test_docs = predict_doc$topics,
+                             train_docs = train_doc$topics,train_rating = rated_papers$rating)
     }
     # rbind (should not sorted)
     df_result_relevent <- rbind(df_result_relevent,
@@ -109,6 +114,7 @@ preprocess.abstract.corpus <- function(result_lst){
   corpus <- tm_map(corpus, content_transformer(tolower))
   corpus <- tm_map(corpus, removeWords, stopwords("SMART"))
   corpus <- tm_map(corpus, removeWords, stopwords("en"))
+  #corpus <- tm_map(corpus, removeWords, stopwords("service"))
   corpus <- tm_map(corpus, stripWhitespace)
   strsplit_space_tokenizer <- function(x){
     unlist(strsplit(as.character(x), "[[:space:]]+"))
@@ -122,3 +128,28 @@ preprocess.abstract.corpus <- function(result_lst){
   corpus_dtm <- DocumentTermMatrix(corpus,control)
   corpus_dtm
 }  
+#ready to loop
+result_relevent_loop<- function(result_relevent){
+  df_result_relevent <- data.frame()
+  for(i in 1:length(result_relevent)){
+  relevent_lst <- result_relevent[[i]]
+  # cal learn_ability
+  learn_ability <- 1
+  if(exists(x = "enetmodel")){
+    learn_ability <- doLVE(enetmodel = enetmodel,
+                           new_doc_i = i,test_docs = predict_doc$topics,
+                           train_docs = train_doc$topics,train_rating = rated_papers$rating)
+  }
+  # rbind (should not sorted)
+  df_result_relevent <- rbind(df_result_relevent,
+                              data.frame(item_ut=relevent_lst$item_ut$item_ut,
+                                         exploitation_relevent = relevent_lst$score,
+                                         exploitation_rating = 1,
+                                         exploration_learn = learn_ability,
+                                         exploration_quality = doQE(magazine = relevent_lst$magazine$full_source_title),
+                                         exploration_summary = doSVE(z = predict_doc$topics[i,]),
+                                         exploration_fresh = doFE(publication_year = relevent_lst$publication_year$publication_year),
+                                         row.names = F,stringsAsFactors = F))
+}
+  return(df_result_relevent)
+}
