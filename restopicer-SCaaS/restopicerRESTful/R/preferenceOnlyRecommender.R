@@ -62,18 +62,6 @@ preferenceOnlyRecommend <- function(result_relevent,rated_papers,
   df_result_relevent$weightedHybrid <- 
     df_result_relevent$exploitation_relevent * weight_lst$exploitation_relevent_w +
     df_result_relevent$exploitation_rating * weight_lst$exploitation_rating_w
-  
-  df_result_relevent$weightedHybrid <- scale(df_result_relevent$weightedHybrid,center = F,scale = T)
-  df_result_relevent$weightedHybrid <- 5*df_result_relevent$weightedHybrid/max(df_result_relevent$weightedHybrid)
-  df_result_relevent$weightedHybrid <- round(df_result_relevent$weightedHybrid,2)
-  for(i in 1:length(result_relevent)){
-    relevent_title <- result_relevent[[i]]$item_ut
-    # get weightHybrid
-    relevent_weightHybrid<- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"weightedHybrid"]
-    relevent_weightHybrid<-relevent_weightHybrid[1]
-    result_relevent[[i]]$weightedHybrid<-relevent_weightHybrid
-  }
-  
   result_relevent[order(df_result_relevent$weightedHybrid,decreasing = T)[1:min(length(result_relevent),composite_N)]]
 }
 # preprocessing for abstract corpus
