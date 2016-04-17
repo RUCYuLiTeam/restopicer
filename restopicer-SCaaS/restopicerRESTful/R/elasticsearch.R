@@ -87,8 +87,7 @@ searchingByItemUT <- function(papers){
                 issue=x$`_source`["issue"],
                 publication_year=x$`_source`["publication_year"],
                 authors=x$`_source`["authors"],
-                keywords=x$`_source`["keywords"],
-                score=x$`_score`)
+                keywords=x$`_source`["keywords"])
     if(is.null(result_list)){
       result_list <- list(tmp)
     }else{
