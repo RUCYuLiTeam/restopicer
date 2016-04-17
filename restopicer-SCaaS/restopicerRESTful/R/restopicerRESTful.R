@@ -30,11 +30,11 @@ getMissionInfo <- function(username){
   dbDisconnect(conn)
   result
 }
-
-getRatedPaper<- function(mission_id){
+##### get user's rated paper by mission id #####
+getRatedPaper <- function(mission_id){
   conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
   #dbListTables(conn)
-  res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = '",mission_id,"'",sep = ""))
+  res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE rating > 0 AND mission_id = '",mission_id,"'",sep = ""))
   result <- dbFetch(res,n = -1)
   dbClearResult(res)
   dbDisconnect(conn)
@@ -45,21 +45,7 @@ getCurrentMissionInfo <- function(username){
   result <- getMissionInfo(username)
   result[which.max(result$mission_id),]
 }
-
-getMaxRatedMissionRound<-function(username){
-  result<- getMissionInfo(username)
-  mission_id<- result$mission_id
-  ratedpaper <- getRatedPaper(mission_id)
-  ratedpaper<- ratedpaper[ratedpaper$rating!=-1,]
-  if(nrow(ratedpaper)==0){
-    result<- 0
-  }else{
-    result<- max(ratedpaper$mission_round)
-  }
-  #names(result)<- "maxMission_round"
-  result
-}
-##### addPreferenceKeyword for current mission #####
+##### add PreferenceKeyword for current mission #####
 addPreferenceKeyword <- function(username,newkeyword){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
@@ -80,8 +66,8 @@ addPreferenceKeywords <- function(username,newkeywords){
   }
   dbDisconnect(conn)
 }
-##### get history recommendations
-historyrecommendation <- function(username){
+##### get history recommendations #####
+getAllRatedPaper <- historyrecommendation <- function(username){
   currentMission <- getCurrentMissionInfo(username=username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
@@ -89,7 +75,7 @@ historyrecommendation <- function(username){
   conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
   #dbListTables
   #get all recommended papers
-  res <- dbSendQuery(conn,  paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
+  res <- dbSendQuery(conn,  paste("SELECT * FROM preference_paper WHERE rating > 0 AND mission_id = ",mission_id,sep = ""))
   recommendedPapers <- dbFetch(res, n= -1)
   #recommendedPapers <- recommendedPapers[recommendedPapers$rating != -1,]
   dbClearResult(res)
@@ -105,7 +91,7 @@ historyrecommendation <- function(username){
   dbDisconnect(conn)
   result
 }
-##### get top relevent 8 keywords
+##### get top relevent 8 keywords #####
 getTopKeywords <- function(username,showround=0){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
@@ -177,7 +163,6 @@ getTopKeywords <- function(username,showround=0){
   tmp_name<-names(tmp)
   tmp_name
 }
-
 ##### goRecommendation for current mission #####
 goRecommendation <- function(username,relevent_N=100,recommendername="exploreHybridRecommend",composite_N=5,...){
   currentMission <- getCurrentMissionInfo(username = username)
@@ -203,12 +188,15 @@ goRecommendation <- function(username,relevent_N=100,recommendername="exploreHyb
     result <- searchingByItemUT(recommendedPapers[recommendedPapers$rating==-1,"item_ut"])    
     for(i in 1:length(result)){
       result_title <- result[[i]]$item_ut
-      # get rec_score
-      result_weightHybrid<- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score"]
       #add rec_score to result
-      result[[i]]$weightedHybrid<-result_weightHybrid
+      result[[i]]$weightedHybrid <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score"]
+      result[[i]]$relevent <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"relevent"]
+      result[[i]]$pred_rating <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"pred_rating"]
+      result[[i]]$quality <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"quality"]
+      result[[i]]$learn_ability <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"learn_ability"]
+      result[[i]]$summary_degree <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"summary_degree"]
+      result[[i]]$fresh <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"fresh"]
     }
-    
   }else{
     # searching elastic search (relevent_N)
     result_relevent <- searchingByKeywords(keywords = preferenceKeywords$keyword,item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N,preferenceKeywords=preferenceKeywords)
@@ -220,7 +208,16 @@ goRecommendation <- function(username,relevent_N=100,recommendername="exploreHyb
     for(tmp in result){
       item_ut <- tmp$item_ut$item_ut
       rec_score<- tmp$weightedHybrid
-      dbSendQuery(conn, paste("INSERT INTO preference_paper(mission_id,item_ut,rating,mission_round,rec_score) VALUES ('",mission_id,"','",item_ut,"',",-1,",",mission_round,",",rec_score,")",sep = ""))
+      relevent<- tmp$relevent
+      pred_rating<- tmp$pred_rating
+      quality<- tmp$quality
+      learn_ability<- tmp$learn_ability
+      summary_degree <- tmp$summary_degree
+      fresh <- tmp$fresh
+      dbSendQuery(conn, paste("INSERT INTO preference_paper(mission_id,item_ut,rating,mission_round,
+                              rec_score,relevent,pred_rating,quality,learn_ability,summary_degree,fresh) 
+                              VALUES ('",mission_id,"','",item_ut,"',",-1,",",mission_round,",",rec_score,",",
+                              relevent,",",pred_rating,",",quality,",",learn_ability,",",summary_degree,",",fresh,")",sep = ""))
     }
     dbSendQuery(conn, paste("UPDATE mission_info SET mission_round=",mission_round," WHERE mission_id=",mission_id,sep = ""))
   }
@@ -248,7 +245,7 @@ ratings <- function(username,item_ut_array,ratevalues){
     dbDisconnect(conn)
   }
 }
-##### select topic
+##### select topic that user liked and disliked (which suggested removed) ##### 
 topic_show <- function(username){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
@@ -285,6 +282,5 @@ topic_show <- function(username){
   bottom_topics <- names(sort(coef$coefficients)[1:6])
   list(top_topics=top_topics,bottom_topics=bottom_topics)
 }
-
 ##### clear current mission of unique username #####
 clearMission <- createMission

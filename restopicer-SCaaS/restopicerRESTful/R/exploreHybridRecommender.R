@@ -54,8 +54,8 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
                                 data.frame(item_ut=relevent_lst$item_ut$item_ut,
                                            exploitation_relevent = relevent_lst$score,
                                            exploitation_rating = 1,
+                                           exploitation_quality = doQE(magazine = relevent_lst$magazine$full_source_title),
                                            exploration_learn = learn_ability,
-                                           exploration_quality = doQE(magazine = relevent_lst$magazine$full_source_title),
                                            exploration_summary = doSVE(z = predict_doc$topics[i,]),
                                            exploration_fresh = doFE(publication_year = relevent_lst$publication_year$publication_year),
                                            row.names = F,stringsAsFactors = F))
@@ -63,41 +63,44 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
   # cal preference of rating
   if(exists(x = "enetmodel"))  df_result_relevent$exploitation_rating <- doRE(enetmodel = enetmodel,predict_new_docs = predict_doc$topics)
   # scaling
-  df_result_relevent$exploitation_relevent <- scale(df_result_relevent$exploitation_relevent,center = F,scale = T)
+  #df_result_relevent$exploitation_relevent <- scale(df_result_relevent$exploitation_relevent,center = F,scale = T)
   df_result_relevent$exploitation_relevent <- df_result_relevent$exploitation_relevent/max(df_result_relevent$exploitation_relevent)
-  df_result_relevent$exploitation_rating <- scale(df_result_relevent$exploitation_rating,center = F,scale = T)
+  #df_result_relevent$exploitation_rating <- scale(df_result_relevent$exploitation_rating,center = F,scale = T)
   df_result_relevent$exploitation_rating <- df_result_relevent$exploitation_rating/abs(max(df_result_relevent$exploitation_rating))
-  df_result_relevent$exploration_learn <- scale(df_result_relevent$exploration_learn,center = F,scale = T)
+  #df_result_relevent$exploitation_quality <- scale(df_result_relevent$exploration_quality,center = F,scale = T)
+  df_result_relevent$exploitation_quality <- df_result_relevent$exploration_quality/max(df_result_relevent$exploration_quality)
+  #df_result_relevent$exploration_learn <- scale(df_result_relevent$exploration_learn,center = F,scale = T)
   df_result_relevent$exploration_learn <- df_result_relevent$exploration_learn/max(df_result_relevent$exploration_learn)
-  df_result_relevent$exploration_quality <- scale(df_result_relevent$exploration_quality,center = F,scale = T)
-  df_result_relevent$exploration_quality <- df_result_relevent$exploration_quality/max(df_result_relevent$exploration_quality)
-  df_result_relevent$exploration_summary <- scale(df_result_relevent$exploration_summary,center = F,scale = T)
+  #df_result_relevent$exploration_summary <- scale(df_result_relevent$exploration_summary,center = F,scale = T)
   df_result_relevent$exploration_summary <- df_result_relevent$exploration_summary/max( df_result_relevent$exploration_summary)
   df_result_relevent$exploration_fresh <- df_result_relevent$exploration_fresh/max(df_result_relevent$exploration_fresh)
   # cal control weight
-  doRecommenderControl <- getRecommendController(controllername = "hybridWeightControl")
+  doRecommenderControl <- getRecommendController(controllername = "simpleHybridWeightControl")
   weight_lst <- doRecommenderControl(mission_round)
   # cal the hybrid weight
   df_result_relevent$weightedHybrid <- 
     df_result_relevent$exploitation_relevent * weight_lst$exploitation_relevent_w +
     df_result_relevent$exploitation_rating * weight_lst$exploitation_rating_w +
     df_result_relevent$exploration_learn * weight_lst$exploration_learn_w +
-    df_result_relevent$exploration_quality * weight_lst$exploration_quality_w +
+    df_result_relevent$exploitation_quality * weight_lst$exploitation_quality_w +
     df_result_relevent$exploration_summary * weight_lst$exploration_summary_w +
     df_result_relevent$exploration_fresh * weight_lst$exploration_fresh_w
   #scale
-  df_result_relevent$weightedHybrid <- scale(df_result_relevent$weightedHybrid,center = F,scale = T)
-  df_result_relevent$weightedHybrid <- 5*df_result_relevent$weightedHybrid/max(df_result_relevent$weightedHybrid)
-  for(i in 1:length(result_relevent)){
-    relevent_title <- result_relevent[[i]]$item_ut
+  #df_result_relevent$weightedHybrid <- scale(df_result_relevent$weightedHybrid,center = F,scale = T)
+  df_result_relevent$weightedHybrid <- 6*df_result_relevent$weightedHybrid/max(df_result_relevent$weightedHybrid)
+  result_output <- result_relevent[order(df_result_relevent$weightedHybrid,decreasing = T)[1:min(length(result_relevent),composite_N)]]
+  for(i in 1:length(result_output)){
+    relevent_title <- result_output[[i]]$item_ut$item_ut
     # get weightHybrid
-    relevent_weightHybrid<- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"weightedHybrid"]
-    relevent_weightHybrid<-relevent_weightHybrid[1]
-    result_relevent[[i]]$weightedHybrid<-relevent_weightHybrid
+    result_output[[i]]$weightedHybrid <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"weightedHybrid"]
+    result_output[[i]]$relevent <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"relevent"]
+    result_output[[i]]$pred_rating <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"pred_rating"]
+    result_output[[i]]$quality <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"quality"]
+    result_output[[i]]$learn_ability <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"learn_ability"]
+    result_output[[i]]$summary_degree <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"summary_degree"]
+    result_output[[i]]$fresh <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"fresh"]
   }
-  
-  result_relevent[order(df_result_relevent$weightedHybrid,decreasing = T)[1:min(length(result_relevent),composite_N)]]
-  
+  result_output
 }
 # preprocessing for abstract corpus
 preprocess.abstract.corpus <- function(result_lst){
