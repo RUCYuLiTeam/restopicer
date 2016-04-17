@@ -15,7 +15,8 @@ getRecommendController<-function(controllername){
   cmpfun(
     switch(controllername,
            simpleWeightControl=simpleWeightControl,
-           hybridWeightControl=hybridWeightControl
+           hybridWeightControl=hybridWeightControl,
+           simpleHybridWeightControl=simpleHybridWeightControl
     ))
 }
 # sub-measures in every recommender

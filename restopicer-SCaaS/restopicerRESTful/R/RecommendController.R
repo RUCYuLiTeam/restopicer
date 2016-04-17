@@ -1,3 +1,28 @@
+simpleHybridWeightControl <- function(mission_round=1){
+  exploration_w <- 1/2 + ifelse(rbinom(1, 1, 1/(log(mission_round)+1))==1,1,-1) * runif(1, min = 0, max = 1/2)
+  exploitation_w <- 1 - exploration_w
+  if(mission_round==1){
+    exploitation_relevent_w <- exploitation_w/2
+    exploitation_rating_w <- 0
+    exploitation_quality_w <- exploitation_w/2
+    exploration_learn_w <- 0
+    exploration_summary_w <- exploration_w/2
+    exploration_fresh_w <- exploration_w/2
+  }else{
+    exploitation_relevent_w <- exploitation_w/3
+    exploitation_rating_w <- exploitation_w/3
+    exploitation_quality_w <- exploitation_w/3
+    exploration_fresh_w <- exploration_w/3
+    exploration_learn_w <- exploration_w/3
+    exploration_summary_w <- exploration_w/3
+  }
+  list(exploitation_relevent_w=exploitation_relevent_w,
+       exploitation_rating_w=exploitation_rating_w,
+       exploration_learn_w=exploration_learn_w,
+       exploitation_quality_w=exploitation_quality_w,
+       exploration_summary_w=exploration_summary_w,
+       exploration_fresh_w=exploration_fresh_w)
+}
 hybridWeightControl <- function(mission_round=1){
   exploration_w <- 1/2 + ifelse(rbinom(1, 1, 1/(log(mission_round)+1))==1,1,-1) * runif(1, min = 0, max = 1/2)
   exploitation_w <- 1 - exploration_w
