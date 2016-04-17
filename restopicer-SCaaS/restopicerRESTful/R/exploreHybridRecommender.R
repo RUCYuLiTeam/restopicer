@@ -20,7 +20,7 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
       #rated_papers$rating[rated_bool] <- rated_papers$rating[rated_bool] - min(rated_papers$rating[rated_bool])
     }
     # build elastic model
-    enetmodel <- enet(x = I(train_doc$topics),y = rated_papers$rating,lambda=0.5,normalize = F,intercept = T)
+    enetmodel <- glmnet(x = I(train_doc$topics),y = rated_papers$rating,alpha = 0.5,intercept = F)
     #plot(enetmodel)
   }
   # generate topic by LDA and preprocess for relevent and rated papers

@@ -8,6 +8,7 @@
 # if(!require(topicmodels)){install.packages("topicmodels")}
 # if(!require(tm)){install.packages("tm")}
 # if(!require(wordcloud)){install.packages("wordcloud")}
+# if(!require(glmnet)){install.packages("glmnet")}
 # relevent_N <- 1000
 # composite_N <- 5
 # recommendername <- "weightedHybridRecommender"
