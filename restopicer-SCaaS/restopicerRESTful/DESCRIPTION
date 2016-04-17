@@ -8,5 +8,5 @@ Maintainer: Joshua ZHANG <joshua_zhang@foxmail.com>
 Description: A sub-project of Restopicer
 License: MIT
 Depends:
-    RMySQL,compiler,RJSONIO,RCurl,dplyr,elasticnet,topicmodels,tm,wordcloud
+    RMySQL,compiler,RJSONIO,RCurl,dplyr,elasticnet,topicmodels,tm,wordcloud,glmnet
 LazyData: no
