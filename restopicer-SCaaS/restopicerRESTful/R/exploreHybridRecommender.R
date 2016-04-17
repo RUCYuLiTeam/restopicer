@@ -93,12 +93,12 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
     relevent_title <- result_output[[i]]$item_ut$item_ut
     # get weightHybrid
     result_output[[i]]$weightedHybrid <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"weightedHybrid"]
-    result_output[[i]]$relevent <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"relevent"]
-    result_output[[i]]$pred_rating <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"pred_rating"]
-    result_output[[i]]$quality <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"quality"]
-    result_output[[i]]$learn_ability <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"learn_ability"]
-    result_output[[i]]$summary_degree <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"summary_degree"]
-    result_output[[i]]$fresh <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"fresh"]
+    result_output[[i]]$relevent <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"exploitation_relevent"]
+    result_output[[i]]$pred_rating <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"exploitation_rating"]
+    result_output[[i]]$quality <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"exploitation_quality"]
+    result_output[[i]]$learn_ability <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"exploration_learn"]
+    result_output[[i]]$summary_degree <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"exploration_summary"]
+    result_output[[i]]$fresh <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"exploration_fresh"]
   }
   result_output
 }
