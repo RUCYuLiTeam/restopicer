@@ -67,8 +67,8 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
   df_result_relevent$exploitation_relevent <- df_result_relevent$exploitation_relevent/max(df_result_relevent$exploitation_relevent)
   #df_result_relevent$exploitation_rating <- scale(df_result_relevent$exploitation_rating,center = F,scale = T)
   df_result_relevent$exploitation_rating <- df_result_relevent$exploitation_rating/abs(max(df_result_relevent$exploitation_rating))
-  #df_result_relevent$exploitation_quality <- scale(df_result_relevent$exploration_quality,center = F,scale = T)
-  df_result_relevent$exploitation_quality <- df_result_relevent$exploration_quality/max(df_result_relevent$exploration_quality)
+  #df_result_relevent$exploitation_quality <- scale(df_result_relevent$exploitation_quality,center = F,scale = T)
+  df_result_relevent$exploitation_quality <- df_result_relevent$exploitation_quality/max(df_result_relevent$exploitation_quality)
   #df_result_relevent$exploration_learn <- scale(df_result_relevent$exploration_learn,center = F,scale = T)
   df_result_relevent$exploration_learn <- df_result_relevent$exploration_learn/max(df_result_relevent$exploration_learn)
   #df_result_relevent$exploration_summary <- scale(df_result_relevent$exploration_summary,center = F,scale = T)
@@ -149,7 +149,7 @@ result_relevent_loop<- function(result_relevent){
                                          exploitation_relevent = relevent_lst$score,
                                          exploitation_rating = 1,
                                          exploration_learn = learn_ability,
-                                         exploration_quality = doQE(magazine = relevent_lst$magazine$full_source_title),
+                                         exploitation_quality = doQE(magazine = relevent_lst$magazine$full_source_title),
                                          exploration_summary = doSVE(z = predict_doc$topics[i,]),
                                          exploration_fresh = doFE(publication_year = relevent_lst$publication_year$publication_year),
                                          row.names = F,stringsAsFactors = F))
