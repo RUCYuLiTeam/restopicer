@@ -40,6 +40,26 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
   doFE <- getFreshEvaluator(name = "yearDiffReciprocalFreshEval")
   # ready to loop
   relevent_N <- length(result_relevent)
+  # using lappy
+#   result_relevent_lst <- lapply(1:relevent_N, function(i){
+#     relevent_lst <- result_relevent[[i]]
+#     learn_ability <- 1
+#     if(exists(x = "enetmodel")){
+#       learn_ability <- doLVE(enetmodel = enetmodel,
+#                              new_doc_i = i,test_docs = predict_doc$topics,
+#                              train_docs = train_doc$topics,train_rating = rated_papers$rating)
+#     }
+#     data.frame(item_ut=relevent_lst$item_ut$item_ut,
+#                exploitation_relevent = relevent_lst$score,
+#                exploitation_rating = 1,
+#                exploitation_quality = doQE(magazine = relevent_lst$magazine$full_source_title),
+#                exploration_learn = learn_ability,
+#                exploration_summary = doSVE(z = predict_doc$topics[i,]),
+#                exploration_fresh = doFE(publication_year = relevent_lst$publication_year$publication_year),
+#                row.names = F,stringsAsFactors = F)
+#   })
+#   df_result_relevent <- as.data.frame(rbindlist(result_relevent_lst))
+  # manual loop
   df_result_relevent <- data.frame(item_ut=character(relevent_N),
                                    exploitation_relevent=numeric(relevent_N),exploitation_rating=numeric(relevent_N),exploitation_quality=numeric(relevent_N),
                                    exploration_learn=numeric(relevent_N),exploration_summary=numeric(relevent_N),exploration_fresh=numeric(relevent_N),
