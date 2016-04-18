@@ -6,7 +6,7 @@ searchLocation <- paste(es_location,"_search",sep = "/")
 #searching on elastic search
 # 1975 to 2013
 # Article
-searchingByKeywords <- function(keywords,relevent_N,item_ut_already_list,preferenceKeywords){
+searchingByKeywords <- function(relevent_N,item_ut_already_list,preferenceKeywords){
   query_must <- preferenceKeywords[which.max(preferenceKeywords$id),"keyword"]
   query_should <- paste(preferenceKeywords[-which.max(preferenceKeywords$id),"keyword"],sep = " ",collapse = " ")
   must_not_body <- paste(lapply(item_ut_already_list, function(item_ut){
