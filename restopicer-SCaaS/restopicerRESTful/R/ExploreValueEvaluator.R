@@ -3,7 +3,7 @@
 # many estimates to change will result in the improvement of many estimates,
 # and is considered useful
 activeExploreEval <- function(enetmodel,#learn a preference approximation function based on the current training set
-                              new_doc_i,test_docs,train_docs,train_rating,sample_size=50){
+                              new_doc_i,test_docs,train_docs,train_rating,sample_size=15){
   if(sample_size<length(train_rating)){
     train_sample <- sample(1:length(train_rating),size = sample_size,replace = F)
     train_docs <- train_docs[train_sample,]
@@ -16,7 +16,7 @@ activeExploreEval <- function(enetmodel,#learn a preference approximation functi
   #test_fits <- predict.glmnet(object = enetmodel,newx = test_docs,s=0.5,type = "link",exact = T)
   # generate new training set : add a hypothetical training point
   new_train_docs <- rbind(train_docs,test_docs[new_doc_i,])
-  new_train_ratings <- lapply(1:5,FUN = function(x){append(train_rating,x)})
+  new_train_ratings <- lapply(4:5,FUN = function(x){append(train_rating,x)})
   # final G_change
   G_change <- 0
   # for each possible rating from 1 to 5
