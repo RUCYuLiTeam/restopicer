@@ -8,7 +8,8 @@
 # if(!require(topicmodels)){install.packages("topicmodels")}
 # if(!require(tm)){install.packages("tm")}
 # if(!require(wordcloud)){install.packages("wordcloud")}
-# if(!require(glmnet)){install.packages("glmnet")}
+#if(!require(glmnet)){install.packages("glmnet")}
+#if(!require(data.table)){install.packages("data.table")}
 # relevent_N <- 1000
 # composite_N <- 5
 # recommendername <- "weightedHybridRecommender"
@@ -200,7 +201,7 @@ goRecommendation <- function(username,relevent_N=100,recommendername="exploreHyb
     }
   }else{
     # searching elastic search (relevent_N)
-    result_relevent <- searchingByKeywords(keywords = preferenceKeywords$keyword,item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N,preferenceKeywords=preferenceKeywords)
+    result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N,preferenceKeywords=preferenceKeywords)
     # retrieve by recommender (composite_N)
     doRecommend <- getRecommender(recommendername = recommendername)
     mission_round <- mission_round + 1
