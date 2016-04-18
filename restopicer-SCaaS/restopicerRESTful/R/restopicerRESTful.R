@@ -8,8 +8,11 @@
 # if(!require(topicmodels)){install.packages("topicmodels")}
 # if(!require(tm)){install.packages("tm")}
 # if(!require(wordcloud)){install.packages("wordcloud")}
+# if(!require(data.table)){install.packages("data.table")}
+# if(!require(bipartite)){install.packages("bipartite")}
+# if(!require(igraph)){install.packages("igraph")}
+# if(!require(linkcomm)){install.packages("linkcomm")}
 #if(!require(glmnet)){install.packages("glmnet")}
-#if(!require(data.table)){install.packages("data.table")}
 # relevent_N <- 1000
 # composite_N <- 5
 # recommendername <- "weightedHybridRecommender"
@@ -94,7 +97,7 @@ getAllRatedPaper <- historyrecommendation <- function(username){
   result
 }
 ##### get top relevent 8 keywords #####
-getTopKeywords <- function(username,showround=0){
+getTopKeywords_old <- function(username,showround=0){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   #mission_round <- currentMission$mission_round
@@ -164,6 +167,55 @@ getTopKeywords <- function(username,showround=0){
   tmp <- tmp[order(tmp,decreasing = T)][1:8]
   tmp_name<-names(tmp)
   tmp_name
+}
+getTopKeywords <- function(username,show_k=8){
+  currentMission <- getCurrentMissionInfo(username = username)
+  mission_id <- currentMission$mission_id
+  mission_round <- currentMission$mission_round
+  # get connect
+  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+  # get All recmmended papers
+  res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
+  recommendedPapers <- dbFetch(res,n = -1)
+  dbClearResult(res)
+  # get All preference keywords
+  res <- dbSendQuery(conn, paste("SELECT * FROM preference_keyword WHERE mission_id = ",mission_id))
+  preferenceKeywords <- dbFetch(res,n = -1)
+  dbClearResult(res)
+  # searching elastic search (relevent_N)
+  result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = 100,preferenceKeywords=preferenceKeywords)
+  # using community detection
+  relevent_lst <- lapply(result_relevent, function(x){
+    data.frame(item_ut=x$item_ut$item_ut,author_keyword=x$keywords$keywords)
+  })
+  papers_keywords_df <- rbindlist(relevent_lst)
+  data <- unique(papers_keywords_df)
+  bi_matrix <- table(data$item_ut,tolower(data$author_keyword))
+  corpus_dtm <- as.DocumentTermMatrix(bi_matrix,weighting = weightTf)
+  bi_graph <- graph_from_incidence_matrix(corpus_dtm)
+  proj_graph <- bipartite_projection(bi_graph, types = NULL, multiplicity = TRUE,probe1 = NULL, which = "true", remove.type = TRUE)
+  coterm_graph <- simplify(proj_graph)
+  fc <- fastgreedy.community(coterm_graph)
+  community_member_list <- communities(fc)
+  if(length(community_member_list)<show_k) {
+    fc$membership<-cutat(fc,no=show_k)
+    community_member_list <- communities(fc)
+  }
+  # get show K community
+  community_member_list <- community_member_list[order(sapply(community_member_list,function(x){length(x)}),decreasing = T)[1:show_k]]
+  # cal weight
+  bi_matrix <- matrix(data = 0,nrow = length(community_member_list),ncol = length(V(coterm_graph)),dimnames = c(list(1:length(community_member_list)),list(V(coterm_graph)$name)))
+  for(i in 1:length(community_member_list)){
+    g <- delete.vertices(coterm_graph,names(V(coterm_graph))[!(names(V(coterm_graph)) %in% community_member_list[[i]])])
+    w <- eigen_centrality(g)$vector/sum(eigen_centrality(g)$vector)
+    bi_matrix[i,names(V(g))] <- w
+  }
+  bi_matrix <- as.matrix(bi_matrix)
+  as.character(  apply(bi_matrix,1,FUN = function(x){
+    tmp <- x[!(names(x) %in% preferenceKeywords$keyword)]
+    tmp <- tmp[nchar(names(tmp))>=10 & nchar(names(tmp))<30]
+    names(sort(tmp,decreasing = T)[1])
+  }))
 }
 ##### goRecommendation for current mission #####
 goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybridRecommend",composite_N=5,...){
