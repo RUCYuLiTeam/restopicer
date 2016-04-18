@@ -12,24 +12,25 @@ activeExploreEval <- function(enetmodel,#learn a preference approximation functi
   ### extract the coefficient vector with L1 norm fraction=0.5
   #coef <- predict.enet(enetmodel, s=0.5, type="coef", mode="fraction")
   #sum(coef$coefficients!=0)
-  #test_fits <- predict.enet(object = enetmodel, newx = test_docs, s = 0.5, type = "fit",mode = "fraction")
-  test_fits <- predict(object = enetmodel,newx = test_docs,s=0.5,type = "link",exact = T)
+  test_fits <- predict.enet(object = enetmodel, newx = test_docs, s = 0.5, type = "fit",mode = "fraction")
+  #test_fits <- predict.glmnet(object = enetmodel,newx = test_docs,s=0.5,type = "link",exact = T)
   # generate new training set : add a hypothetical training point
   new_train_docs <- rbind(train_docs,test_docs[new_doc_i,])
+  new_train_ratings <- lapply(1:5,FUN = function(x){append(train_rating,x)})
   # final G_change
   G_change <- 0
   # for each possible rating from 1 to 5
-  for(new_rating in 1:5){
+  for(new_rating in new_train_ratings){
     # learn a new preference approximation function based on the new training set
-    #new_enetmodel <- enet(x = I(new_train_docs),y = c(train_rating,new_rating),lambda=0.5,normalize = F,intercept = F)
-    new_enetmodel <- glmnet(x = I(new_train_docs),y = c(train_rating,new_rating),alpha=0.5,intercept = F)
+    new_enetmodel <- enet(x = new_train_docs,y = new_rating,lambda=0.5,normalize = F,intercept = F)
+    #new_enetmodel <- glmnet(x = new_train_docs,y = new_rating, alpha=0.5, intercept = F)
     #plot(new_enetmodel)
     # for each unrated docs
-    #new_test_fits <- predict(object = new_enetmodel, newx = test_docs, s = 0.5, type = "fit",mode = "fraction")
-    new_test_fits <- predict(object = new_enetmodel, newx = test_docs, s = 0.5, type = "link",exact = T)
+    new_test_fits <- predict(object = new_enetmodel, newx = test_docs, s = 0.5, type = "fit",mode = "fraction")
+    #new_test_fits <- predict(object = new_enetmodel, newx = test_docs, s = 0.5, type = "link",exact = T)
     # record and cal the differences between ratings estimates
-    #G_change <- G_change + sum((test_fits$fit-new_test_fits$fit)^2)
-    G_change <- G_change + sum((test_fits-new_test_fits)^2)
+    G_change <- G_change + sum((test_fits$fit-new_test_fits$fit)^2)
+    #G_change <- G_change + sum((test_fits-new_test_fits)^2)
   }
   G_change/5
 }
