@@ -278,7 +278,8 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
   result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = 100,preferenceKeywords=preferenceKeywords)
   # using community detection
   relevent_lst <- lapply(result_relevent, function(x){
-    data.frame(item_ut=x$item_ut$item_ut,author_keyword=x$keywords$keywords)
+    if(length(x$keywords$keywords) !=0){data.frame(item_ut=x$item_ut$item_ut,author_keyword=x$keywords$keywords)}
+      
   })
   papers_keywords_df <- rbindlist(relevent_lst)
   data <- unique(papers_keywords_df)
@@ -354,7 +355,11 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
     dir.create(filename)
     if(!file.exists(paste(filename,image_name,sep ="/"))){
       if(mission_round==1){
-        rated_papers <- recommendedPapers
+        # get All recmmended papers
+        res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
+        recommendedPapers_1 <- dbFetch(res,n = -1)
+        dbClearResult(res)
+        rated_papers <- recommendedPapers_1
         # preprocess for rated papers
         result_rated <- searchingByItemUT(papers = rated_papers$item_ut)
         #rated_papers <- recommendedPapers
@@ -431,7 +436,6 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
     }
   }
   
-  
   dbDisconnect(conn)
   result$username <- username
   result$top_keywords <- top_keywords
@@ -464,8 +468,8 @@ topic_show <- function(username){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
-  if(mission_round == 1){
-    return(0)
+  if(mission_round == 0){
+    return(NULL)
   }
   conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
   #dbListTables(conn)
