@@ -96,7 +96,7 @@ getAllRatedPaper <- historyrecommendation <- function(username){
   conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
   #dbListTables
   #get all recommended papers
-  res <- dbSendQuery(conn,  paste("SELECT * FROM preference_paper WHERE rating > 0 AND mission_id = ",mission_id,sep = ""))
+  res <- dbSendQuery(conn,  paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
   recommendedPapers <- dbFetch(res, n= -1)
   #recommendedPapers <- recommendedPapers[recommendedPapers$rating != -1,]
   dbClearResult(res)
@@ -111,6 +111,26 @@ getAllRatedPaper <- historyrecommendation <- function(username){
   }
   dbDisconnect(conn)
   result
+}
+#### get similar preference papers
+getSimilarpapers <- function(username, relevent=10){
+  currentMission <- getCurrentMissionInfo(username = username)
+  mission_id <- currentMission$mission_id
+  mission_round <- currentMission$mission_round
+  # get connect
+  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+  #dbListTables(conn)
+  # get All recmmended papers
+  res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
+  recommendedPapers <- dbFetch(res,n = -1)
+  dbClearResult(res)
+  
+  res <- dbSendQuery(conn, paste("SELECT * FROM preference_keyword WHERE mission_id = ",mission_id))
+  preferenceKeywords <- dbFetch(res,n = -1)
+  dbClearResult(res)
+  dbDisconnect(conn)
+  result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = 10,preferenceKeywords=preferenceKeywords)
+  result_relevent
 }
 ##### get top relevent 8 keywords #####
 getTopKeywords_old <- function(username,showround=0){
