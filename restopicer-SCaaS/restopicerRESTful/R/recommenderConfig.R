@@ -21,6 +21,7 @@ getRecommendController<-function(controllername){
 }
 # sub-measures in every recommender
 data(result_LDA_abstarct_VEM, envir=environment())
+data(pretrain_doc, envir=environment())
 getPreferenceEvaluator<-function(name){
   cmpfun(
     switch(name,
