@@ -85,16 +85,16 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
   if(exists(x = "enetmodel"))  df_result_relevent$exploitation_rating <- doRE(enetmodel = enetmodel,predict_new_docs = predict_doc$topics)
   # scaling
   #df_result_relevent$exploitation_relevent <- scale(df_result_relevent$exploitation_relevent,center = F,scale = T)
-  df_result_relevent$exploitation_relevent <- 6*df_result_relevent$exploitation_relevent/max(df_result_relevent$exploitation_relevent)
+  df_result_relevent$exploitation_relevent <- 10*df_result_relevent$exploitation_relevent/max(df_result_relevent$exploitation_relevent)
   #df_result_relevent$exploitation_rating <- scale(df_result_relevent$exploitation_rating,center = F,scale = T)
-  df_result_relevent$exploitation_rating <- 6*df_result_relevent$exploitation_rating/abs(max(df_result_relevent$exploitation_rating))
+  df_result_relevent$exploitation_rating <- 10*df_result_relevent$exploitation_rating/abs(max(df_result_relevent$exploitation_rating))
   #df_result_relevent$exploitation_quality <- scale(df_result_relevent$exploitation_quality,center = F,scale = T)
-  df_result_relevent$exploitation_quality <- 6*df_result_relevent$exploitation_quality/max(df_result_relevent$exploitation_quality)
+  df_result_relevent$exploitation_quality <- 10*df_result_relevent$exploitation_quality/max(df_result_relevent$exploitation_quality)
   df_result_relevent$exploration_learn <- scale(df_result_relevent$exploration_learn,center = F,scale = T)
-  df_result_relevent$exploration_learn <- 6*df_result_relevent$exploration_learn/max(df_result_relevent$exploration_learn)
+  df_result_relevent$exploration_learn <- 10*df_result_relevent$exploration_learn/max(df_result_relevent$exploration_learn)
   #df_result_relevent$exploration_summary <- scale(df_result_relevent$exploration_summary,center = F,scale = T)
-  df_result_relevent$exploration_summary <- 6*df_result_relevent$exploration_summary/max( df_result_relevent$exploration_summary)
-  df_result_relevent$exploration_fresh <- 6*df_result_relevent$exploration_fresh/max(df_result_relevent$exploration_fresh)
+  df_result_relevent$exploration_summary <- 10*df_result_relevent$exploration_summary/max( df_result_relevent$exploration_summary)
+  df_result_relevent$exploration_fresh <- 10*df_result_relevent$exploration_fresh/max(df_result_relevent$exploration_fresh)
   # cal control weight
   doRecommenderControl <- getRecommendController(controllername = "simpleHybridWeightControl")
   weight_lst <- doRecommenderControl(mission_round)
@@ -108,11 +108,12 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
     df_result_relevent$exploration_fresh * weight_lst$exploration_fresh_w
   #scale
   #df_result_relevent$weightedHybrid <- scale(df_result_relevent$weightedHybrid,center = F,scale = T)
-  df_result_relevent$weightedHybrid <- 6*df_result_relevent$weightedHybrid/max(df_result_relevent$weightedHybrid)
+  df_result_relevent$weightedHybrid <- 10*df_result_relevent$weightedHybrid/max(df_result_relevent$weightedHybrid)
   result_output <- result_relevent[order(df_result_relevent$weightedHybrid,decreasing = T)[1:min(length(result_relevent),composite_N)]]
   for(i in 1:length(result_output)){
     relevent_title <- result_output[[i]]$item_ut$item_ut
     # get weightHybrid
+    result_output[[i]]$mission_round <- mission_round
     result_output[[i]]$weightedHybrid <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"weightedHybrid"]
     result_output[[i]]$relevent <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"exploitation_relevent"]
     result_output[[i]]$pred_rating <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"exploitation_rating"]
