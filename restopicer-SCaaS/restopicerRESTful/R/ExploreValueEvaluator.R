@@ -26,7 +26,7 @@ activeExploreEval <- function(enetmodel,#learn a preference approximation functi
     #new_enetmodel <- glmnet(x = new_train_docs,y = new_rating, alpha=0.5, intercept = F)
     #plot(new_enetmodel)
     # for each unrated docs
-    new_test_fits <- predict(object = new_enetmodel, newx = test_docs, s = 0.5, type = "fit",mode = "fraction")
+    new_test_fits <- predict.enet(object = new_enetmodel, newx = test_docs, s = 0.5, type = "fit",mode = "fraction")
     #new_test_fits <- predict(object = new_enetmodel, newx = test_docs, s = 0.5, type = "link",exact = T)
     # record and cal the differences between ratings estimates
     G_change <- G_change + sum((test_fits$fit-new_test_fits$fit)^2)
