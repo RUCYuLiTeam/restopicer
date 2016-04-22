@@ -509,9 +509,13 @@ topic_show <- function(username){
       # preprocess for rated papers
       result_rated <- searchingByItemUT(papers = rated_papers$item_ut)
       # preprocess for rated papers
-      corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
+      #corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
       # generate topic by LDA
-      train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
+      #train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
+      rated_id <- unlist(lapply(result_rated, function(x){
+        which(pretrain_doc$item_ut==x$item_ut$item_ut)
+      }))
+      train_doc <- list(topics=pretrain_doc$topics[rated_id,],terms=pretrain_doc$terms)
       #dropped topics for enet
       if(length(dropped_topic$topic_drop)!=0)  train_doc$topics <- train_doc$topics[,-dropped_topic$topic_drop]
       # build elastic model and get coef
@@ -522,9 +526,13 @@ topic_show <- function(username){
       # preprocess for rated papers
       result_rated <- searchingByItemUT(papers = rated_papers$item_ut)
       # preprocess for rated papers
-      corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
+      #corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
       # generate topic by LDA
-      train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
+      #train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
+      rated_id <- unlist(lapply(result_rated, function(x){
+        which(pretrain_doc$item_ut==x$item_ut$item_ut)
+      }))
+      train_doc <- list(topics=pretrain_doc$topics[rated_id,],terms=pretrain_doc$terms)
       #dropped topics for enet
       if(length(dropped_topic$topic_drop)!=0)  train_doc$topics <- train_doc$topics[,-dropped_topic$topic_drop]
       # build elastic model and get coef
