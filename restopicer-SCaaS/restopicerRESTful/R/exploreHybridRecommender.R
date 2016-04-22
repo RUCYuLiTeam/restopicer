@@ -6,9 +6,13 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
   if(mission_round>=2 && !is.null(rated_papers) && nrow(rated_papers)>=2){
     # preprocess for relevent and rated papers
     result_rated <- searchingByItemUT(papers = rated_papers[rated_papers$rating!=-1,"item_ut"])
-    corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
+    #corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
     # generate topic by LDA
-    train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
+    #train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
+    rated_id <- unlist(lapply(result_rated, function(x){
+      which(pretrain_doc$item_ut==x$item_ut$item_ut)
+    }))
+    train_doc <- list(topics=pretrain_doc$topics[rated_id,],terms=pretrain_doc$terms)
     #dropped topics for enet
     if(length(dropped_topic$topic_drop)!=0)  train_doc$topics <- train_doc$topics[,-dropped_topic$topic_drop]
     # model bug fix needed (new feature selection method, should not use LASSO)
@@ -26,8 +30,12 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
   }
   # generate topic by LDA and preprocess for relevent and rated papers
   # http://stats.stackexchange.com/questions/9315/topic-prediction-using-latent-dirichlet-allocation
-  corpus_relevent <- preprocess.abstract.corpus(result_lst = result_relevent)
-  predict_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_relevent)
+  #corpus_relevent <- preprocess.abstract.corpus(result_lst = result_relevent)
+  #predict_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_relevent)
+  rated_id <- unlist(lapply(result_relevent, function(x){
+    which(pretrain_doc$item_ut==x$item_ut$item_ut)
+  }))
+  predict_doc <- list(topics=pretrain_doc$topics[rated_id,],terms=pretrain_doc$terms)
   #dropped topics for enet
   if(length(dropped_topic$topic_drop)!=0)  predict_doc$topics <- predict_doc$topics[,-dropped_topic$topic_drop]
   # get evaluator
