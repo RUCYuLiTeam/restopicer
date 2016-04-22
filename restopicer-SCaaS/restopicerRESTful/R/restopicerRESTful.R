@@ -92,24 +92,28 @@ getAllRatedPaper <- historyrecommendation <- function(username){
   currentMission <- getCurrentMissionInfo(username=username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
-  #get connect
-  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
-  #dbListTables
-  #get all recommended papers
-  res <- dbSendQuery(conn,  paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
-  recommendedPapers <- dbFetch(res, n= -1)
-  #recommendedPapers <- recommendedPapers[recommendedPapers$rating != -1,]
-  dbClearResult(res)
-  result <- searchingByItemUT(recommendedPapers[,"item_ut"]) 
-  for(i in 1:length(result)){
-    result_title <- result[[i]]$item_ut
-    # get rec_score
-    result_weightHybrid <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score"]
-    #add rec_score to result
-    result[[i]]$weightedHybrid <- result_weightHybrid
-    #result[[i]] <- list(result[[i]]$article_title,result[[i]]$magazine,result[[i]]$issue,result[[i]]$publication_year,result[[i]]$weightedHybrid) 
+  if(mission_round == 0){
+    result <- 0
+  }else{
+    #get connect
+    conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+    #dbListTables
+    #get all recommended papers
+    res <- dbSendQuery(conn,  paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
+    recommendedPapers <- dbFetch(res, n= -1)
+    #recommendedPapers <- recommendedPapers[recommendedPapers$rating != -1,]
+    dbClearResult(res)
+    result <- searchingByItemUT(recommendedPapers[,"item_ut"]) 
+    for(i in 1:length(result)){
+      result_title <- result[[i]]$item_ut
+      # get rec_score
+      result_weightHybrid <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score"]
+      #add rec_score to result
+      result[[i]]$weightedHybrid <- result_weightHybrid
+      #result[[i]] <- list(result[[i]]$article_title,result[[i]]$magazine,result[[i]]$issue,result[[i]]$publication_year,result[[i]]$weightedHybrid) 
+    }
+    dbDisconnect(conn)
   }
-  dbDisconnect(conn)
   result
 }
 #### get similar preference papers
@@ -485,7 +489,53 @@ topic_show <- function(username){
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
   if(mission_round == 0){
-    return(NULL)
+    top_topics <- 0
+    bottom_topics <- 0
+  }else{
+    conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+    #dbListTables(conn)
+    # get All recmmended papers
+    res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
+    recommendedPapers <- dbFetch(res,n = -1)
+    dbClearResult(res)
+    # get All preference topic
+    res <- dbSendQuery(conn, paste("SELECT * FROM preference_topic WHERE mission_id = ",mission_id,sep = ""))
+    dropped_topic <- dbFetch(res,n = -1)
+    dbClearResult(res)
+    # get rated paper
+    rated_papers <- recommendedPapers[recommendedPapers$rating != -1,]
+    if(nrow(rated_papers)==0){
+      rated_papers <- recommendedPapers
+      # preprocess for rated papers
+      result_rated <- searchingByItemUT(papers = rated_papers$item_ut)
+      # preprocess for rated papers
+      corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
+      # generate topic by LDA
+      train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
+      #dropped topics for enet
+      if(length(dropped_topic$topic_drop)!=0)  train_doc$topics <- train_doc$topics[,-dropped_topic$topic_drop]
+      # build elastic model and get coef
+      enetmodel <- enet(x = I(train_doc$topics),
+                        y = rated_papers$rec_score,
+                        lambda=0.5,normalize = F,intercept = T)
+    }else{
+      # preprocess for rated papers
+      result_rated <- searchingByItemUT(papers = rated_papers$item_ut)
+      # preprocess for rated papers
+      corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
+      # generate topic by LDA
+      train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
+      #dropped topics for enet
+      if(length(dropped_topic$topic_drop)!=0)  train_doc$topics <- train_doc$topics[,-dropped_topic$topic_drop]
+      # build elastic model and get coef
+      enetmodel <- enet(x = I(train_doc$topics),
+                        y = rated_papers$rating,
+                        lambda=0.5,normalize = F,intercept = T)
+    }
+    coef <- predict.enet(enetmodel, s=0.5, type="coef", mode="fraction")
+    top_topics <- names(sort(coef$coefficients)[(length(coef$coefficients)-5):length(coef$coefficients)])
+    bottom_topics <- names(sort(coef$coefficients)[1:6])
+   
   }
   conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
   #dbListTables(conn)
