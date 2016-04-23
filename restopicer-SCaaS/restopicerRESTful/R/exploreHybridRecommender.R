@@ -99,7 +99,7 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
   #df_result_relevent$exploitation_quality <- scale(df_result_relevent$exploitation_quality,center = F,scale = T)
   df_result_relevent$exploitation_quality <- 10*score_scaling(df_result_relevent$exploitation_quality,x_min=1,x_max=5.311,min_scale=0.3)
   #df_result_relevent$exploration_learn <- scale(df_result_relevent$exploration_learn,center = F,scale = T)
-  df_result_relevent$exploration_learn <- zoo::na.fill(10*score_scaling(df_result_relevent$exploration_learn,min_scale=0.2),1)
+  df_result_relevent$exploration_learn <- zoo::na.fill(10*score_scaling(df_result_relevent$exploration_learn,min_scale=0.1),1)
   #df_result_relevent$exploration_summary <- scale(df_result_relevent$exploration_summary,center = F,scale = T)
   df_result_relevent$exploration_summary <- 10*score_scaling(df_result_relevent$exploration_summary,min_scale=0.1)
   df_result_relevent$exploration_fresh <- 10*score_scaling(df_result_relevent$exploration_fresh,x_min=0,x_max=1,min_scale=0)
