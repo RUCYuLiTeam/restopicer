@@ -14,6 +14,9 @@ searchingByKeywords <- function(relevent_N,item_ut_already_list,preferenceKeywor
           \"query_string\": { \"default_field\": \"paper.item_ut\",\"query\": \"',item_ut,'\"}
       }',sep="",collapse = "")
     }),sep = "",collapse = ",")
+  if(length(query_must)==0){
+    query_must <- paste(names(which.max(colSums(pretrain_doc$terms))),sep = " ",collapse = " ")
+  }
   jsonbody <- paste('{
         \"query\": {
           \"bool\": {
