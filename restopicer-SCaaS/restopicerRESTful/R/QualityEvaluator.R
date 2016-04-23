@@ -9,5 +9,6 @@ SCIImpactFactorEval <- function(magazine){
          "JOURNAL OF ELECTRONIC COMMERCE RESEARCH" = 1.229,
          "JOURNAL OF MANAGEMENT INFORMATION SYSTEMS" = 2.062,
          "MIS QUARTERLY" = 5.311,
+         "MANAGEMENT SCIENCE" = 2.482,
          1)
 }

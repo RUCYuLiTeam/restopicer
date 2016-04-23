@@ -32,5 +32,5 @@ activeExploreEval <- function(enetmodel,#learn a preference approximation functi
     G_change <- G_change + sum((test_fits$fit-new_test_fits$fit)^2)
     #G_change <- G_change + sum((test_fits-new_test_fits)^2)
   }
-  G_change/5
+  log10(G_change)
 }
