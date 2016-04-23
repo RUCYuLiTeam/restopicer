@@ -330,6 +330,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
       #add rec_score to result
       result[[i]]$mission_round <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"mission_round"]
       result[[i]]$weightedHybrid <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score"]
+      result[[i]]$weightedHybrid_true <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score_true"]
       result[[i]]$relevent <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"relevent"]
       result[[i]]$pred_rating <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"pred_rating"]
       result[[i]]$quality <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"quality"]
@@ -354,10 +355,11 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
       learn_ability<- tmp$learn_ability
       summary_degree <- tmp$summary_degree
       fresh <- tmp$fresh
+      rec_score_true <- tmp$weightedHybrid_true
       dbSendQuery(conn, paste("INSERT INTO preference_paper(mission_id,item_ut,rating,mission_round,
-                              rec_score,relevent,pred_rating,quality,learn_ability,summary_degree,fresh) 
+                              rec_score,relevent,pred_rating,quality,learn_ability,summary_degree,fresh,rec_score_true) 
                               VALUES ('",mission_id,"','",item_ut,"',",-1,",",mission_round,",",rec_score,",",
-                              relevent,",",pred_rating,",",quality,",",learn_ability,",",summary_degree,",",fresh,")",sep = ""))
+                              relevent,",",pred_rating,",",quality,",",learn_ability,",",summary_degree,",",fresh,",",rec_score_true,")",sep = ""))
     }
     dbSendQuery(conn, paste("UPDATE mission_info SET mission_round=",mission_round," WHERE mission_id=",mission_id,sep = ""))
     # plot wordcloud
