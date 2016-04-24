@@ -17,9 +17,6 @@
 # composite_N <- 5
 # recommendername <- "weightedHybridRecommender"
 ##### create new mission with unique username #####
-hostname="222.29.196.230"
-username="restopicer"
-pwd="abc123"
 createMission <- function(username){
   #initial emvironment
   conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile",username,pwd,hostname)
