@@ -6,6 +6,7 @@ indexname <- "restopicer"
 typename  <- "paper"
 es_location <- paste(elastic_search_server,indexname,typename,sep = "/")
 searchLocation <- paste(es_location,"_search",sep = "/")
+restopicer_pic_path <- "/var/www/html/restopicer_pic"
 getRecommender<-function(recommendername){
   cmpfun(
     switch(recommendername,
