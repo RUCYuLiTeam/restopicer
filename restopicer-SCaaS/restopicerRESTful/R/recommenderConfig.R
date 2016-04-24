@@ -1,6 +1,11 @@
 hostname="222.29.196.230"
 username="restopicer"
 pwd="abc123"
+elastic_search_server <- "http://222.29.196.230:9200"
+indexname <- "restopicer"
+typename  <- "paper"
+es_location <- paste(elastic_search_server,indexname,typename,sep = "/")
+searchLocation <- paste(es_location,"_search",sep = "/")
 getRecommender<-function(recommendername){
   cmpfun(
     switch(recommendername,
