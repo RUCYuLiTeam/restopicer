@@ -1,8 +1,3 @@
-elastic_search_server <- "http://222.29.196.230:9200"
-indexname <- "restopicer"
-typename  <- "paper"
-es_location <- paste(elastic_search_server,indexname,typename,sep = "/")
-searchLocation <- paste(es_location,"_search",sep = "/")
 #searching on elastic search
 # 1975 to 2013
 # Article
