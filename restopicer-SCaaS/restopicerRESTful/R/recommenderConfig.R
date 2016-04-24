@@ -1,3 +1,6 @@
+hostname="222.29.196.230"
+username="restopicer"
+pwd="abc123"
 getRecommender<-function(recommendername){
   cmpfun(
     switch(recommendername,
