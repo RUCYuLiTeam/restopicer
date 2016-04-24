@@ -364,8 +364,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
     dbSendQuery(conn, paste("UPDATE mission_info SET mission_round=",mission_round," WHERE mission_id=",mission_id,sep = ""))
     # plot wordcloud
     image_name <- paste(mission_round ,".jpg",sep="")
-    path <- "E:/phpStudy/WWW/restopicer/sites/all/modules/custom/restopicer/images"
-    filename <- paste(path,username,sep="/")
+    filename <- paste(restopicer_pic_path,username,sep="/")
     dir.create(filename)
     if(!file.exists(paste(filename,image_name,sep ="/"))){
       if(mission_round==1){
@@ -401,7 +400,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
         tmp[1] <- 300
        
         round_name <- paste( mission_round,".jpg",sep="")
-        png(file.path(path,paste(username , round_name ,sep="/")))
+        png(file.path(restopicer_pic_path,paste(username , round_name ,sep="/")))
         par(fig = c(0,1,0,1),mar = c(0,0,0,0))
         #pal <- brewer.pal(9,"Blues")[4:9]
         #color_cluster <- pal[ceiling(6*(log(tmp)/max(log(tmp))))]
@@ -444,7 +443,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
        
         round_name <- paste(mission_round,".jpg",sep="")
         
-        png(file.path(path,username , round_name))
+        png(file.path(restopicer_pic_path,username , round_name))
         
         par(fig = c(0,1,0,1),mar = c(0,0,0,0))
         #pal <- brewer.pal(9,"Blues")[4:9]
