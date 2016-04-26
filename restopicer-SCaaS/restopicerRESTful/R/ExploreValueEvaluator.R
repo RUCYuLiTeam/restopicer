@@ -16,7 +16,7 @@ activeExploreEval <- function(enetmodel,#learn a preference approximation functi
   #test_fits <- predict.glmnet(object = enetmodel,newx = test_docs,s=0.5,type = "link",exact = T)
   # generate new training set : add a hypothetical training point
   new_train_docs <- rbind(train_docs,test_docs[new_doc_i,])
-  new_train_ratings <- lapply(3:5,FUN = function(x){append(train_rating,x)})
+  new_train_ratings <- lapply(4:5,FUN = function(x){append(train_rating,x)})
   # final G_change
   G_change <- 0
   # for each possible rating from 1 to 5
