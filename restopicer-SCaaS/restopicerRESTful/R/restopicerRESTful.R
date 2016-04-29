@@ -266,7 +266,7 @@ getTopKeywords <- function(username,show_k=10){
   }))
 }
 ##### goRecommendation for current mission #####
-goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybridRecommend",composite_N=5,show_k=10,...){
+goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybridRecommend",composite_N=5,show_k=10,controllername = "simpleHybridWeightControl",...){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
