@@ -121,8 +121,7 @@ showPreferenceWordCloud <- function(username,showround=0){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
-  path <- "E:/phpStudy/WWW/restopicer/sites/all/modules/custom/restopicer/images"
-  filename<-paste(path,username,sep="/")
+  filename<-paste(restopicer_pic_path,username,sep="/")
   dir.create(filename)
   if(currentMission$mission_round==1){
     conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
@@ -172,7 +171,7 @@ showPreferenceWordCloud <- function(username,showround=0){
     #tmp<- tmp+min(tmp)
     #summary(tmp)
     # word cloud
-    png(file.path(path, paste(username , paste(mission_round,".jpg",sep=""),sep="/")))
+    png(file.path(restopicer_pic_path, paste(username , paste(mission_round,".jpg",sep=""),sep="/")))
     par(fig = c(0,1,0,1),mar = c(0,0,0,0))
     #pal <- brewer.pal(9,"Blues")[4:9]
     #color_cluster <- pal[ceiling(6*(log(tmp)/max(log(tmp))))]
@@ -233,7 +232,7 @@ showPreferenceWordCloud <- function(username,showround=0){
     #summary(tmp)
     # word cloud
     roundname<- mission_round+1
-    png(file.path(path, paste(username , paste(roundname ,".jpg",sep=""),sep="/")))
+    png(file.path(restopicer_pic_path, paste(username , paste(roundname ,".jpg",sep=""),sep="/")))
     par(fig = c(0,1,0,1),mar = c(0,0,0,0))
     #pal <- brewer.pal(9,"Blues")[4:9]
     #color_cluster <- pal[ceiling(6*(log(tmp)/max(log(tmp))))]

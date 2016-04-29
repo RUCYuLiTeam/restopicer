@@ -1,3 +1,12 @@
+db_hostname <- "222.29.196.230"
+db_username <- "restopicer"
+db_pwd <- "abc123"
+elastic_search_server <- "http://222.29.196.230:9200"
+indexname <- "restopicer"
+typename  <- "paper"
+es_location <- paste(elastic_search_server,indexname,typename,sep = "/")
+searchLocation <- paste(es_location,"_search",sep = "/")
+restopicer_pic_path <- "/var/www/html/restopicer_pic/images"
 getRecommender<-function(recommendername){
   cmpfun(
     switch(recommendername,
