@@ -22,7 +22,7 @@ simpleHybridWeightControl <- function(mission_round=1,mu_explore=1/2){
   }else{
     exploitation_relevent_w <- exploitation_w/2
     exploitation_rating_w <- exploitation_w/2
-    exploitation_quality_w <- exploitation_w/4
+    exploitation_quality_w <- exploration_w/4
     exploration_fresh_w <- exploration_w/4
     exploration_learn_w <- exploration_w/4
     exploration_summary_w <- exploration_w/4
