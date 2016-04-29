@@ -330,7 +330,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
         result_title <- result[[i]]$item_ut
         #add rec_score to result
         result[[i]]$mission_round <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"mission_round"]
-        result[[i]]$weightedHybrid <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score"]
+        result[[i]]$exploration_w <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"exploration_w"]
         result[[i]]$weightedHybrid_true <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score_true"]
         result[[i]]$relevent <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"relevent"]
         result[[i]]$pred_rating <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"pred_rating"]
@@ -347,10 +347,9 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
       mission_round <- mission_round + 1
       result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,mission_round=mission_round,dropped_topic=dropped_topic,controllername=controllername)
       # save to mysql
-      
       for(tmp in result){
         item_ut <- tmp$item_ut$item_ut
-        rec_score<- tmp$weightedHybrid
+        #rec_score<- tmp$weightedHybrid
         relevent<- tmp$relevent
         pred_rating<- tmp$pred_rating
         quality<- tmp$quality
@@ -358,9 +357,10 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
         summary_degree <- tmp$summary_degree
         fresh <- tmp$fresh
         rec_score_true <- tmp$weightedHybrid_true
+        exploration_w <- tmp$exploration_w
         dbSendQuery(conn, paste("INSERT INTO preference_paper(mission_id,item_ut,rating,mission_round,
-                                rec_score,relevent,pred_rating,quality,learn_ability,summary_degree,fresh,rec_score_true) 
-                                VALUES ('",mission_id,"','",item_ut,"',",-1,",",mission_round,",",rec_score,",",
+                                exploration_w,relevent,pred_rating,quality,learn_ability,summary_degree,fresh,rec_score_true) 
+                                VALUES ('",mission_id,"','",item_ut,"',",-1,",",mission_round,",",exploration_w,",",
                                 relevent,",",pred_rating,",",quality,",",learn_ability,",",summary_degree,",",fresh,",",rec_score_true,")",sep = ""))
       }
       dbSendQuery(conn, paste("UPDATE mission_info SET mission_round=",mission_round," WHERE mission_id=",mission_id,sep = ""))
@@ -390,7 +390,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
           train_doc <- list(topics=pretrain_doc$topics[rated_id,],terms=pretrain_doc$terms)
           # build elastic model and get coef
           enetmodel <- enet(x = I(train_doc$topics[1:5,]),
-                            y = rated_papers$rec_score,
+                            y = rated_papers$rec_score_true,
                             lambda=0.5,normalize = F,intercept = T)
           coef <- predict.enet(enetmodel, s=0.5, type="coef", mode="fraction")
           tmp <- coef$coefficients %*% train_doc$terms - min(coef$coefficients %*% train_doc$terms)
