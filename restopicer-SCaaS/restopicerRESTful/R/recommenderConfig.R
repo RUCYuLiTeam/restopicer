@@ -25,7 +25,8 @@ getRecommendController<-function(controllername){
     switch(controllername,
            simpleWeightControl=simpleWeightControl,
            hybridWeightControl=hybridWeightControl,
-           simpleHybridWeightControl=simpleHybridWeightControl
+           simpleHybridWeightControl=simpleHybridWeightControl,
+           preferenceOnlyWeightControl=preferenceOnlyWeightControl
     ))
 }
 # sub-measures in every recommender
