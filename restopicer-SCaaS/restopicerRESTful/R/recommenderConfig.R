@@ -1,7 +1,7 @@
 db_hostname <- "222.29.196.230"
 db_username <- "restopicer"
 db_pwd <- "abc123"
-elastic_search_server <- "http://222.29.196.230:9200"
+elastic_search_server <- "http://222.29.196.226:9200"
 indexname <- "restopicer"
 typename  <- "paper"
 es_location <- paste(elastic_search_server,indexname,typename,sep = "/")
