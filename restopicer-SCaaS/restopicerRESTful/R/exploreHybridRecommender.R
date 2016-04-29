@@ -116,21 +116,22 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
     df_result_relevent$exploration_fresh * weight_lst$exploration_fresh_w
   #scale
   df_result_relevent$weightedHybrid_true <- df_result_relevent$weightedHybrid
-  df_result_relevent$weightedHybrid <- scale(df_result_relevent$weightedHybrid,center = F,scale = T)
-  df_result_relevent$weightedHybrid <- 10*df_result_relevent$weightedHybrid/max(df_result_relevent$weightedHybrid)
+  #df_result_relevent$weightedHybrid <- scale(df_result_relevent$weightedHybrid,center = F,scale = T)
+  #df_result_relevent$weightedHybrid <- 10*df_result_relevent$weightedHybrid/max(df_result_relevent$weightedHybrid)
   result_output <- result_relevent[order(df_result_relevent$weightedHybrid,decreasing = T)[1:min(length(result_relevent),composite_N)]]
   for(i in 1:length(result_output)){
     relevent_title <- result_output[[i]]$item_ut$item_ut
     # get weightHybrid
     result_output[[i]]$mission_round <- mission_round
     result_output[[i]]$weightedHybrid_true <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"weightedHybrid_true"]
-    result_output[[i]]$weightedHybrid <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"weightedHybrid"]
+    #result_output[[i]]$weightedHybrid <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"weightedHybrid"]
     result_output[[i]]$relevent <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"exploitation_relevent"]
     result_output[[i]]$pred_rating <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"exploitation_rating"]
     result_output[[i]]$quality <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"exploitation_quality"]
     result_output[[i]]$learn_ability <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"exploration_learn"]
     result_output[[i]]$summary_degree <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"exploration_summary"]
     result_output[[i]]$fresh <- df_result_relevent[which(df_result_relevent$item_ut==relevent_title),"exploration_fresh"]
+    result_output[[i]]$exploration_w <- weight_lst$exploration_w
   }
   #list(result_output=result_output,exploration_w=weight_lst$exploration_w)
   result_output
