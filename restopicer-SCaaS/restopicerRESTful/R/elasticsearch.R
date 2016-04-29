@@ -2,8 +2,8 @@
 # 1975 to 2013
 # Article
 searchingByKeywords <- function(relevent_N,item_ut_already_list,preferenceKeywords){
-  query_must <- preferenceKeywords[which.max(preferenceKeywords$id),"keyword"]
-  query_should <- paste(preferenceKeywords[-which.max(preferenceKeywords$id),"keyword"],sep = " ",collapse = " ")
+  query_must <- paste(preferenceKeywords[preferenceKeywords$mission_round==max(preferenceKeywords$mission_round),"keyword"],sep=" ",collapse = " ")
+  query_should <- paste(preferenceKeywords[preferenceKeywords$mission_round!=max(preferenceKeywords$mission_round),"keyword"],sep = " ",collapse = " ")
   must_not_body <- paste(lapply(item_ut_already_list, function(item_ut){
     paste('{
           \"query_string\": { \"default_field\": \"paper.item_ut\",\"query\": \"',item_ut,'\"}

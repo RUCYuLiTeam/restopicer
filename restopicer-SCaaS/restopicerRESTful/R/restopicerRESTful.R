@@ -107,9 +107,9 @@ getAllRatedPaper <- historyrecommendation <- function(username){
     for(i in 1:length(result)){
       result_title <- result[[i]]$item_ut
       # get rec_score
-      result_weightHybrid <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score"]
+      weightedHybrid_true <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score_true"]
       #add rec_score to result
-      result[[i]]$weightedHybrid <- result_weightHybrid
+      result[[i]]$weightedHybrid_true <- weightedHybrid_true
       #result[[i]] <- list(result[[i]]$article_title,result[[i]]$magazine,result[[i]]$issue,result[[i]]$publication_year,result[[i]]$weightedHybrid) 
     }
     dbDisconnect(conn)
@@ -322,7 +322,6 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
     names(sort(tmp,decreasing = T)[1])
   }))
   
-  if(recommendername == "exploreHybridRecommend"){
     if(any(recommendedPapers$rating <= 0)){
       # searching elastic search
       result <- searchingByItemUT(recommendedPapers[recommendedPapers$rating==-1,"item_ut"])    
@@ -459,7 +458,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
         }
       }
     }
-  }
+
   
   dbDisconnect(conn)
   result$username <- username
@@ -541,7 +540,7 @@ possible_direction <- function(username,relevent_N=50,recommendername="preferenc
     result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N,preferenceKeywords=preferenceKeywords)
     # retrieve by recommender (composite_N)
     doRecommend <- getRecommender(recommendername = recommendername)
-    result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,mission_round=mission_round,dropped_topic=dropped_topic)
+    result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers[which(recommendedPapers$rating!=-1),],composite_N=composite_N,mission_round=mission_round,dropped_topic=dropped_topic)
     
     for(tmp in result){
       item_ut <- tmp$item_ut$item_ut
