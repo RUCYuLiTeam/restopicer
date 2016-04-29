@@ -270,7 +270,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
- 
+  
   # get connect
   conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
   #dbListTables(conn)
@@ -291,7 +291,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
   # using community detection
   relevent_lst <- lapply(result_relevent, function(x){
     if(length(x$keywords$keywords) !=0){data.frame(item_ut=x$item_ut$item_ut,author_keyword=x$keywords$keywords)}
-      
+    
   })
   papers_keywords_df <- rbindlist(relevent_lst)
   data <- unique(papers_keywords_df)
@@ -347,21 +347,21 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
       mission_round <- mission_round + 1
       result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,mission_round=mission_round,dropped_topic=dropped_topic)
       # save to mysql
-  
+      
       for(tmp in result){
-          item_ut <- tmp$item_ut$item_ut
-          rec_score<- tmp$weightedHybrid
-          relevent<- tmp$relevent
-          pred_rating<- tmp$pred_rating
-          quality<- tmp$quality
-          learn_ability<- tmp$learn_ability
-          summary_degree <- tmp$summary_degree
-          fresh <- tmp$fresh
-          rec_score_true <- tmp$weightedHybrid_true
-          dbSendQuery(conn, paste("INSERT INTO preference_paper(mission_id,item_ut,rating,mission_round,
-                                  rec_score,relevent,pred_rating,quality,learn_ability,summary_degree,fresh,rec_score_true) 
-                                  VALUES ('",mission_id,"','",item_ut,"',",-1,",",mission_round,",",rec_score,",",
-                                  relevent,",",pred_rating,",",quality,",",learn_ability,",",summary_degree,",",fresh,",",rec_score_true,")",sep = ""))
+        item_ut <- tmp$item_ut$item_ut
+        rec_score<- tmp$weightedHybrid
+        relevent<- tmp$relevent
+        pred_rating<- tmp$pred_rating
+        quality<- tmp$quality
+        learn_ability<- tmp$learn_ability
+        summary_degree <- tmp$summary_degree
+        fresh <- tmp$fresh
+        rec_score_true <- tmp$weightedHybrid_true
+        dbSendQuery(conn, paste("INSERT INTO preference_paper(mission_id,item_ut,rating,mission_round,
+                                rec_score,relevent,pred_rating,quality,learn_ability,summary_degree,fresh,rec_score_true) 
+                                VALUES ('",mission_id,"','",item_ut,"',",-1,",",mission_round,",",rec_score,",",
+                                relevent,",",pred_rating,",",quality,",",learn_ability,",",summary_degree,",",fresh,",",rec_score_true,")",sep = ""))
       }
       dbSendQuery(conn, paste("UPDATE mission_info SET mission_round=",mission_round," WHERE mission_id=",mission_id,sep = ""))
       # plot wordcloud
@@ -401,7 +401,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
           tmp[1:100] <- seq(from = 100, to = 1,by=-1)
           tmp <- tmp*i
           tmp[1] <- 300
-         
+          
           round_name <- paste( mission_round,".jpg",sep="")
           png(file.path(path,paste(username , round_name ,sep="/")))
           par(fig = c(0,1,0,1),mar = c(0,0,0,0))
@@ -412,7 +412,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
                     use.r.layout=F)
           dev.off()
         }else{
-        
+          
           rated_papers <- recommendedPapers[recommendedPapers$rating != -1,]
           # preprocess for rated papers
           result_rated <- searchingByItemUT(papers = rated_papers[rated_papers$rating!=-1,"item_ut"])
@@ -443,7 +443,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
           tmp[1:100] <- seq(from = 100, to = 1,by=-1)
           tmp <- tmp*i
           tmp[1] <- 300
-         
+          
           round_name <- paste(mission_round,".jpg",sep="")
           
           png(file.path(path,username , round_name))
@@ -465,7 +465,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
   result$username <- username
   result$top_keywords <- top_keywords
   result
-}
+  }
 ##### possible research direction
 possible_direction <- function(username,relevent_N=50,recommendername="preferenceOnlyRecommend",composite_N=5,show_k=10,...){
   currentMission <- getCurrentMissionInfo(username = username)
@@ -522,45 +522,45 @@ possible_direction <- function(username,relevent_N=50,recommendername="preferenc
     tmp <- tmp[nchar(names(tmp))>=10 & nchar(names(tmp))<30]
     names(sort(tmp,decreasing = T)[1])
   }))
-
-    res <- dbSendQuery(conn, paste("SELECT * FROM possible_direction WHERE mission_id = ",mission_id))
-    posDirection <- dbFetch(res,n = -1)
-    dbClearResult(res)
-    if(nrow(posDirection) > 0){
-      # searching elastic search
-      result <- searchingByItemUT(posDirection$item_ut)    
-      for(i in 1:length(result)){
-        result_title <- result[[i]]$item_ut
-        #add rec_score to result
-        result[[i]]$weightedHybrid <- posDirection[which(posDirection$item_ut==result_title),"rec_score"]
-        result[[i]]$relevent <-  posDirection[which(posDirection$item_ut==result_title),"relevent"]
-        result[[i]]$pred_rating <-  posDirection[which(posDirection$item_ut==result_title),"pred_rating"]
-      }
-    }else{
-      # searching elastic search (relevent_N)
-      result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N,preferenceKeywords=preferenceKeywords)
-      # retrieve by recommender (composite_N)
-      doRecommend <- getRecommender(recommendername = recommendername)
-      result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,mission_round=mission_round,dropped_topic=dropped_topic)
-      
-      for(tmp in result){
-        item_ut <- tmp$item_ut$item_ut
-        rec_score<- tmp$weightedHybrid
-        relevent<- tmp$relevent
-        pred_rating<- tmp$pred_rating
-        dbSendQuery(conn, paste("INSERT INTO possible_direction(mission_id,item_ut,rec_score,relevent,pred_rating) 
-                                  VALUES ('",mission_id,"','",item_ut,"',",rec_score,",",
-                                relevent,",",pred_rating,")",sep = ""))
-      }
+  
+  res <- dbSendQuery(conn, paste("SELECT * FROM possible_direction WHERE mission_id = ",mission_id))
+  posDirection <- dbFetch(res,n = -1)
+  dbClearResult(res)
+  if(nrow(posDirection) > 0){
+    # searching elastic search
+    result <- searchingByItemUT(posDirection$item_ut)    
+    for(i in 1:length(result)){
+      result_title <- result[[i]]$item_ut
+      #add rec_score to result
+      result[[i]]$weightedHybrid <- posDirection[which(posDirection$item_ut==result_title),"rec_score"]
+      result[[i]]$relevent <-  posDirection[which(posDirection$item_ut==result_title),"relevent"]
+      result[[i]]$pred_rating <-  posDirection[which(posDirection$item_ut==result_title),"pred_rating"]
     }
+  }else{
+    # searching elastic search (relevent_N)
+    result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N,preferenceKeywords=preferenceKeywords)
+    # retrieve by recommender (composite_N)
+    doRecommend <- getRecommender(recommendername = recommendername)
+    result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,mission_round=mission_round,dropped_topic=dropped_topic)
+    
+    for(tmp in result){
+      item_ut <- tmp$item_ut$item_ut
+      rec_score<- tmp$weightedHybrid
+      relevent<- tmp$relevent
+      pred_rating<- tmp$pred_rating
+      dbSendQuery(conn, paste("INSERT INTO possible_direction(mission_id,item_ut,rec_score,relevent,pred_rating) 
+                              VALUES ('",mission_id,"','",item_ut,"',",rec_score,",",
+                              relevent,",",pred_rating,")",sep = ""))
+    }
+  }
   dbDisconnect(conn)
   # topic_show <- topic_show(username)
   result$username <- username
   result$top_keywords <- top_keywords
   result$topic_show <- topic_show(username)
   result
-    
-}
+  
+  }
 
 ##### rating papers current mission of unique username #####
 rating <- function(username,item_ut,ratevalue){
@@ -643,7 +643,7 @@ topic_show <- function(username){
     coef <- predict.enet(enetmodel, s=0.5, type="coef", mode="fraction")
     top_topics <- names(sort(coef$coefficients)[(length(coef$coefficients)-5):length(coef$coefficients)])
     bottom_topics <- names(sort(coef$coefficients)[1:6])
-   
+    
   }
   list(top_topics=top_topics,bottom_topics=bottom_topics)
 }
