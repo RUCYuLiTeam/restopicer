@@ -1,7 +1,7 @@
 exploreHybridRecommend <- function(result_relevent,rated_papers,
                                    topics_filepath,
                                    mission_round,
-                                   composite_N,dropped_topic,...){
+                                   composite_N,dropped_topic,controllername = "simpleHybridWeightControl"...){
   # for not new mission to train enet model
   if(mission_round>=2 && !is.null(rated_papers) && nrow(rated_papers)>=2){
     # preprocess for relevent and rated papers
@@ -104,7 +104,7 @@ exploreHybridRecommend <- function(result_relevent,rated_papers,
   df_result_relevent$exploration_summary <- 10*score_scaling(df_result_relevent$exploration_summary,min_scale=0.1)
   df_result_relevent$exploration_fresh <- 10*score_scaling(df_result_relevent$exploration_fresh,x_min=0,x_max=1,min_scale=0)
   # cal control weight
-  doRecommenderControl <- getRecommendController(controllername = "simpleHybridWeightControl")
+  doRecommenderControl <- getRecommendController(controllername = controllername)
   weight_lst <- doRecommenderControl(mission_round)
   # cal the hybrid weight
   df_result_relevent$weightedHybrid <- 
