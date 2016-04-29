@@ -1,3 +1,14 @@
+preferenceOnlyWeightControl <- function(mission_round=1){
+  exploration_w <- 0
+  exploitation_w <- 1 - exploration_w
+  list(exploitation_relevent_w=exploitation_w/2,
+       exploitation_rating_w=exploitation_w/2,
+       exploration_learn_w=0,
+       exploitation_quality_w=0,
+       exploration_summary_w=0,
+       exploration_fresh_w=0,
+       exploration_w=exploration_w)
+}
 simpleHybridWeightControl <- function(mission_round=1,mu_explore=1/2){
   exploration_w <- mu_explore + ifelse(rbinom(1, 1, 1/(log(mission_round)+1))==1,1,-1) * runif(1, min = 0, max = 1-mu_explore)
   exploitation_w <- 1 - exploration_w
