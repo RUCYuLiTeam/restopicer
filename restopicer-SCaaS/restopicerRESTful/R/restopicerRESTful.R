@@ -216,7 +216,7 @@ getTopKeywords_old <- function(username,showround=0){
   tmp_name<-names(tmp)
   tmp_name
 }
-getTopKeywords <- function(username,show_k=8){
+getTopKeywords <- function(username,show_k=10){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
@@ -234,7 +234,7 @@ getTopKeywords <- function(username,show_k=8){
   result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = 100,preferenceKeywords=preferenceKeywords)
   # using community detection
   relevent_lst <- lapply(result_relevent, function(x){
-    data.frame(item_ut=x$item_ut$item_ut,author_keyword=x$keywords$keywords)
+    if(length(x$keywords$keywords)!=0){ data.frame(item_ut=x$item_ut$item_ut,author_keyword=x$keywords$keywords)}
   })
   papers_keywords_df <- rbindlist(relevent_lst)
   data <- unique(papers_keywords_df)
@@ -266,7 +266,7 @@ getTopKeywords <- function(username,show_k=8){
   }))
 }
 ##### goRecommendation for current mission #####
-goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybridRecommend",composite_N=5,show_k=8,...){
+goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybridRecommend",composite_N=5,show_k=10,...){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
@@ -322,138 +322,141 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
     names(sort(tmp,decreasing = T)[1])
   }))
   
-  if(any(recommendedPapers$rating <= 0)){
-    # searching elastic search
-    result <- searchingByItemUT(recommendedPapers[recommendedPapers$rating==-1,"item_ut"])    
-    for(i in 1:length(result)){
-      result_title <- result[[i]]$item_ut
-      #add rec_score to result
-      result[[i]]$mission_round <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"mission_round"]
-      result[[i]]$weightedHybrid <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score"]
-      result[[i]]$weightedHybrid_true <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score_true"]
-      result[[i]]$relevent <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"relevent"]
-      result[[i]]$pred_rating <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"pred_rating"]
-      result[[i]]$quality <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"quality"]
-      result[[i]]$learn_ability <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"learn_ability"]
-      result[[i]]$summary_degree <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"summary_degree"]
-      result[[i]]$fresh <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"fresh"]
-    }
-  }else{
-    # searching elastic search (relevent_N)
-    result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N,preferenceKeywords=preferenceKeywords)
-    # retrieve by recommender (composite_N)
-    doRecommend <- getRecommender(recommendername = recommendername)
-    mission_round <- mission_round + 1
-    result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,mission_round=mission_round,dropped_topic=dropped_topic)
-    # save to mysql
-    for(tmp in result){
-      item_ut <- tmp$item_ut$item_ut
-      rec_score<- tmp$weightedHybrid
-      relevent<- tmp$relevent
-      pred_rating<- tmp$pred_rating
-      quality<- tmp$quality
-      learn_ability<- tmp$learn_ability
-      summary_degree <- tmp$summary_degree
-      fresh <- tmp$fresh
-      rec_score_true <- tmp$weightedHybrid_true
-      dbSendQuery(conn, paste("INSERT INTO preference_paper(mission_id,item_ut,rating,mission_round,
-                              rec_score,relevent,pred_rating,quality,learn_ability,summary_degree,fresh,rec_score_true) 
-                              VALUES ('",mission_id,"','",item_ut,"',",-1,",",mission_round,",",rec_score,",",
-                              relevent,",",pred_rating,",",quality,",",learn_ability,",",summary_degree,",",fresh,",",rec_score_true,")",sep = ""))
-    }
-    dbSendQuery(conn, paste("UPDATE mission_info SET mission_round=",mission_round," WHERE mission_id=",mission_id,sep = ""))
-    # plot wordcloud
-    image_name <- paste(mission_round ,".jpg",sep="")
-    path <- "E:/phpStudy/WWW/restopicer/sites/all/modules/custom/restopicer/images"
-    filename <- paste(path,username,sep="/")
-    dir.create(filename)
-    if(!file.exists(paste(filename,image_name,sep ="/"))){
-      if(mission_round==1){
-        # get All recmmended papers
-        res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
-        recommendedPapers_1 <- dbFetch(res,n = -1)
-        dbClearResult(res)
-        rated_papers <- recommendedPapers_1
-        # preprocess for rated papers
-        result_rated <- searchingByItemUT(papers = rated_papers$item_ut)
-        #rated_papers <- recommendedPapers
-        # preprocess for rated papers
-        #result_rated <- searchingByItemUT(papers = dm)
-        #corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
-        # generate topic by LDA
-        #train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
-        rated_id <- unlist(lapply(result_rated, function(x){
-          which(pretrain_doc$item_ut==x$item_ut$item_ut)
-        }))
-        train_doc <- list(topics=pretrain_doc$topics[rated_id,],terms=pretrain_doc$terms)
-        # build elastic model and get coef
-        enetmodel <- enet(x = I(train_doc$topics[1:5,]),
-                          y = rated_papers$rec_score,
-                          lambda=0.5,normalize = F,intercept = T)
-        coef <- predict.enet(enetmodel, s=0.5, type="coef", mode="fraction")
-        tmp <- coef$coefficients %*% train_doc$terms - min(coef$coefficients %*% train_doc$terms)
-        tmp <- as.numeric(tmp)
-        names(tmp) <- colnames(train_doc$terms)
-        tmp<-tmp[order(tmp,decreasing = T)][1:100]
-        i <- seq(from = 2, to = 0.01,by=-0.02)
-        tmp[1:100] <- seq(from = 100, to = 1,by=-1)
-        tmp <- tmp*i
-        tmp[1] <- 300
-       
-        round_name <- paste( mission_round,".jpg",sep="")
-        png(file.path(path,paste(username , round_name ,sep="/")))
-        par(fig = c(0,1,0,1),mar = c(0,0,0,0))
-        #pal <- brewer.pal(9,"Blues")[4:9]
-        #color_cluster <- pal[ceiling(6*(log(tmp)/max(log(tmp))))]
-        wordcloud(words=names(tmp),freq=tmp,scale = c(3.2, 0.5),max.words = 100,
-                  random.order=F,random.color=F,colors=rainbow(100),ordered.colors=F,
-                  use.r.layout=F)
-        dev.off()
-      }else{
-      
-        rated_papers <- recommendedPapers[recommendedPapers$rating != -1,]
-        # preprocess for rated papers
-        result_rated <- searchingByItemUT(papers = rated_papers[rated_papers$rating!=-1,"item_ut"])
-        #corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
-        # generate topic by LDA
-        #train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
-        rated_id <- unlist(lapply(result_rated, function(x){
-          which(pretrain_doc$item_ut==x$item_ut$item_ut)
-        }))
-        train_doc <- list(topics=pretrain_doc$topics[rated_id,],terms=pretrain_doc$terms)
-        # build elastic model and get coef
-        rated_bool <- (rated_papers$rating!=-1)
-        if(length(unique(rated_papers$rating[rated_bool]))==1){
-          normrating <- rnorm(length(rated_bool), mean = 0, sd = 0.5)
-          rated_papers$rating[rated_bool] <- rated_papers$rating[rated_bool] + normrating
-          #rated_papers$rating[rated_bool] <- rated_papers$rating[rated_bool] - min(rated_papers$rating[rated_bool])
+  if(recommendername == "exploreHybridRecommend"){
+    if(any(recommendedPapers$rating <= 0)){
+      # searching elastic search
+      result <- searchingByItemUT(recommendedPapers[recommendedPapers$rating==-1,"item_ut"])    
+      for(i in 1:length(result)){
+        result_title <- result[[i]]$item_ut
+        #add rec_score to result
+        result[[i]]$mission_round <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"mission_round"]
+        result[[i]]$weightedHybrid <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score"]
+        result[[i]]$weightedHybrid_true <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score_true"]
+        result[[i]]$relevent <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"relevent"]
+        result[[i]]$pred_rating <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"pred_rating"]
+        result[[i]]$quality <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"quality"]
+        result[[i]]$learn_ability <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"learn_ability"]
+        result[[i]]$summary_degree <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"summary_degree"]
+        result[[i]]$fresh <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"fresh"]
+      }
+    }else{
+      # searching elastic search (relevent_N)
+      result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N,preferenceKeywords=preferenceKeywords)
+      # retrieve by recommender (composite_N)
+      doRecommend <- getRecommender(recommendername = recommendername)
+      mission_round <- mission_round + 1
+      result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,mission_round=mission_round,dropped_topic=dropped_topic)
+      # save to mysql
+  
+      for(tmp in result){
+          item_ut <- tmp$item_ut$item_ut
+          rec_score<- tmp$weightedHybrid
+          relevent<- tmp$relevent
+          pred_rating<- tmp$pred_rating
+          quality<- tmp$quality
+          learn_ability<- tmp$learn_ability
+          summary_degree <- tmp$summary_degree
+          fresh <- tmp$fresh
+          rec_score_true <- tmp$weightedHybrid_true
+          dbSendQuery(conn, paste("INSERT INTO preference_paper(mission_id,item_ut,rating,mission_round,
+                                  rec_score,relevent,pred_rating,quality,learn_ability,summary_degree,fresh,rec_score_true) 
+                                  VALUES ('",mission_id,"','",item_ut,"',",-1,",",mission_round,",",rec_score,",",
+                                  relevent,",",pred_rating,",",quality,",",learn_ability,",",summary_degree,",",fresh,",",rec_score_true,")",sep = ""))
+      }
+      dbSendQuery(conn, paste("UPDATE mission_info SET mission_round=",mission_round," WHERE mission_id=",mission_id,sep = ""))
+      # plot wordcloud
+      image_name <- paste(mission_round ,".jpg",sep="")
+      path <- "E:/phpStudy/WWW/restopicer/sites/all/modules/custom/restopicer/images"
+      filename <- paste(path,username,sep="/")
+      dir.create(filename)
+      if(!file.exists(paste(filename,image_name,sep ="/"))){
+        if(mission_round==1){
+          # get All recmmended papers
+          res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
+          recommendedPapers_1 <- dbFetch(res,n = -1)
+          dbClearResult(res)
+          rated_papers <- recommendedPapers_1
+          # preprocess for rated papers
+          result_rated <- searchingByItemUT(papers = rated_papers$item_ut)
+          #rated_papers <- recommendedPapers
+          # preprocess for rated papers
+          #result_rated <- searchingByItemUT(papers = dm)
+          #corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
+          # generate topic by LDA
+          #train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
+          rated_id <- unlist(lapply(result_rated, function(x){
+            which(pretrain_doc$item_ut==x$item_ut$item_ut)
+          }))
+          train_doc <- list(topics=pretrain_doc$topics[rated_id,],terms=pretrain_doc$terms)
+          # build elastic model and get coef
+          enetmodel <- enet(x = I(train_doc$topics[1:5,]),
+                            y = rated_papers$rec_score,
+                            lambda=0.5,normalize = F,intercept = T)
+          coef <- predict.enet(enetmodel, s=0.5, type="coef", mode="fraction")
+          tmp <- coef$coefficients %*% train_doc$terms - min(coef$coefficients %*% train_doc$terms)
+          tmp <- as.numeric(tmp)
+          names(tmp) <- colnames(train_doc$terms)
+          tmp<-tmp[order(tmp,decreasing = T)][1:100]
+          i <- seq(from = 2, to = 0.01,by=-0.02)
+          tmp[1:100] <- seq(from = 100, to = 1,by=-1)
+          tmp <- tmp*i
+          tmp[1] <- 300
+         
+          round_name <- paste( mission_round,".jpg",sep="")
+          png(file.path(path,paste(username , round_name ,sep="/")))
+          par(fig = c(0,1,0,1),mar = c(0,0,0,0))
+          #pal <- brewer.pal(9,"Blues")[4:9]
+          #color_cluster <- pal[ceiling(6*(log(tmp)/max(log(tmp))))]
+          wordcloud(words=names(tmp),freq=tmp,scale = c(3.2, 0.5),max.words = 100,
+                    random.order=F,random.color=F,colors=rainbow(100),ordered.colors=F,
+                    use.r.layout=F)
+          dev.off()
+        }else{
+        
+          rated_papers <- recommendedPapers[recommendedPapers$rating != -1,]
+          # preprocess for rated papers
+          result_rated <- searchingByItemUT(papers = rated_papers[rated_papers$rating!=-1,"item_ut"])
+          #corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
+          # generate topic by LDA
+          #train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
+          rated_id <- unlist(lapply(result_rated, function(x){
+            which(pretrain_doc$item_ut==x$item_ut$item_ut)
+          }))
+          train_doc <- list(topics=pretrain_doc$topics[rated_id,],terms=pretrain_doc$terms)
+          # build elastic model and get coef
+          rated_bool <- (rated_papers$rating!=-1)
+          if(length(unique(rated_papers$rating[rated_bool]))==1){
+            normrating <- rnorm(length(rated_bool), mean = 0, sd = 0.5)
+            rated_papers$rating[rated_bool] <- rated_papers$rating[rated_bool] + normrating
+            #rated_papers$rating[rated_bool] <- rated_papers$rating[rated_bool] - min(rated_papers$rating[rated_bool])
+          }
+          enetmodel <- enet(x = I(train_doc$topics),
+                            y = rated_papers$rating,
+                            lambda=0.5,normalize = F,intercept = T)
+          coef <- predict.enet(enetmodel, s=0.5, type="coef", mode="fraction")
+          tmp <- coef$coefficients %*% train_doc$terms - min(coef$coefficients %*% train_doc$terms)
+          tmp <- as.numeric(tmp)
+          tmp<- tmp/max(tmp)
+          names(tmp) <- colnames(train_doc$terms)
+          tmp<-tmp[order(tmp,decreasing = T)][1:100]
+          i <- seq(from = 2, to = 0.01,by=-0.02)
+          tmp[1:100] <- seq(from = 100, to = 1,by=-1)
+          tmp <- tmp*i
+          tmp[1] <- 300
+         
+          round_name <- paste(mission_round,".jpg",sep="")
+          
+          png(file.path(path,username , round_name))
+          
+          par(fig = c(0,1,0,1),mar = c(0,0,0,0))
+          #pal <- brewer.pal(9,"Blues")[4:9]
+          #color_cluster <- pal[ceiling(6*(log(tmp)/max(log(tmp))))]
+          wordcloud(words=names(tmp),freq=tmp,scale = c(3.2, 0.5),max.words = 100,
+                    random.order=F,random.color=F,colors=rainbow(100),ordered.colors=F,
+                    use.r.layout=F)
+          dev.off()
+          
         }
-        enetmodel <- enet(x = I(train_doc$topics),
-                          y = rated_papers$rating,
-                          lambda=0.5,normalize = F,intercept = T)
-        coef <- predict.enet(enetmodel, s=0.5, type="coef", mode="fraction")
-        tmp <- coef$coefficients %*% train_doc$terms - min(coef$coefficients %*% train_doc$terms)
-        tmp <- as.numeric(tmp)
-        tmp<- tmp/max(tmp)
-        names(tmp) <- colnames(train_doc$terms)
-        tmp<-tmp[order(tmp,decreasing = T)][1:100]
-        i <- seq(from = 2, to = 0.01,by=-0.02)
-        tmp[1:100] <- seq(from = 100, to = 1,by=-1)
-        tmp <- tmp*i
-        tmp[1] <- 300
-       
-        round_name <- paste(mission_round,".jpg",sep="")
-        
-        png(file.path(path,username , round_name))
-        
-        par(fig = c(0,1,0,1),mar = c(0,0,0,0))
-        #pal <- brewer.pal(9,"Blues")[4:9]
-        #color_cluster <- pal[ceiling(6*(log(tmp)/max(log(tmp))))]
-        wordcloud(words=names(tmp),freq=tmp,scale = c(3.2, 0.5),max.words = 100,
-                  random.order=F,random.color=F,colors=rainbow(100),ordered.colors=F,
-                  use.r.layout=F)
-        dev.off()
-        
       }
     }
   }
@@ -462,6 +465,101 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
   result$username <- username
   result$top_keywords <- top_keywords
   result
+}
+##### possible research direction
+possible_direction <- function(username,relevent_N=50,recommendername="preferenceOnlyRecommend",composite_N=5,show_k=10,...){
+  currentMission <- getCurrentMissionInfo(username = username)
+  mission_id <- currentMission$mission_id
+  mission_round <- currentMission$mission_round
+  
+  # get connect
+  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+  #dbListTables(conn)
+  # get All recmmended papers
+  res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
+  recommendedPapers <- dbFetch(res,n = -1)
+  dbClearResult(res)
+  # get All preference keywords
+  res <- dbSendQuery(conn, paste("SELECT * FROM preference_keyword WHERE mission_id = ",mission_id))
+  preferenceKeywords <- dbFetch(res,n = -1)
+  dbClearResult(res)
+  # get All preference topic
+  res <- dbSendQuery(conn, paste("SELECT * FROM preference_topic WHERE mission_id = ",mission_id,sep = ""))
+  dropped_topic <- dbFetch(res,n = -1)
+  dbClearResult(res)
+  # searching elastic search (relevent_N)
+  result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N*3,preferenceKeywords=preferenceKeywords)
+  # using community detection
+  relevent_lst <- lapply(result_relevent, function(x){
+    if(length(x$keywords$keywords) !=0){data.frame(item_ut=x$item_ut$item_ut,author_keyword=x$keywords$keywords)}
+    
+  })
+  papers_keywords_df <- rbindlist(relevent_lst)
+  data <- unique(papers_keywords_df)
+  bi_matrix <- table(data$item_ut,tolower(data$author_keyword))
+  corpus_dtm <- as.DocumentTermMatrix(bi_matrix,weighting = weightTf)
+  bi_graph <- graph_from_incidence_matrix(corpus_dtm)
+  proj_graph <- bipartite_projection(bi_graph, types = NULL, multiplicity = TRUE,probe1 = NULL, which = "true", remove.type = TRUE)
+  coterm_graph <- simplify(proj_graph)
+  fc <- fastgreedy.community(coterm_graph)
+  community_member_list <- communities(fc)
+  if(length(community_member_list)<show_k) {
+    fc$membership<-cutat(fc,no=show_k)
+    community_member_list <- communities(fc)
+  }
+  # get show K community
+  community_member_list <- community_member_list[order(sapply(community_member_list,function(x){length(x)}),decreasing = T)[1:show_k]]
+  # cal weight
+  bi_matrix <- matrix(data = 0,nrow = length(community_member_list),ncol = length(V(coterm_graph)),dimnames = c(list(1:length(community_member_list)),list(V(coterm_graph)$name)))
+  for(i in 1:length(community_member_list)){
+    g <- delete.vertices(coterm_graph,names(V(coterm_graph))[!(names(V(coterm_graph)) %in% community_member_list[[i]])])
+    w <- eigen_centrality(g)$vector/sum(eigen_centrality(g)$vector)
+    bi_matrix[i,names(V(g))] <- w
+  }
+  bi_matrix <- as.matrix(bi_matrix)
+  top_keywords <- as.character(  apply(bi_matrix,1,FUN = function(x){
+    tmp <- x[!(names(x) %in% preferenceKeywords$keyword)]
+    tmp <- tmp[nchar(names(tmp))>=10 & nchar(names(tmp))<30]
+    names(sort(tmp,decreasing = T)[1])
+  }))
+
+    res <- dbSendQuery(conn, paste("SELECT * FROM possible_direction WHERE mission_id = ",mission_id))
+    posDirection <- dbFetch(res,n = -1)
+    dbClearResult(res)
+    if(nrow(posDirection) > 0){
+      # searching elastic search
+      result <- searchingByItemUT(posDirection$item_ut)    
+      for(i in 1:length(result)){
+        result_title <- result[[i]]$item_ut
+        #add rec_score to result
+        result[[i]]$weightedHybrid <- posDirection[which(posDirection$item_ut==result_title),"rec_score"]
+        result[[i]]$relevent <-  posDirection[which(posDirection$item_ut==result_title),"relevent"]
+        result[[i]]$pred_rating <-  posDirection[which(posDirection$item_ut==result_title),"pred_rating"]
+      }
+    }else{
+      # searching elastic search (relevent_N)
+      result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N,preferenceKeywords=preferenceKeywords)
+      # retrieve by recommender (composite_N)
+      doRecommend <- getRecommender(recommendername = recommendername)
+      result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,mission_round=mission_round,dropped_topic=dropped_topic)
+      
+      for(tmp in result){
+        item_ut <- tmp$item_ut$item_ut
+        rec_score<- tmp$weightedHybrid
+        relevent<- tmp$relevent
+        pred_rating<- tmp$pred_rating
+        dbSendQuery(conn, paste("INSERT INTO possible_direction(mission_id,item_ut,rec_score,relevent,pred_rating) 
+                                  VALUES ('",mission_id,"','",item_ut,"',",rec_score,",",
+                                relevent,",",pred_rating,")",sep = ""))
+      }
+    }
+  dbDisconnect(conn)
+  # topic_show <- topic_show(username)
+  result$username <- username
+  result$top_keywords <- top_keywords
+  result$topic_show <- topic_show(username)
+  result
+    
 }
 
 ##### rating papers current mission of unique username #####
@@ -547,37 +645,6 @@ topic_show <- function(username){
     bottom_topics <- names(sort(coef$coefficients)[1:6])
    
   }
-  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
-  #dbListTables(conn)
-  # get All recmmended papers
-  res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
-  recommendedPapers <- dbFetch(res,n = -1)
-  dbClearResult(res)
-  # get All preference topic
-  res <- dbSendQuery(conn, paste("SELECT * FROM preference_topic WHERE mission_id = ",mission_id,sep = ""))
-  dropped_topic <- dbFetch(res,n = -1)
-  dbClearResult(res)
-  # get rated paper
-  rated_papers <- recommendedPapers[recommendedPapers$rating != -1,]
-  # preprocess for rated papers
-  result_rated <- searchingByItemUT(papers = rated_papers$item_ut)
-  # preprocess for rated papers
-  #corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
-  # generate topic by LDA
-  #train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
-  rated_id <- unlist(lapply(result_rated, function(x){
-    which(pretrain_doc$item_ut==x$item_ut$item_ut)
-  }))
-  train_doc <- list(topics=pretrain_doc$topics[rated_id,],terms=pretrain_doc$terms)
-  #dropped topics for enet
-  if(length(dropped_topic$topic_drop)!=0)  train_doc$topics <- train_doc$topics[,-dropped_topic$topic_drop]
-  # build elastic model and get coef
-  enetmodel <- enet(x = I(train_doc$topics),
-                    y = rated_papers$rating,
-                    lambda=0.5,normalize = F,intercept = T)
-  coef <- predict.enet(enetmodel, s=0.5, type="coef", mode="fraction")
-  top_topics <- names(sort(coef$coefficients)[(length(coef$coefficients)-5):length(coef$coefficients)])
-  bottom_topics <- names(sort(coef$coefficients)[1:6])
   list(top_topics=top_topics,bottom_topics=bottom_topics)
 }
 ##### clear current mission of unique username #####
