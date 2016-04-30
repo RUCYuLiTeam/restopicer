@@ -37,7 +37,7 @@ searchingByKeywords <- function(relevent_N,item_ut_already_list,preferenceKeywor
                     \"query\": "',query_must,'",
                     \"type\": \"best_fields\",
                     \"fields\": [ \"paper.article_title^5\",\"paper.abstract^2\",\"paper.keywords^3\" ],
-                    \"operator\": \"and\",
+                    \"operator\": \"or\",
                     \"tie_breaker\": 0.3,
                     \"boost\": 3
               }
