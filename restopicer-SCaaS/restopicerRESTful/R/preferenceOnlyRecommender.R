@@ -1,7 +1,7 @@
 preferenceOnlyRecommend <- function(result_relevent,rated_papers,
                                    topics_filepath,
                                    mission_round,
-                                   composite_N,...){
+                                   composite_N,dropped_topic,...){
   # for not new mission to train enet model
   if(mission_round!=1 && !is.null(rated_papers) && nrow(rated_papers)>=2){
     # preprocess for relevent and rated papers
