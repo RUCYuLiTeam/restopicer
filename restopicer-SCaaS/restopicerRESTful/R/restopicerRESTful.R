@@ -287,7 +287,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
   dropped_topic <- dbFetch(res,n = -1)
   dbClearResult(res)
   # searching elastic search (relevent_N)
-  result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N*3,preferenceKeywords=preferenceKeywords)
+  result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers[recommendedPapers$rating!=-1,]$item_ut,relevent_N = relevent_N*3,preferenceKeywords=preferenceKeywords)
   # using community detection
   relevent_lst <- lapply(result_relevent, function(x){
     if(length(x$keywords$keywords) !=0){data.frame(item_ut=x$item_ut$item_ut,author_keyword=x$keywords$keywords)}
