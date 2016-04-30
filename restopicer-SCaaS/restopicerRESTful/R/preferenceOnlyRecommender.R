@@ -89,7 +89,7 @@ preferenceOnlyRecommend <- function(result_relevent,rated_papers,
 score_scaling <- function(x,x_min=min(x),x_max=max(x),min_scale=0.1){
   scale_multiply <- min_scale/(1 - min_scale)
   delta <- (x_max - x_min) * scale_multiply
-  (x - x_min + delta)/(x_max - x_min + delta)
+  zoo::na.fill((x - x_min + delta)/(x_max - x_min + delta),0.05)
 }
 # preprocessing for abstract corpus
 preprocess.abstract.corpus <- function(result_lst){
