@@ -357,15 +357,14 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
         fresh <- tmp$fresh
         rec_score_true <- tmp$weightedHybrid_true
         exploration_w <- tmp$exploration_w
-        dbSendQuery(conn, paste("INSERT INTO preference_paper(mission_id,item_ut,rating,mission_round,
-                                exploration_w,relevent,pred_rating,quality,learn_ability,summary_degree,fresh,rec_score_true) 
+        dbSendQuery(conn, paste("INSERT INTO preference_paper(mission_id,item_ut,rating,mission_round,exploration_w,relevent,pred_rating,quality,learn_ability,summary_degree,fresh,rec_score_true) 
                                 VALUES ('",mission_id,"','",item_ut,"',",-1,",",mission_round,",",exploration_w,",",
                                 relevent,",",pred_rating,",",quality,",",learn_ability,",",summary_degree,",",fresh,",",rec_score_true,")",sep = ""))
       }
       dbSendQuery(conn, paste("UPDATE mission_info SET mission_round=",mission_round," WHERE mission_id=",mission_id,sep = ""))
       # plot wordcloud
       image_name <- paste(mission_round ,".jpg",sep="")
-      path <- "E:/phpStudy/WWW/restopicer/sites/all/modules/custom/restopicer/images"
+      path <- "http://222.29.196.226/restopicer_pic/images/"
       filename <- paste(path,username,sep="/")
       dir.create(filename)
       if(!file.exists(paste(filename,image_name,sep ="/"))){
