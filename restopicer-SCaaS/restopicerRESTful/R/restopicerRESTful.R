@@ -364,7 +364,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
       dbSendQuery(conn, paste("UPDATE mission_info SET mission_round=",mission_round," WHERE mission_id=",mission_id,sep = ""))
       # plot wordcloud
       image_name <- paste(mission_round ,".jpg",sep="")
-      path <- "http://222.29.196.226/restopicer_pic/images/"
+      path <- restopicer_pic_path
       filename <- paste(path,username,sep="/")
       dir.create(filename)
       if(!file.exists(paste(filename,image_name,sep ="/"))){
