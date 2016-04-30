@@ -19,7 +19,7 @@
 ##### create new mission with unique username #####
 createMission <- function(username){
   #initial emvironment
-  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile",db_username,db_pwd,db_hostname)
   #dbListTables(conn)
   res <- dbSendQuery(conn, paste("INSERT INTO mission_info(name) VALUES ('",username,"')",sep = ""))
   dbDisconnect(conn)
@@ -27,7 +27,7 @@ createMission <- function(username){
 ##### get user's mission info with unique username #####
 getMissionInfo <- function(username){
   #initial emvironment
-  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile",db_username,db_pwd,db_hostname)
   #dbListTables(conn)
   res <- dbSendQuery(conn, paste("SELECT * FROM mission_info WHERE name = '",username,"'",sep = ""))
   result <- dbFetch(res,n = -1)
@@ -38,7 +38,7 @@ getMissionInfo <- function(username){
 
 ##### get user's rated paper by mission id #####
 getRatedPaper <- function(mission_id){
-  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile",db_username,db_pwd,db_hostname)
   #dbListTables(conn)
   res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE rating > 0 AND mission_id = '",mission_id,"'",sep = ""))
   result <- dbFetch(res,n = -1)
@@ -71,7 +71,7 @@ addPreferenceKeyword <- function(username,newkeyword){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   #initial emvironment
-  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile",db_username,db_pwd,db_hostname)
   #dbListTables(conn)
   dbSendQuery(conn, paste("INSERT INTO preference_keyword(mission_id,keyword) VALUES ('",mission_id,"','",newkeyword,"')",sep = ""))
   dbDisconnect(conn)
@@ -80,7 +80,7 @@ addPreferenceKeywords <- function(username,newkeywords){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   #initial emvironment
-  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile",db_username,db_pwd,db_hostname)
   #dbListTables(conn)
   for(newkeyword in newkeywords){
     dbSendQuery(conn, paste("INSERT INTO preference_keyword(mission_id,keyword) VALUES ('",mission_id,"','",newkeyword,"')",sep = ""))
@@ -96,7 +96,7 @@ getAllRatedPaper <- historyrecommendation <- function(username){
     result <- 0
   }else{
     #get connect
-    conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+    conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile",db_username,db_pwd,db_hostname)
     #dbListTables
     #get all recommended papers
     res <- dbSendQuery(conn,  paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
@@ -122,7 +122,7 @@ getSimilarpapers <- function(username, relevent=10){
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
   # get connect
-  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile",db_username,db_pwd,db_hostname)
   #dbListTables(conn)
   # get All recmmended papers
   res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
@@ -142,7 +142,7 @@ getTopKeywords_old <- function(username,showround=0){
   mission_id <- currentMission$mission_id
   #mission_round <- currentMission$mission_round
   if(currentMission$mission_round==1){
-    conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+    conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile",db_username,db_pwd,db_hostname)
     #dbListTables(conn)
     # get All recmmended papers
     res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
@@ -180,7 +180,7 @@ getTopKeywords_old <- function(username,showround=0){
     if(showround<1) showround <- mission_round
     if(showround<1) return(NULL)
     # get connect
-    conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+    conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile",db_username,db_pwd,db_hostname)
     #dbListTables(conn)
     # get All recmmended papers
     res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
@@ -221,7 +221,7 @@ getTopKeywords <- function(username,show_k=10){
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
   # get connect
-  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile",db_username,db_pwd,db_hostname)
   # get All recmmended papers
   res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
   recommendedPapers <- dbFetch(res,n = -1)
@@ -272,7 +272,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
   mission_round <- currentMission$mission_round
   
   # get connect
-  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile",db_username,db_pwd,db_hostname)
   #dbListTables(conn)
   # get All recmmended papers
   res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
@@ -472,7 +472,7 @@ possible_direction <- function(username,relevent_N=50,recommendername="preferenc
   mission_round <- currentMission$mission_round
   
   # get connect
-  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile",db_username,db_pwd,db_hostname)
   #dbListTables(conn)
   # get All recmmended papers
   res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
@@ -565,7 +565,7 @@ possible_direction <- function(username,relevent_N=50,recommendername="preferenc
 rating <- function(username,item_ut,ratevalue){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
-  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+  conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile",db_username,db_pwd,db_hostname)
   dbSendQuery(conn, paste("UPDATE preference_paper SET rating=",ratevalue," WHERE mission_id=",mission_id," AND item_ut='",item_ut,"'",sep = ""))
   dbDisconnect(conn)
 }
@@ -591,7 +591,7 @@ topic_show <- function(username){
     top_topics <- 0
     bottom_topics <- 0
   }else{
-    conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile")
+    conn <- dbConnect(MySQL(), dbname = "restopicer_user_profile",db_username,db_pwd,db_hostname)
     #dbListTables(conn)
     # get All recmmended papers
     res <- dbSendQuery(conn, paste("SELECT * FROM preference_paper WHERE mission_id = ",mission_id,sep = ""))
