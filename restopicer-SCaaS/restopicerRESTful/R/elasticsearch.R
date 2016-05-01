@@ -1,14 +1,19 @@
 #searching on elastic search
 # 1975 to 2013
 # Article
-searchingByKeywords <- function(relevent_N,item_ut_already_list,preferenceKeywords){
+searchingByKeywords <- function(relevent_N,item_ut_already_list,preferenceKeywords,searchingControll){
   query_must <- paste(preferenceKeywords[preferenceKeywords$mission_round==max(preferenceKeywords$mission_round),"keyword"],sep=" ",collapse = " ")
   query_should <- paste(preferenceKeywords[preferenceKeywords$mission_round!=max(preferenceKeywords$mission_round),"keyword"],sep = " ",collapse = " ")
-  must_not_body <- paste(lapply(item_ut_already_list, function(item_ut){
-    paste('{
-          \"query_string\": { \"default_field\": \"paper.item_ut\",\"query\": \"',item_ut,'\"}
-      }',sep="",collapse = "")
-    }),sep = "",collapse = ",")
+  if(searchingControll=="possibledirection"){
+      must_not_body=""
+  }else{
+      must_not_body <- paste(lapply(item_ut_already_list, function(item_ut){
+        paste('{
+            \"query_string\": { \"default_field\": \"paper.item_ut\",\"query\": \"',item_ut,'\"}
+        }',sep="",collapse = "")
+      }),sep = "",collapse = ",")
+  }
+  
   if(length(query_must)==0){
     query_must <- paste(names(which.max(colSums(pretrain_doc$terms))),sep = " ",collapse = " ")
   }

@@ -117,7 +117,7 @@ getAllRatedPaper <- historyrecommendation <- function(username){
   result
 }
 #### get similar preference papers
-getSimilarpapers <- function(username, relevent=10){
+getSimilarpapers <- function(username, relevent=10,searchingControll="exploreHybridRecommend"){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
@@ -133,7 +133,7 @@ getSimilarpapers <- function(username, relevent=10){
   preferenceKeywords <- dbFetch(res,n = -1)
   dbClearResult(res)
   dbDisconnect(conn)
-  result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = 10,preferenceKeywords=preferenceKeywords)
+  result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = 10,preferenceKeywords=preferenceKeywords,searchingControll=searchingControll)
   result_relevent
 }
 ##### get top relevent 8 keywords #####
@@ -216,7 +216,7 @@ getTopKeywords_old <- function(username,showround=0){
   tmp_name<-names(tmp)
   tmp_name
 }
-getTopKeywords <- function(username,show_k=10){
+getTopKeywords <- function(username,show_k=10,searchingControll="exploreHybridRecommend"){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
@@ -231,7 +231,7 @@ getTopKeywords <- function(username,show_k=10){
   preferenceKeywords <- dbFetch(res,n = -1)
   dbClearResult(res)
   # searching elastic search (relevent_N)
-  result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = 100,preferenceKeywords=preferenceKeywords)
+  result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = 100,preferenceKeywords=preferenceKeywords,searchingControll=searchingControll)
   # using community detection
   relevent_lst <- lapply(result_relevent, function(x){
     if(length(x$keywords$keywords)!=0){ data.frame(item_ut=x$item_ut$item_ut,author_keyword=x$keywords$keywords)}
@@ -266,7 +266,7 @@ getTopKeywords <- function(username,show_k=10){
   }))
 }
 ##### goRecommendation for current mission #####
-goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybridRecommend",composite_N=5,show_k=10,controllername = "simpleHybridWeightControl",...){
+goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybridRecommend",composite_N=5,show_k=10,controllername = "simpleHybridWeightControl",searchingControll="exploreHybridRecommend",...){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
@@ -287,7 +287,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
   dropped_topic <- dbFetch(res,n = -1)
   dbClearResult(res)
   # searching elastic search (relevent_N)
-  result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers[recommendedPapers$rating!=-1,]$item_ut,relevent_N = relevent_N*3,preferenceKeywords=preferenceKeywords)
+  result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers[recommendedPapers$rating!=-1,]$item_ut,relevent_N = relevent_N*3,preferenceKeywords=preferenceKeywords,searchingControll=searchingControll)
   # using community detection
   relevent_lst <- lapply(result_relevent, function(x){
     if(length(x$keywords$keywords) !=0){data.frame(item_ut=x$item_ut$item_ut,author_keyword=x$keywords$keywords)}
@@ -340,7 +340,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
       }
     }else{
       # searching elastic search (relevent_N)
-      result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N,preferenceKeywords=preferenceKeywords)
+      result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N,preferenceKeywords=preferenceKeywords,searchingControll=searchingControll)
       # retrieve by recommender (composite_N)
       doRecommend <- getRecommender(recommendername = recommendername)
       mission_round <- mission_round + 1
@@ -364,6 +364,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
       dbSendQuery(conn, paste("UPDATE mission_info SET mission_round=",mission_round," WHERE mission_id=",mission_id,sep = ""))
       # plot wordcloud
       image_name <- paste(mission_round ,".jpg",sep="")
+      #path <- "E:/phpStudy/WWW/restopicer/sites/all/modules/custom/restopicer/images"
       path <- restopicer_pic_path
       filename <- paste(path,username,sep="/")
       dir.create(filename)
@@ -465,7 +466,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
   result
   }
 ##### possible research direction
-possible_direction <- function(username,relevent_N=50,recommendername="preferenceOnlyRecommend",composite_N=5,show_k=10,...){
+possible_direction <- function(username,relevent_N=50,recommendername="preferenceOnlyRecommend",composite_N=5,show_k=10,searchingControll="possibledirection",...){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
   mission_round <- currentMission$mission_round
@@ -486,7 +487,7 @@ possible_direction <- function(username,relevent_N=50,recommendername="preferenc
   dropped_topic <- dbFetch(res,n = -1)
   dbClearResult(res)
   # searching elastic search (relevent_N)
-  result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N*3,preferenceKeywords=preferenceKeywords)
+  result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N,preferenceKeywords=preferenceKeywords,searchingControll=searchingControll)
   # using community detection
   relevent_lst <- lapply(result_relevent, function(x){
     if(length(x$keywords$keywords) !=0){data.frame(item_ut=x$item_ut$item_ut,author_keyword=x$keywords$keywords)}
@@ -536,7 +537,7 @@ possible_direction <- function(username,relevent_N=50,recommendername="preferenc
     }
   }else{
     # searching elastic search (relevent_N)
-    result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N,preferenceKeywords=preferenceKeywords)
+    result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N,preferenceKeywords=preferenceKeywords,searchingControll=searchingControll)
     # retrieve by recommender (composite_N)
     doRecommend <- getRecommender(recommendername = recommendername)
     result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers[which(recommendedPapers$rating!=-1),],composite_N=composite_N,mission_round=mission_round,dropped_topic=dropped_topic)
