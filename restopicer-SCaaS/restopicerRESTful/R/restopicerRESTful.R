@@ -461,6 +461,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
 
   
   dbDisconnect(conn)
+  result$mission_id <- mission_id
   result$username <- username
   result$top_keywords <- top_keywords
   result
