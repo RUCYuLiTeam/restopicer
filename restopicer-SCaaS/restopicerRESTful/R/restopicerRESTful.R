@@ -427,7 +427,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
           for(i in 1:length(result_rated)){
             result_title <- result_rated[[i]]$item_ut
             #add rec_score to result
-            result_rated[[i]]$rated <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score_true"]
+            result_rated[[i]]$rated <- recommendedPapers_1[which(recommendedPapers_1$item_ut==result_title),"rec_score_true"]
             result_rated[[i]]$rated <- round(result_rated[[i]]$rated)
             if(length(result_rated[[i]]$keywords$keywords)==0){
               res_keywords <- res_keywords
@@ -445,7 +445,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
           kw <- as.matrix(which(table(kw_freq[,1])>1))
           k <- dimnames(kw)[[1]]
           k_len <- length(k)
-          len <- c(1:K_len)
+          len <- c(1:k_len)
           k_ids <- c()
           for(i in 1:k_len){
             len[i] <- sum(as.numeric(kw_freq[which(kw_freq[,1]==k[i]),2]))
