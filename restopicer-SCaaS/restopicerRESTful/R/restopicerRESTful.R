@@ -269,6 +269,7 @@ getTopKeywords <- function(username,show_k=10,searchingControll="exploreHybridRe
 goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybridRecommend",composite_N=5,show_k=10,controllername = "simpleHybridWeightControl",searchingControll="exploreHybridRecommend",...){
   currentMission <- getCurrentMissionInfo(username = username)
   mission_id <- currentMission$mission_id
+  algorithm <- currentMission$algorithm
   mission_round <- currentMission$mission_round
   
   # get connect
@@ -286,6 +287,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
   res <- dbSendQuery(conn, paste("SELECT * FROM preference_topic WHERE mission_id = ",mission_id,sep = ""))
   dropped_topic <- dbFetch(res,n = -1)
   dbClearResult(res)
+
   # searching elastic search (relevent_N)
   result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers[recommendedPapers$rating!=-1,]$item_ut,relevent_N = relevent_N*3,preferenceKeywords=preferenceKeywords,searchingControll=searchingControll)
   # using community detection
@@ -339,12 +341,31 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
         result[[i]]$fresh <-  recommendedPapers[which(recommendedPapers$item_ut==result_title),"fresh"]
       }
     }else{
+      #judge if user like recommended papers
+      if(mission_round == 0){
+        if_like=0
+      }else if(nrow(recommendedPapers)==5){
+        current_round_rating <-  sum(recommendedPapers$rating[(nrow(recommendedPapers)-4):nrow(recommendedPapers)])/5
+        if(current_round_rating >=3){
+          if_like =1
+        }else {
+          if_like =0
+        }
+      }else if(nrow(recommendedPapers)>5){
+        current_round_rating <-  sum(recommendedPapers$rating[(nrow(recommendedPapers)-4):nrow(recommendedPapers)])/5
+        previous_round_rating <- sum(recommendedPapers$rating[-c((nrow(recommendedPapers)-4):nrow(recommendedPapers))])/(nrow(recommendedPapers)-5)
+        if(current_round_rating >= previous_round_rating){
+          if_like =1
+        }else {
+          if_like =0
+        }
+      }
       # searching elastic search (relevent_N)
       result_relevent <- searchingByKeywords(item_ut_already_list=recommendedPapers$item_ut,relevent_N = relevent_N,preferenceKeywords=preferenceKeywords,searchingControll=searchingControll)
       # retrieve by recommender (composite_N)
       doRecommend <- getRecommender(recommendername = recommendername)
       mission_round <- mission_round + 1
-      result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,mission_round=mission_round,dropped_topic=dropped_topic,controllername=controllername)
+      result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,mission_round=mission_round,dropped_topic=dropped_topic,controllername=controllername,if_like)
       # save to mysql
       for(tmp in result){
         item_ut <- tmp$item_ut$item_ut
@@ -383,65 +404,135 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
           #corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
           # generate topic by LDA
           #train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
-          rated_id <- unlist(lapply(result_rated, function(x){
-            which(pretrain_doc$item_ut==x$item_ut$item_ut)
-          }))
-          train_doc <- list(topics=pretrain_doc$topics[rated_id,],terms=pretrain_doc$terms)
-          # build elastic model and get coef
-          enetmodel <- enet(x = I(train_doc$topics[1:5,]),
-                            y = rated_papers$rec_score_true,
-                            lambda=0.5,normalize = F,intercept = T)
-          coef <- predict.enet(enetmodel, s=0.5, type="coef", mode="fraction")
-          tmp <- coef$coefficients %*% train_doc$terms - min(coef$coefficients %*% train_doc$terms)
-          tmp <- as.numeric(tmp)
-          names(tmp) <- colnames(train_doc$terms)
-          tmp<-tmp[order(tmp,decreasing = T)][1:100]
-          i <- seq(from = 2, to = 0.01,by=-0.02)
-          tmp[1:100] <- seq(from = 100, to = 1,by=-1)
-          tmp <- tmp*i
-          tmp[1] <- 300
+#           rated_id <- unlist(lapply(result_rated, function(x){
+#             which(pretrain_doc$item_ut==x$item_ut$item_ut)
+#           }))
+#           train_doc <- list(topics=pretrain_doc$topics[rated_id,],terms=pretrain_doc$terms)
+#           # build elastic model and get coef
+#           enetmodel <- enet(x = I(train_doc$topics[1:5,]),
+#                             y = rated_papers$rec_score_true,
+#                             lambda=0.5,normalize = F,intercept = T)
+#           coef <- predict.enet(enetmodel, s=0.5, type="coef", mode="fraction")
+#           tmp <- coef$coefficients %*% train_doc$terms - min(coef$coefficients %*% train_doc$terms)
+#           tmp <- as.numeric(tmp)
+#           names(tmp) <- colnames(train_doc$terms)
+#           tmp<-tmp[order(tmp,decreasing = T)][1:100]
+#           i <- seq(from = 2, to = 0.01,by=-0.02)
+#           tmp[1:100] <- seq(from = 100, to = 1,by=-1)
+#           tmp <- tmp*i
+#           tmp[1] <- 300
+          res_keywords <- c()
+          kw <- c()
+          for(i in 1:length(result_rated)){
+            result_title <- result_rated[[i]]$item_ut
+            #add rec_score to result
+            result_rated[[i]]$rated <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score_true"]
+            result_rated[[i]]$rated <- round(result_rated[[i]]$rated)
+            res_keywords <- c(res_keywords,table(result_rated[[i]]$keywords)*result_rated[[i]]$rated)
+          }
+          res_keywords <- as.matrix(res_keywords)
+          kw_freq<- matrix(nrow = nrow(res_keywords),ncol = 2)
+          kw_freq[,1]=dimnames(res_keywords)[[1]]
+          kw_freq[,2]=res_keywords[,1] 
+          colnames(kw_freq) = c("keywords","freq")
+          kw_freq[,1]=tolower(kw_freq[,1])
+          kw <- as.matrix(which(table(kw_freq[,1])>1))
+          k <- dimnames(kw)[[1]]
+          k_len <- length(k)
+          len <- c(1:K_len)
+          k_ids <- c()
+          for(i in 1:k_len){
+            len[i] <- sum(as.numeric(kw_freq[which(kw_freq[,1]==k[i]),2]))
+            k_id <- which(kw_freq[,1]==k[i])
+            k_ids <- c(k_ids,k_id)
+          }
+          kw_fre_1 <- kw_freq[-k_ids,]
+          kw_fre_2 <- cbind(k,len)
+          kw_fre_new <- rbind(kw_fre_1,kw_fre_2)
+          kw_fre_new[,2] <- as.numeric(kw_fre_new[,2])
+          kw_fre_new<-kw_fre_new[order(as.numeric(kw_fre_new[,2]),decreasing = T),]
+          i <- seq(from = 2, to = 0.01,by=-2/nrow(kw_fre_new))
+          kw_fre_new[,2] <- seq(from=nrow(kw_fre_new), to=1, by=-1)
+          kw_fre_new[,2] <- as.numeric(kw_fre_new[,2])
+          kw_fre_new[,2] <- as.numeric(kw_fre_new[,2])*i
+          kw_fre_new[1,2] <- as.numeric(kw_fre_new[1,2]) + mean(as.numeric(kw_fre_new[,2]))
+
           
           round_name <- paste( mission_round,".jpg",sep="")
           png(file.path(path,paste(username , round_name ,sep="/")))
           par(fig = c(0,1,0,1),mar = c(0,0,0,0))
           #pal <- brewer.pal(9,"Blues")[4:9]
           #color_cluster <- pal[ceiling(6*(log(tmp)/max(log(tmp))))]
-          wordcloud(words=names(tmp),freq=tmp,scale = c(3.2, 0.5),max.words = 100,
+          wordcloud(words=kw_fre_new[,1],freq=as.numeric(kw_fre_new[,2]),scale = c(4, 0.5),max.words = 100,
                     random.order=F,random.color=F,colors=rainbow(100),ordered.colors=F,
                     use.r.layout=F)
           dev.off()
-        }else{
-          
+        }else{         
           rated_papers <- recommendedPapers[recommendedPapers$rating != -1,]
           # preprocess for rated papers
           result_rated <- searchingByItemUT(papers = rated_papers[rated_papers$rating!=-1,"item_ut"])
-          #corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
-          # generate topic by LDA
-          #train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
-          rated_id <- unlist(lapply(result_rated, function(x){
-            which(pretrain_doc$item_ut==x$item_ut$item_ut)
-          }))
-          train_doc <- list(topics=pretrain_doc$topics[rated_id,],terms=pretrain_doc$terms)
-          # build elastic model and get coef
-          rated_bool <- (rated_papers$rating!=-1)
-          if(length(unique(rated_papers$rating[rated_bool]))==1){
-            normrating <- rnorm(length(rated_bool), mean = 0, sd = 0.5)
-            rated_papers$rating[rated_bool] <- rated_papers$rating[rated_bool] + normrating
-            #rated_papers$rating[rated_bool] <- rated_papers$rating[rated_bool] - min(rated_papers$rating[rated_bool])
+#           #corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
+#           # generate topic by LDA
+#           #train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
+#           rated_id <- unlist(lapply(result_rated, function(x){
+#             which(pretrain_doc$item_ut==x$item_ut$item_ut)
+#           }))
+#           train_doc <- list(topics=pretrain_doc$topics[rated_id,],terms=pretrain_doc$terms)
+#           # build elastic model and get coef
+#           rated_bool <- (rated_papers$rating!=-1)
+#           if(length(unique(rated_papers$rating[rated_bool]))==1){
+#             normrating <- rnorm(length(rated_bool), mean = 0, sd = 0.5)
+#             rated_papers$rating[rated_bool] <- rated_papers$rating[rated_bool] + normrating
+#             #rated_papers$rating[rated_bool] <- rated_papers$rating[rated_bool] - min(rated_papers$rating[rated_bool])
+#           }
+#           enetmodel <- enet(x = I(train_doc$topics),
+#                             y = rated_papers$rating,
+#                             lambda=0.5,normalize = F,intercept = T)
+#           coef <- predict.enet(enetmodel, s=0.5, type="coef", mode="fraction")
+#           tmp <- coef$coefficients %*% train_doc$terms - min(coef$coefficients %*% train_doc$terms)
+#           tmp <- as.numeric(tmp)
+#           tmp<- tmp/max(tmp)
+#           names(tmp) <- colnames(train_doc$terms)
+#           tmp<-tmp[order(tmp,decreasing = T)][1:100]
+#           i <- seq(from = 2, to = 0.01,by=-0.02)
+#           tmp[1:100] <- seq(from = 100, to = 1,by=-1)
+#           tmp <- tmp*i
+#           tmp[1] <- 300
+          res_keywords <- c()
+          kw <- c()
+          for(i in 1:length(result_rated)){
+            result_title <- result_rated[[i]]$item_ut
+            #add rec_score to result
+            result_rated[[i]]$rated <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rating"]
+            res_keywords <- c(res_keywords,table(result_rated[[i]]$keywords)*result_rated[[i]]$rated)
           }
-          enetmodel <- enet(x = I(train_doc$topics),
-                            y = rated_papers$rating,
-                            lambda=0.5,normalize = F,intercept = T)
-          coef <- predict.enet(enetmodel, s=0.5, type="coef", mode="fraction")
-          tmp <- coef$coefficients %*% train_doc$terms - min(coef$coefficients %*% train_doc$terms)
-          tmp <- as.numeric(tmp)
-          tmp<- tmp/max(tmp)
-          names(tmp) <- colnames(train_doc$terms)
-          tmp<-tmp[order(tmp,decreasing = T)][1:100]
-          i <- seq(from = 2, to = 0.01,by=-0.02)
-          tmp[1:100] <- seq(from = 100, to = 1,by=-1)
-          tmp <- tmp*i
-          tmp[1] <- 300
+          res_keywords <- as.matrix(res_keywords)
+          kw_freq<- matrix(nrow = nrow(res_keywords),ncol = 2)
+          kw_freq[,1]=dimnames(res_keywords)[[1]]
+          kw_freq[,2]=res_keywords[,1] 
+          colnames(kw_freq) = c("keywords","freq")
+          kw_freq[,1]=tolower(kw_freq[,1])
+          kw <- as.matrix(which(table(kw_freq[,1])>1))
+          k <- dimnames(kw)[[1]]
+          k_len <- length(k)
+          len <- c(1:K_len)
+          k_ids <- c()
+          for(i in 1:k_len){
+            len[i] <- sum(as.numeric(kw_freq[which(kw_freq[,1]==k[i]),2]))
+            k_id <- which(kw_freq[,1]==k[i])
+            k_ids <- c(k_ids,k_id)
+          }
+          kw_fre_1 <- kw_freq[-k_ids,]
+          kw_fre_2 <- cbind(k,len)
+          kw_fre_new <- rbind(kw_fre_1,kw_fre_2)
+          kw_fre_new[,2] <- as.numeric(kw_fre_new[,2])
+          kw_fre_new<-kw_fre_new[order(as.numeric(kw_fre_new[,2]),decreasing = T),]
+          i <- seq(from = 2, to = 0.01,by=-2/nrow(kw_fre_new))
+          kw_fre_new[,2] <- seq(from=nrow(kw_fre_new), to=1, by=-1)
+          kw_fre_new[,2] <- as.numeric(kw_fre_new[,2])
+          kw_fre_new[,2] <- as.numeric(kw_fre_new[,2])*i
+          kw_fre_new[1,2] <- as.numeric(kw_fre_new[1,2]) + mean(as.numeric(kw_fre_new[,2]))
+          
           
           round_name <- paste(mission_round,".jpg",sep="")
           
@@ -450,7 +541,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
           par(fig = c(0,1,0,1),mar = c(0,0,0,0))
           #pal <- brewer.pal(9,"Blues")[4:9]
           #color_cluster <- pal[ceiling(6*(log(tmp)/max(log(tmp))))]
-          wordcloud(words=names(tmp),freq=tmp,scale = c(3.2, 0.5),max.words = 100,
+          wordcloud(words=kw_fre_new[,1],freq=as.numeric(kw_fre_new[,2]),scale = c(3.2, 0.5),max.words = 100,
                     random.order=F,random.color=F,colors=rainbow(100),ordered.colors=F,
                     use.r.layout=F)
           dev.off()
@@ -462,6 +553,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
   
   dbDisconnect(conn)
   result$mission_id <- mission_id
+  result$algorithm <- algorithm
   result$username <- username
   result$top_keywords <- top_keywords
   result
