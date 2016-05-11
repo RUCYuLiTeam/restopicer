@@ -9,6 +9,78 @@ preferenceOnlyWeightControl <- function(mission_round=1){
        exploration_fresh_w=0,
        exploration_w=exploration_w)
 }
+simpleHybridWeightControl_high <- function(mission_round=1,if_like){
+  exploration_w <- 0.8
+  exploitation_w <- 1-exploration_w
+  if(mission_round <= 1){
+    exploitation_relevent_w <- exploitation_w
+    exploitation_rating_w <- 0
+    exploitation_quality_w <- exploitation_w/3
+    exploration_learn_w <- 0
+    exploration_summary_w <- exploration_w/3
+    exploration_fresh_w <- exploration_w/3
+  }else if(if_like){
+    exploration_w <- 0.8
+    exploitation_relevent_w <- exploitation_w/2
+    exploitation_rating_w <- exploitation_w/2
+    exploitation_quality_w <- exploration_w/4
+    exploration_fresh_w <- exploration_w/4
+    exploration_learn_w <- exploration_w/4
+    exploration_summary_w <- exploration_w/4
+  }else if(if_like == 0){
+    exploration_w <- 0.9
+    exploitation_relevent_w <- exploitation_w/2
+    exploitation_rating_w <- exploitation_w/2
+    exploitation_quality_w <- exploration_w/4
+    exploration_fresh_w <- exploration_w/4
+    exploration_learn_w <- exploration_w/4
+    exploration_summary_w <- exploration_w/4
+  }
+  list(exploitation_relevent_w=exploitation_relevent_w,
+       exploitation_rating_w=exploitation_rating_w,
+       exploration_learn_w=exploration_learn_w,
+       exploitation_quality_w=exploitation_quality_w,
+       exploration_summary_w=exploration_summary_w,
+       exploration_fresh_w=exploration_fresh_w,
+       exploration_w=exploration_w)
+  
+}
+simpleHybridWeightControl_low <- function(mission_round=1,if_like){
+  exploration_w <- 0.2
+  exploitation_w <- 1-exploration_w
+  if(mission_round <= 1){
+    exploitation_relevent_w <- exploitation_w
+    exploitation_rating_w <- 0
+    exploitation_quality_w <- exploitation_w/3
+    exploration_learn_w <- 0
+    exploration_summary_w <- exploration_w/3
+    exploration_fresh_w <- exploration_w/3
+  }else if(if_like){
+    exploration_w <- 0.2
+    exploitation_relevent_w <- exploitation_w/2
+    exploitation_rating_w <- exploitation_w/2
+    exploitation_quality_w <- exploration_w/4
+    exploration_fresh_w <- exploration_w/4
+    exploration_learn_w <- exploration_w/4
+    exploration_summary_w <- exploration_w/4
+  }else if(if_like == 0){
+    exploration_w <- 0.4
+    exploitation_relevent_w <- exploitation_w/2
+    exploitation_rating_w <- exploitation_w/2
+    exploitation_quality_w <- exploration_w/4
+    exploration_fresh_w <- exploration_w/4
+    exploration_learn_w <- exploration_w/4
+    exploration_summary_w <- exploration_w/4
+  }
+  list(exploitation_relevent_w=exploitation_relevent_w,
+       exploitation_rating_w=exploitation_rating_w,
+       exploration_learn_w=exploration_learn_w,
+       exploitation_quality_w=exploitation_quality_w,
+       exploration_summary_w=exploration_summary_w,
+       exploration_fresh_w=exploration_fresh_w,
+       exploration_w=exploration_w)
+  
+}
 simpleHybridWeightControl <- function(mission_round=1,mu_explore=1/2){
   exploration_w <- mu_explore + ifelse(rbinom(1, 1, 1/(log(mission_round)+1))==1,1,-1) * runif(1, min = 0, max = 1-mu_explore)
   exploitation_w <- 1 - exploration_w
