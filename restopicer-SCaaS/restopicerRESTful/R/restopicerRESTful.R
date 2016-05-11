@@ -366,7 +366,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
       # retrieve by recommender (composite_N)
       doRecommend <- getRecommender(recommendername = recommendername)
       mission_round <- mission_round + 1
-      result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,mission_round=mission_round,dropped_topic=dropped_topic,controllername=controllername,if_like)
+      result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,mission_round=mission_round,dropped_topic=dropped_topic,controllername=controllername,if_like=if_like)
       # save to mysql
       for(tmp in result){
         item_ut <- tmp$item_ut$item_ut
@@ -429,7 +429,12 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
             #add rec_score to result
             result_rated[[i]]$rated <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score_true"]
             result_rated[[i]]$rated <- round(result_rated[[i]]$rated)
-            res_keywords <- c(res_keywords,table(result_rated[[i]]$keywords)*result_rated[[i]]$rated)
+            if(length(result_rated[[i]]$keywords$keywords)==0){
+              res_keywords <- res_keywords
+            }else {
+              res_keywords <- c(res_keywords,table(result_rated[[i]]$keywords)*result_rated[[i]]$rated)
+            }
+            
           }
           res_keywords <- as.matrix(res_keywords)
           kw_freq<- matrix(nrow = nrow(res_keywords),ncol = 2)
@@ -505,7 +510,12 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
             result_title <- result_rated[[i]]$item_ut
             #add rec_score to result
             result_rated[[i]]$rated <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rating"]
-            res_keywords <- c(res_keywords,table(result_rated[[i]]$keywords)*result_rated[[i]]$rated)
+            if(length(result_rated[[i]]$keywords$keywords)==0){
+              res_keywords <- res_keywords
+            }else {
+              res_keywords <- c(res_keywords,table(result_rated[[i]]$keywords)*result_rated[[i]]$rated)
+            }
+            
           }
           res_keywords <- as.matrix(res_keywords)
           kw_freq<- matrix(nrow = nrow(res_keywords),ncol = 2)
@@ -516,7 +526,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
           kw <- as.matrix(which(table(kw_freq[,1])>1))
           k <- dimnames(kw)[[1]]
           k_len <- length(k)
-          len <- c(1:K_len)
+          len <- c(1:k_len)
           k_ids <- c()
           for(i in 1:k_len){
             len[i] <- sum(as.numeric(kw_freq[which(kw_freq[,1]==k[i]),2]))
