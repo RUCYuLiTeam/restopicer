@@ -366,7 +366,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
       # retrieve by recommender (composite_N)
       doRecommend <- getRecommender(recommendername = recommendername)
       mission_round <- mission_round + 1
-      result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,mission_round=mission_round,dropped_topic=dropped_topic,controllername=controllername,if_like)
+      result <- doRecommend(result_relevent=result_relevent,rated_papers=recommendedPapers,composite_N=composite_N,mission_round=mission_round,dropped_topic=dropped_topic,controllername=controllername,if_like=if_like)
       # save to mysql
       for(tmp in result){
         item_ut <- tmp$item_ut$item_ut
