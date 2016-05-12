@@ -25,6 +25,8 @@ getRecommendController<-function(controllername){
     switch(controllername,
            simpleWeightControl=simpleWeightControl,
            hybridWeightControl=hybridWeightControl,
+           simpleHybridWeightControl_high=simpleHybridWeightControl_high,
+           simpleHybridWeightControl_low=simpleHybridWeightControl_low,
            simpleHybridWeightControl=simpleHybridWeightControl,
            preferenceOnlyWeightControl=preferenceOnlyWeightControl
     ))
