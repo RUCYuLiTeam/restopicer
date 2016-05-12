@@ -508,20 +508,18 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
           res_keywords <- c()
           kw <- c()
           for(i in 1:length(result_rated)){
+            result_title <- result_rated[[i]]$item_ut
+            #add rec_score to result
+            result_rated[[i]]$rated <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rating"]
             if(i<(length(result_rated)-4)){
-              result_title <- result_rated[[i]]$item_ut
-              #add rec_score to result
-              result_rated[[i]]$rated <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rating"]
+              
               if(length(result_rated[[i]]$keywords$keywords)==0){
                 res_keywords <- res_keywords
               }else {
                 res_keywords <- c(res_keywords,table(result_rated[[i]]$keywords)*(result_rated[[i]]$rated)/2)
               }
             }else{
-              
-              result_title <- result_rated[[i]]$item_ut
-              #add rec_score to result
-              result_rated[[i]]$rated <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rating"]
+            
               if(length(result_rated[[i]]$keywords$keywords)==0){
                 res_keywords <- res_keywords
               }else {
