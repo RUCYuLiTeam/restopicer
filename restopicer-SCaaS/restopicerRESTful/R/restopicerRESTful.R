@@ -474,10 +474,10 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
                     use.r.layout=F)
           dev.off()
         }else{         
-          rated_papers <- recommendedPapers[recommendedPapers$rating != -1,]
+          #rated_papers <- recommendedPapers[recommendedPapers$rating != -1,]
           # preprocess for rated papers
-          result_rated <- searchingByItemUT(papers = rated_papers[rated_papers$rating!=-1,"item_ut"])
-          #result_rated <- searchingByItemUT(papers = recommendedPapers$item_ut)
+          #result_rated <- searchingByItemUT(papers = rated_papers[rated_papers$rating!=-1,"item_ut"])
+          result_rated <- searchingByItemUT(papers = recommendedPapers$item_ut)
 #           #corpus_rated <- preprocess.abstract.corpus(result_lst = result_rated)
 #           # generate topic by LDA
 #           #train_doc <- posterior(object = result_LDA_abstarct_VEM$corpus_topic,newdata = corpus_rated)
@@ -510,20 +510,27 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
           for(i in 1:length(result_rated)){
             result_title <- result_rated[[i]]$item_ut
             #add rec_score to result
-            result_rated[[i]]$rated <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rating"]
-            if(i<(length(result_rated)-4)){
-              
+          
+            if(i<(length(result_rated)-9)){
+              result_rated[[i]]$rated <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rating"]
               if(length(result_rated[[i]]$keywords$keywords)==0){
                 res_keywords <- res_keywords
               }else {
-                res_keywords <- c(res_keywords,table(result_rated[[i]]$keywords)*(result_rated[[i]]$rated)/2)
+                res_keywords <- c(res_keywords,table(result_rated[[i]]$keywords)*(result_rated[[i]]$rated)*0.6/2)
+              }
+            }if(i>(length(result_rated)-10) && i<(length(result_rated)-4)){
+              result_rated[[i]]$rated <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rating"]
+              if(length(result_rated[[i]]$keywords$keywords)==0){
+                res_keywords <- res_keywords
+              }else {
+                res_keywords <- c(res_keywords,table(result_rated[[i]]$keywords)*(result_rated[[i]]$rated)*0.6)
               }
             }else{
-            
+              result_rated[[i]]$rated <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rec_score_true"]
               if(length(result_rated[[i]]$keywords$keywords)==0){
                 res_keywords <- res_keywords
               }else {
-                res_keywords <- c(res_keywords,table(result_rated[[i]]$keywords)*result_rated[[i]]$rated)
+                res_keywords <- c(res_keywords,table(result_rated[[i]]$keywords)*result_rated[[i]]$rated*0.4)
               }
             }
            
