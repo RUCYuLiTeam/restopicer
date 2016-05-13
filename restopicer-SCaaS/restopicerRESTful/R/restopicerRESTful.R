@@ -518,7 +518,7 @@ goRecommendation <- function(username,relevent_N=50,recommendername="exploreHybr
               }else {
                 res_keywords <- c(res_keywords,table(result_rated[[i]]$keywords)*(result_rated[[i]]$rated)*0.6/2)
               }
-            }if(i>(length(result_rated)-10) && i<(length(result_rated)-4)){
+            }else if(i>(length(result_rated)-10) && i<(length(result_rated)-4)){
               result_rated[[i]]$rated <- recommendedPapers[which(recommendedPapers$item_ut==result_title),"rating"]
               if(length(result_rated[[i]]$keywords$keywords)==0){
                 res_keywords <- res_keywords
