@@ -1,7 +1,7 @@
 exploreHybridRecommend <- function(result_relevent,rated_papers,
                                    topics_filepath,
                                    mission_round,
-                                   composite_N,dropped_topic,controllername = "simpleHybridWeightControl",if_like,...){
+                                   composite_N,dropped_topic,controllername,if_like,...){
   # for not new mission to train enet model
   if(mission_round>=2 && !is.null(rated_papers) && nrow(rated_papers)>=2){
     # preprocess for relevent and rated papers
